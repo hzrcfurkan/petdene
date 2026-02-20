@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    ...
+  
 
 // Confirm payment completion and update invoice status
 export async function POST(req: NextRequest) {
