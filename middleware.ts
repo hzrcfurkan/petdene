@@ -3,105 +3,112 @@ import type { NextRequest } from "next/server"
 import { NextResponse } from "next/server"
 
 export async function middleware(request: NextRequest) {
-	const path = request.nextUrl.pathname
+  const path = request.nextUrl.pathname
 
-	// Get token from NextAuth
-	const token = await getToken({
-		req: request,
-		secret: process.env.NEXTAUTH_SECRET,
-		// Ensure cookie name matches auth configuration
-		cookieName: process.env.NODE_ENV === "production" 
-			? "__Secure-next-auth.session-token" 
-			: "next-auth.session-token",
-	})
+  // 🔐 NextAuth token (cookieName override YOK)
+  const token = await getToken({
+    req: request,
+    secret: process.env.NEXTAUTH_SECRET,
+  })
 
-	// 🚫 Protected routes - require authentication
-	const protectedRoutes = ["/customer", "/admin", "/staff", "/profile", "/settings"]
-	const isProtectedRoute = protectedRoutes.some((route) => path.startsWith(route))
+  // 🚫 Auth sayfaları asla korunmasın
+  if (
+    path.startsWith("/signin") ||
+    path.startsWith("/signup") ||
+    path.startsWith("/forgot-password") ||
+    path.startsWith("/reset-password")
+  ) {
+    return NextResponse.next()
+  }
 
-	if (isProtectedRoute && !token) {
-		const signInUrl = new URL("/signin", request.url)
-		signInUrl.searchParams.set("callbackUrl", path)
-		return NextResponse.redirect(signInUrl)
-	}
+  // 🚫 Korunan alanlar
+  const protectedRoutes = ["/customer", "/admin", "/staff", "/profile", "/settings"]
+  const isProtectedRoute = protectedRoutes.some((route) =>
+    path.startsWith(route)
+  )
 
-	// If no token, allow access to public routes
-	if (!token) {
-		return NextResponse.next()
-	}
+  // Giriş yapılmamışsa signin'e yönlendir
+  if (isProtectedRoute && !token) {
+    const signInUrl = new URL("/signin", request.url)
+    signInUrl.searchParams.set("callbackUrl", path)
+    return NextResponse.redirect(signInUrl)
+  }
 
-	// Get user role from token
-	const userRole = (token.role as string) || "CUSTOMER"
+  // Token yok ama public route ise devam
+  if (!token) {
+    return NextResponse.next()
+  }
 
-	// Role-based access control
-	// SUPER ADMIN only routes
-	if (path.startsWith("/admin/super")) {
-		if (userRole !== "SUPER_ADMIN") {
-			// Redirect to appropriate dashboard based on role
-			if (userRole === "ADMIN") {
-				return NextResponse.redirect(new URL("/admin", request.url))
-			}
-			if (userRole === "STAFF") {
-				return NextResponse.redirect(new URL("/staff", request.url))
-			}
-			return NextResponse.redirect(new URL("/customer", request.url))
-		}
-	}
+  const userRole = (token.role as string) || "CUSTOMER"
 
-	// ADMIN routes (accessible by ADMIN, SUPER_ADMIN, and STAFF for certain pages)
-	if (path.startsWith("/admin") && !path.startsWith("/admin/super")) {
-		// STAFF can access specific admin pages: appointments, pets, vaccinations, prescriptions, medical-records, invoices
-		const staffAllowedPaths = [
-			"/admin/appointments",
-			"/admin/pets",
-			"/admin/vaccinations",
-			"/admin/prescriptions",
-			"/admin/medical-records",
-			"/admin/invoices",
-		]
-		const isStaffAllowedPath = staffAllowedPaths.some((allowedPath) => path.startsWith(allowedPath))
-		
-		if (userRole === "STAFF" && !isStaffAllowedPath) {
-			// STAFF can only access specific pages, redirect others to staff dashboard
-			return NextResponse.redirect(new URL("/staff", request.url))
-		}
-		
-		if (!["ADMIN", "SUPER_ADMIN", "STAFF"].includes(userRole)) {
-			return NextResponse.redirect(new URL("/customer", request.url))
-		}
-	}
+  // 👑 SUPER ADMIN
+  if (path.startsWith("/admin/super") && userRole !== "SUPER_ADMIN") {
+    if (userRole === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin", request.url))
+    }
+    if (userRole === "STAFF") {
+      return NextResponse.redirect(new URL("/staff", request.url))
+    }
+    return NextResponse.redirect(new URL("/customer", request.url))
+  }
 
-	// STAFF only routes
-	if (path.startsWith("/staff")) {
-		if (userRole !== "STAFF") {
-			if (userRole === "SUPER_ADMIN") {
-				return NextResponse.redirect(new URL("/admin/super", request.url))
-			}
-			if (userRole === "ADMIN") {
-				return NextResponse.redirect(new URL("/admin", request.url))
-			}
-			return NextResponse.redirect(new URL("/customer", request.url))
-		}
-	}
+  // 🏢 ADMIN alanı
+  if (path.startsWith("/admin") && !path.startsWith("/admin/super")) {
+    const staffAllowedPaths = [
+      "/admin/appointments",
+      "/admin/pets",
+      "/admin/vaccinations",
+      "/admin/prescriptions",
+      "/admin/medical-records",
+      "/admin/invoices",
+    ]
 
-	// CUSTOMER only routes
-	if (path.startsWith("/customer")) {
-		if (userRole !== "CUSTOMER") {
-			if (userRole === "SUPER_ADMIN") {
-				return NextResponse.redirect(new URL("/admin/super", request.url))
-			}
-			if (userRole === "ADMIN") {
-				return NextResponse.redirect(new URL("/admin", request.url))
-			}
-			if (userRole === "STAFF") {
-				return NextResponse.redirect(new URL("/staff", request.url))
-			}
-		}
-	}
+    const isStaffAllowedPath = staffAllowedPaths.some((allowedPath) =>
+      path.startsWith(allowedPath)
+    )
 
-	return NextResponse.next()
+    if (userRole === "STAFF" && !isStaffAllowedPath) {
+      return NextResponse.redirect(new URL("/staff", request.url))
+    }
+
+    if (!["ADMIN", "SUPER_ADMIN", "STAFF"].includes(userRole)) {
+      return NextResponse.redirect(new URL("/customer", request.url))
+    }
+  }
+
+  // 👨‍⚕️ STAFF
+  if (path.startsWith("/staff") && userRole !== "STAFF") {
+    if (userRole === "SUPER_ADMIN") {
+      return NextResponse.redirect(new URL("/admin/super", request.url))
+    }
+    if (userRole === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin", request.url))
+    }
+    return NextResponse.redirect(new URL("/customer", request.url))
+  }
+
+  // 👤 CUSTOMER
+  if (path.startsWith("/customer") && userRole !== "CUSTOMER") {
+    if (userRole === "SUPER_ADMIN") {
+      return NextResponse.redirect(new URL("/admin/super", request.url))
+    }
+    if (userRole === "ADMIN") {
+      return NextResponse.redirect(new URL("/admin", request.url))
+    }
+    if (userRole === "STAFF") {
+      return NextResponse.redirect(new URL("/staff", request.url))
+    }
+  }
+
+  return NextResponse.next()
 }
 
 export const config = {
-	matcher: ["/customer/:path*", "/admin/:path*", "/staff/:path*", "/profile/:path*", "/settings/:path*"],
+  matcher: [
+    "/customer/:path*",
+    "/admin/:path*",
+    "/staff/:path*",
+    "/profile/:path*",
+    "/settings/:path*",
+  ],
 }
