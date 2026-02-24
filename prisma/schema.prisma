@@ -1,0 +1,184 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider  = "postgresql"
+}
+
+model Account {
+    id                String  @id @default(uuid())
+    userId            String
+    type              String
+    provider          String
+    providerAccountId String
+    refresh_token     String?
+    access_token      String?
+    expires_at        Int?
+    token_type        String?
+    scope             String?
+    id_token          String?
+    session_state     String?
+
+    user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+    @@unique([provider, providerAccountId])
+}
+
+model Session {
+    id           String   @id @default(uuid())
+    sessionToken String   @unique
+    userId       String
+    expires      DateTime
+    user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model User {
+    id            String         @id @default(uuid())
+    name          String?
+    email         String         @unique
+    emailVerified DateTime?
+    password      String? // Optional for OAuth users
+    role          String         @default("CUSTOMER") // SUPER_ADMIN, ADMIN, STAFF, or CUSTOMER
+    phone         String?
+    image         String?
+    createdAt     DateTime       @default(now())
+    updatedAt     DateTime       @updatedAt
+    accounts      Account[]
+    sessions      Session[]
+    pets          Pet[]
+    appointments  Appointment[]
+    prescriptions Prescription[]
+}
+
+model VerificationToken {
+    identifier String
+    token      String   @unique
+    expires    DateTime
+
+    @@unique([identifier, token])
+}
+
+// -----------------------------
+// PET CARE MODELS
+// -----------------------------
+
+model Pet {
+    id          String    @id @default(uuid())
+    ownerId     String
+    name        String
+    species     String // Dog, Cat, Bird, etc.
+    breed       String?
+    gender      String? // Male/Female
+    age         Int?
+    dateOfBirth DateTime?
+    weight      Float?
+    color       String?
+    image       String?
+    notes       String?
+    createdAt   DateTime  @default(now())
+    updatedAt   DateTime  @updatedAt
+
+    owner         User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+    vaccinations  Vaccination[]
+    medicalLogs   MedicalRecord[]
+    prescriptions Prescription[]
+    appointments  Appointment[]
+}
+
+model PetService {
+    id          String   @id @default(uuid())
+    title       String
+    type        String // grooming, vet-checkup, bath, boarding, training
+    description String?
+    duration    Int? // in minutes
+    price       Float
+    image       String?
+    active      Boolean  @default(true)
+    createdAt   DateTime @default(now())
+    updatedAt   DateTime @updatedAt
+
+    appointments Appointment[]
+}
+
+model Appointment {
+    id        String   @id @default(uuid())
+    petId     String
+    serviceId String
+    staffId   String? // Vet/Groomer assigned
+    date      DateTime
+    status    String   @default("PENDING")
+    notes     String?
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    pet     Pet        @relation(fields: [petId], references: [id], onDelete: Cascade)
+    service PetService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
+    staff   User?      @relation(fields: [staffId], references: [id])
+    invoice Invoice?
+}
+
+model Vaccination {
+    id          String    @id @default(uuid())
+    petId       String
+    vaccineName String
+    dateGiven   DateTime
+    nextDue     DateTime?
+    notes       String?
+
+    pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+}
+
+model MedicalRecord {
+    id          String   @id @default(uuid())
+    petId       String
+    title       String
+    description String?
+    diagnosis   String?
+    treatment   String?
+    date        DateTime @default(now())
+
+    pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+}
+
+model Prescription {
+    id           String   @id @default(uuid())
+    petId        String
+    issuedById   String
+    medicineName String
+    dosage       String?
+    instructions String?
+    dateIssued   DateTime @default(now())
+
+    pet      Pet  @relation(fields: [petId], references: [id], onDelete: Cascade)
+    issuedBy User @relation(fields: [issuedById], references: [id])
+}
+
+model Invoice {
+    id            String   @id @default(uuid())
+    appointmentId String   @unique
+    amount        Float
+    status        String   @default("UNPAID") // UNPAID, PAID, CANCELLED, PARTIAL
+    notes         String?
+    createdAt     DateTime @default(now())
+    updatedAt     DateTime @updatedAt
+
+    appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+    payment     Payment?
+}
+
+model Payment {
+    id                    String    @id @default(uuid())
+    invoiceId             String    @unique
+    method                String // card, cash, stripe
+    transactionId         String?
+    stripePaymentIntentId String? // Stripe Payment Intent ID
+    stripeClientSecret    String? // Stripe client secret for frontend
+    amount                Float
+    paidAt                DateTime?
+    status                String    @default("PENDING") // PENDING, COMPLETED, FAILED, CANCELLED
+    createdAt             DateTime  @default(now())
+    updatedAt             DateTime  @updatedAt
+
+    invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
