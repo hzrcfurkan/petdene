@@ -1,5 +1,6 @@
 "use client"
 
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -28,6 +29,7 @@ interface CustomerAppointmentPopupProps {
 }
 
 export function CustomerAppointmentPopup({ onSuccess, trigger }: CustomerAppointmentPopupProps) {
+	const { formatCurrency } = useCurrency()
 	const [isOpen, setIsOpen] = useState(false)
 	const [petId, setPetId] = useState("")
 	const [serviceId, setServiceId] = useState("")
@@ -183,7 +185,7 @@ export function CustomerAppointmentPopup({ onSuccess, trigger }: CustomerAppoint
 								<SelectContent>
 									{services.map((service) => (
 										<SelectItem key={service.id} value={service.id}>
-											{service.title} - ${service.price}
+											{service.title} - {formatCurrency(service.price)}
 											{service.duration && ` (${service.duration} min)`}
 										</SelectItem>
 									))}

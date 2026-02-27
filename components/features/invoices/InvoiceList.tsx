@@ -1,10 +1,13 @@
 "use client"
 
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { InlinePaymentForm } from "@/components/features/payments/InlinePaymentForm"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
+import { ResponsiveTableWrapper } from "@/components/ui/responsive-table"
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -17,6 +20,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/ui/date-picker"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { currentUserClient } from "@/lib/auth/client"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { useDeleteInvoice, useInvoices, type Invoice } from "@/lib/react-query/hooks/invoices"
 import { generateInvoicePDF } from "@/lib/utils/invoice-pdf"
 import { format } from "date-fns"
@@ -42,6 +46,7 @@ interface InvoiceListProps {
 }
 
 export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, showActions = true }: InvoiceListProps) {
+	const { formatCurrency, currency } = useCurrency()
 	const [page, setPage] = useState(1)
 	const [sortBy, setSortBy] = useState<string>("date-desc")
 	const [statusFilter, setStatusFilter] = useState<string>(status || "ALL")
@@ -50,8 +55,11 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 	const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null)
 	const [viewingInvoice, setViewingInvoice] = useState<Invoice | null>(null)
 	const [isFormOpen, setIsFormOpen] = useState(false)
+	const [isCreateFormOpen, setIsCreateFormOpen] = useState(false)
 
 	const currentUser = currentUserClient()
+	const pathname = usePathname()
+	const detailBasePath = pathname?.startsWith("/admin") ? "/admin/invoices" : pathname?.startsWith("/customer") ? "/customer/invoices" : undefined
 
 	const { data, refetch, isLoading } = useInvoices({
 		page,
@@ -83,6 +91,13 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 	const handleEdit = (invoice: Invoice) => {
 		setEditingInvoice(invoice)
 		setIsFormOpen(true)
+		setIsCreateFormOpen(false)
+	}
+
+	const handleCreateNew = () => {
+		setEditingInvoice(null)
+		setIsCreateFormOpen(true)
+		setIsFormOpen(false)
 	}
 
 	const handleView = (invoice: Invoice) => {
@@ -94,13 +109,13 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 		e?.stopPropagation()
 
 		try {
-			// Check if invoice has required data
-			if (!invoice.appointment) {
+			// Check if invoice has required data (appointment or visit)
+			if (!invoice.appointment && !invoice.visit) {
 				toast.error("Invoice data is incomplete. Please refresh the page and try again.")
 				return
 			}
 
-			generateInvoicePDF(invoice)
+			generateInvoicePDF(invoice, currency)
 			toast.success("Invoice PDF downloaded")
 		} catch (error: any) {
 			console.error("Error generating PDF:", error)
@@ -110,6 +125,7 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 
 	const handleFormSuccess = () => {
 		setIsFormOpen(false)
+		setIsCreateFormOpen(false)
 		setEditingInvoice(null)
 		refetch()
 	}
@@ -135,6 +151,12 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 						</CardTitle>
 						<CardDescription>Manage and view invoice records</CardDescription>
 					</div>
+					{showActions && canEdit && (
+						<Button onClick={handleCreateNew}>
+							<FileText className="w-4 h-4 mr-2" />
+							New Invoice
+						</Button>
+					)}
 				</div>
 			</CardHeader>
 			<CardContent className="space-y-4">
@@ -196,8 +218,8 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 					<div className="text-center py-8 text-muted-foreground">No invoices found</div>
 				) : (
 					<>
-						<div className="rounded-md border">
-							<Table>
+						<ResponsiveTableWrapper>
+							<Table className="min-w-[640px] md:min-w-0">
 								<TableHeader>
 									<TableRow>
 										<TableHead>Invoice ID</TableHead>
@@ -214,34 +236,42 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 								<TableBody>
 									{invoices.map((invoice) => (
 										<TableRow key={invoice.id}>
-											<TableCell className="font-mono text-sm">
+											<TableCell data-label="Invoice ID" className="font-mono text-sm">
 												{invoice.id.slice(0, 8)}...
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Pet">
 												<div>
-													<div className="font-medium">{invoice.appointment?.pet?.name}</div>
-													<div className="text-sm text-muted-foreground">{invoice.appointment?.pet?.species}</div>
+													<div className="font-medium">
+														{invoice.visit?.pet?.name ?? invoice.appointment?.pet?.name}
+													</div>
+													<div className="text-sm text-muted-foreground">
+														{invoice.visit?.pet?.species ?? invoice.appointment?.pet?.species}
+													</div>
 												</div>
 											</TableCell>
-											<TableCell>
-												{invoice.appointment?.service?.title || "N/A"}
+											<TableCell data-label="Service">
+												{invoice.visit
+													? `PRO-${invoice.visit.protocolNumber}`
+													: invoice.appointment?.service?.title || "N/A"}
 											</TableCell>
-											<TableCell>
-												${invoice.amount.toFixed(2)}
+											<TableCell data-label="Amount">
+												{formatCurrency(invoice.amount)}
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Status">
 												<Badge className={statusColors[invoice.status]}>
 													{invoice.status}
 												</Badge>
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Date">
 												{format(new Date(invoice.createdAt), "MMM dd, yyyy")}
 											</TableCell>
-											<TableCell>
-												{invoice.appointment?.pet?.owner?.name || invoice.appointment?.pet?.owner?.email || "N/A"}
+											<TableCell data-label="Owner">
+												{(invoice.visit?.pet?.owner ?? invoice.appointment?.pet?.owner)?.name ||
+													(invoice.visit?.pet?.owner ?? invoice.appointment?.pet?.owner)?.email ||
+													"N/A"}
 											</TableCell>
 											{showActions && canPay && (
-												<TableCell>
+												<TableCell data-label="Payment">
 													{invoice.status === "UNPAID" ? (
 														<InlinePaymentForm
 															invoice={invoice}
@@ -253,7 +283,7 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 												</TableCell>
 											)}
 											{showActions && (
-												<TableCell className="text-right">
+												<TableCell className="text-right" data-label="">
 													<DropdownMenu>
 														<DropdownMenuTrigger asChild>
 															<Button variant="ghost" size="sm" title="Actions">
@@ -261,10 +291,19 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 															</Button>
 														</DropdownMenuTrigger>
 														<DropdownMenuContent align="end" className="w-48">
-															<DropdownMenuItem onClick={() => handleView(invoice)}>
-																<Eye className="w-4 h-4 mr-2" />
-																View Details
-															</DropdownMenuItem>
+															{detailBasePath ? (
+																<DropdownMenuItem asChild>
+																	<Link href={`${detailBasePath}/${invoice.id}`}>
+																		<Eye className="w-4 h-4 mr-2" />
+																		View Details
+																	</Link>
+																</DropdownMenuItem>
+															) : (
+																<DropdownMenuItem onClick={() => handleView(invoice)}>
+																	<Eye className="w-4 h-4 mr-2" />
+																	View Details
+																</DropdownMenuItem>
+															)}
 															<DropdownMenuItem onClick={(e) => handleDownloadPDF(invoice, e)}>
 																<Download className="w-4 h-4 mr-2" />
 																Download PDF
@@ -298,7 +337,7 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 									))}
 								</TableBody>
 							</Table>
-						</div>
+						</ResponsiveTableWrapper>
 
 						{/* Pagination */}
 						{pagination && pagination.pages > 1 && (
@@ -335,6 +374,24 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 				<Dialog open={!!viewingInvoice} onOpenChange={() => setViewingInvoice(null)}>
 					<DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
 						<InvoiceDetail invoice={viewingInvoice} />
+					</DialogContent>
+				</Dialog>
+			)}
+
+			{/* Create Invoice Dialog */}
+			{isCreateFormOpen && (
+				<Dialog open={isCreateFormOpen} onOpenChange={(open) => !open && setIsCreateFormOpen(false)}>
+					<DialogContent className="max-w-lg w-[95vw] sm:w-full max-h-[90vh] overflow-y-auto">
+						<DialogHeader>
+							<DialogTitle>Create Invoice</DialogTitle>
+							<DialogDescription>Create a new invoice from a protocol (visit)</DialogDescription>
+						</DialogHeader>
+						<div className="pt-2">
+							<InvoiceForm
+								onSuccess={handleFormSuccess}
+								onCancel={() => setIsCreateFormOpen(false)}
+							/>
+						</div>
 					</DialogContent>
 				</Dialog>
 			)}

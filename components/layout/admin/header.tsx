@@ -24,8 +24,8 @@ export default function Header() {
 	const userImage = currentUser.image
 
 	return (
-		<header className="sticky top-0 z-30 h-16 border-b border-border bg-card">
-			<div className="flex h-full items-center justify-between pl-14 sm:pl-16 lg:pl-6 pr-4 sm:pr-6 lg:pr-8">
+		<header className="sticky top-0 z-30 h-16 bg-card">
+			<div className="flex h-full items-center justify-between pl-14 sm:pl-16 lg:pl-6 pr-4 sm:pr-6 lg:pr-8 min-w-0">
 				<div className="flex items-center">
 					<h1 className="text-base font-semibold text-foreground hidden lg:block">Dashboard</h1>
 				</div>

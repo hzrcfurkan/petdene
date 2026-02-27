@@ -4,10 +4,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Button } from "@/components/ui/button"
-import { FileText, Calendar, PawPrint, User, Mail, DollarSign, CreditCard, Download } from "lucide-react"
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select"
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+} from "@/components/ui/dialog"
+import { FileText, Calendar, PawPrint, User, Mail, DollarSign, CreditCard, Download, CheckCircle } from "lucide-react"
 import { format } from "date-fns"
+import { useState } from "react"
 import { type Invoice } from "@/lib/react-query/hooks/invoices"
+import { useMarkInvoicePaid } from "@/lib/react-query/hooks/invoices"
 import { generateInvoicePDF } from "@/lib/utils/invoice-pdf"
+import { toast } from "sonner"
+import { currentUserClient } from "@/lib/auth/client"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 
 interface InvoiceDetailProps {
 	invoice: Invoice
@@ -20,8 +39,30 @@ const statusColors: Record<string, string> = {
 }
 
 export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
+	const { formatCurrency, currency } = useCurrency()
+	const [markPaidOpen, setMarkPaidOpen] = useState(false)
+	const [paymentMethod, setPaymentMethod] = useState("cash")
+
+	const currentUser = currentUserClient()
+	const canMarkPaid =
+		currentUser &&
+		(currentUser.isAdmin || currentUser.isSuperAdmin || currentUser.isStaff) &&
+		invoice.status === "UNPAID"
+
+	const markPaid = useMarkInvoicePaid(invoice.id)
+
+	const handleMarkAsPaid = async () => {
+		try {
+			await markPaid.mutateAsync({ method: paymentMethod })
+			toast.success("Invoice marked as paid")
+			setMarkPaidOpen(false)
+		} catch (err: any) {
+			toast.error(err?.info?.error || "Failed to mark as paid")
+		}
+	}
+
 	const handleDownloadPDF = () => {
-		generateInvoicePDF(invoice)
+		generateInvoicePDF(invoice, currency)
 	}
 
 	return (
@@ -35,6 +76,45 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
 					</CardDescription>
 				</div>
 				<div className="flex items-center gap-2">
+					{canMarkPaid && (
+						<Dialog open={markPaidOpen} onOpenChange={setMarkPaidOpen}>
+							<Button onClick={() => setMarkPaidOpen(true)} size="sm">
+								<CheckCircle className="w-4 h-4 mr-2" />
+								Mark as Paid
+							</Button>
+							<DialogContent>
+								<DialogHeader>
+									<DialogTitle>Mark Invoice as Paid</DialogTitle>
+									<DialogDescription>
+										Record payment of {formatCurrency(invoice.amount)}. This will create a payment record and update the invoice status.
+									</DialogDescription>
+								</DialogHeader>
+								<div className="space-y-4 py-4">
+									<div>
+										<label className="text-sm font-medium">Payment method</label>
+										<Select value={paymentMethod} onValueChange={setPaymentMethod}>
+											<SelectTrigger className="mt-2">
+												<SelectValue />
+											</SelectTrigger>
+											<SelectContent>
+												<SelectItem value="cash">Cash</SelectItem>
+												<SelectItem value="card">Card</SelectItem>
+												<SelectItem value="stripe">Stripe</SelectItem>
+											</SelectContent>
+										</Select>
+									</div>
+									<div className="flex gap-2 justify-end">
+										<Button variant="outline" onClick={() => setMarkPaidOpen(false)}>
+											Cancel
+										</Button>
+										<Button onClick={handleMarkAsPaid} disabled={markPaid.isPending}>
+											{markPaid.isPending ? "Processing..." : "Mark as Paid"}
+										</Button>
+									</div>
+								</div>
+							</DialogContent>
+						</Dialog>
+					)}
 					<Button onClick={handleDownloadPDF} variant="outline" size="sm">
 						<Download className="w-4 h-4 mr-2" />
 						Download PDF
@@ -58,7 +138,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
-							${invoice.amount.toFixed(2)}
+							{formatCurrency(invoice.amount)}
 						</div>
 					</CardContent>
 				</Card>
@@ -82,7 +162,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
 				</Card>
 
 				{/* Pet Information */}
-				{invoice.appointment?.pet && (
+				{(invoice.visit?.pet ?? invoice.appointment?.pet) && (
 					<Card>
 						<CardHeader className="pb-3">
 							<CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -91,16 +171,33 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<div className="text-lg font-semibold">{invoice.appointment.pet.name}</div>
+							<div className="text-lg font-semibold">
+								{(invoice.visit?.pet ?? invoice.appointment?.pet)?.name}
+							</div>
 							<div className="text-sm text-muted-foreground mt-1">
-								{invoice.appointment.pet.species}
+								{(invoice.visit?.pet ?? invoice.appointment?.pet)?.species}
 							</div>
 						</CardContent>
 					</Card>
 				)}
 
-				{/* Service Information */}
-				{invoice.appointment?.service && (
+				{/* Service / Protocol Information */}
+				{invoice.visit ? (
+					<Card>
+						<CardHeader className="pb-3">
+							<CardTitle className="text-sm font-medium">Protocol</CardTitle>
+						</CardHeader>
+						<CardContent>
+							<div className="text-lg font-semibold">PRO-{invoice.visit.protocolNumber}</div>
+							<div className="text-sm text-muted-foreground mt-1">
+								Visit Date: {format(new Date(invoice.visit.visitDate), "EEEE, MMMM dd, yyyy")}
+							</div>
+							<div className="text-sm text-muted-foreground mt-1">
+								Status: <Badge variant="outline" className="ml-1">{invoice.visit.status}</Badge>
+							</div>
+						</CardContent>
+					</Card>
+				) : invoice.appointment?.service ? (
 					<Card>
 						<CardHeader className="pb-3">
 							<CardTitle className="text-sm font-medium">Service</CardTitle>
@@ -108,14 +205,14 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
 						<CardContent>
 							<div className="text-lg font-semibold">{invoice.appointment.service.title}</div>
 							<div className="text-sm text-muted-foreground mt-1">
-								Service Price: ${invoice.appointment.service.price.toFixed(2)}
+								Service Price: {formatCurrency(invoice.appointment.service.price)}
 							</div>
 						</CardContent>
 					</Card>
-				)}
+				) : null}
 
 				{/* Owner Information */}
-				{invoice.appointment?.pet?.owner && (
+				{(invoice.visit?.pet?.owner ?? invoice.appointment?.pet?.owner) && (
 					<Card>
 						<CardHeader className="pb-3">
 							<CardTitle className="text-sm font-medium flex items-center gap-2">
@@ -124,27 +221,37 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
 							</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<div className="text-lg font-semibold">{invoice.appointment.pet.owner.name || "N/A"}</div>
+							<div className="text-lg font-semibold">
+								{(invoice.visit?.pet?.owner ?? invoice.appointment?.pet?.owner)?.name || "N/A"}
+							</div>
 							<div className="text-sm text-muted-foreground mt-1 flex items-center gap-1">
 								<Mail className="w-3 h-3" />
-								{invoice.appointment.pet.owner.email}
+								{(invoice.visit?.pet?.owner ?? invoice.appointment?.pet?.owner)?.email}
 							</div>
 						</CardContent>
 					</Card>
 				)}
 
-				{/* Appointment Date */}
-				{invoice.appointment && (
+				{/* Visit / Appointment Date */}
+				{(invoice.visit ?? invoice.appointment) && (
 					<Card>
 						<CardHeader className="pb-3">
-							<CardTitle className="text-sm font-medium">Appointment Date</CardTitle>
+							<CardTitle className="text-sm font-medium">
+								{invoice.visit ? "Visit Date" : "Appointment Date"}
+							</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="text-lg font-semibold">
-								{format(new Date(invoice.appointment.date), "EEEE, MMMM dd, yyyy")}
+								{format(
+									new Date(invoice.visit?.visitDate ?? invoice.appointment?.date ?? ""),
+									"EEEE, MMMM dd, yyyy"
+								)}
 							</div>
 							<div className="text-sm text-muted-foreground mt-1">
-								Status: <Badge variant="outline" className="ml-1">{invoice.appointment.status}</Badge>
+								Status:{" "}
+								<Badge variant="outline" className="ml-1">
+									{invoice.visit?.status ?? invoice.appointment?.status}
+								</Badge>
 							</div>
 						</CardContent>
 					</Card>
@@ -167,7 +274,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
 								</div>
 								<div>
 									<span className="text-sm text-muted-foreground">Amount: </span>
-									<span className="font-semibold">${invoice.payment.amount.toFixed(2)}</span>
+									<span className="font-semibold">{formatCurrency(invoice.payment.amount)}</span>
 								</div>
 								{invoice.payment.paidAt && (
 									<div>

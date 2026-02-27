@@ -1,5 +1,7 @@
 "use client"
 
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,6 +15,7 @@ import { useAppointments, useDeleteAppointment, useUpdateAppointment, type Appoi
 import { toast } from "sonner"
 import { format } from "date-fns"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { ResponsiveTableWrapper } from "@/components/ui/responsive-table"
 import { AppointmentForm } from "./AppointmentForm"
 import { AppointmentDetail } from "./AppointmentDetail"
 import { currentUserClient } from "@/lib/auth/client"
@@ -46,6 +49,8 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 	const [isFormOpen, setIsFormOpen] = useState(false)
 
 	const currentUser = currentUserClient()
+	const pathname = usePathname()
+	const detailBasePath = pathname?.startsWith("/admin") ? "/admin/appointments" : pathname?.startsWith("/customer") ? "/customer/appointments" : undefined
 
 	const { data, refetch, isLoading } = useAppointments({
 		page,
@@ -98,8 +103,8 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 	return (
 		<Card>
 			<CardHeader>
-				<div className="flex items-center justify-between">
-					<div>
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+					<div className="min-w-0">
 						<CardTitle className="flex items-center gap-2">
 							<Calendar className="w-5 h-5" />
 							Appointments
@@ -136,8 +141,8 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 			</CardHeader>
 			<CardContent className="space-y-4">
 				{/* Filters */}
-				<div className="flex gap-2 flex-wrap">
-					<div className="flex-1 min-w-[200px]">
+				<div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+					<div className="w-full min-w-0 sm:flex-1 sm:min-w-[200px]">
 						<div className="relative">
 							<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
@@ -148,46 +153,48 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 							/>
 						</div>
 					</div>
-					<Select value={statusFilter} onValueChange={setStatusFilter}>
-						<SelectTrigger className="w-[180px]">
-							<Filter className="w-4 h-4 mr-2" />
-							<SelectValue placeholder="Status" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="ALL">All Status</SelectItem>
-							<SelectItem value="PENDING">Pending</SelectItem>
-							<SelectItem value="CONFIRMED">Confirmed</SelectItem>
-							<SelectItem value="COMPLETED">Completed</SelectItem>
-							<SelectItem value="CANCELLED">Cancelled</SelectItem>
-						</SelectContent>
-					</Select>
-					<Select value={sortBy} onValueChange={setSortBy}>
-						<SelectTrigger className="w-[180px]">
-							<SelectValue placeholder="Sort by" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="date-desc">Date (Newest)</SelectItem>
-							<SelectItem value="date-asc">Date (Oldest)</SelectItem>
-							<SelectItem value="status-asc">Status (A-Z)</SelectItem>
-							<SelectItem value="status-desc">Status (Z-A)</SelectItem>
-						</SelectContent>
-					</Select>
+					<div className="flex gap-2 flex-wrap">
+						<Select value={statusFilter} onValueChange={setStatusFilter}>
+							<SelectTrigger className="w-full sm:w-[180px]">
+								<Filter className="w-4 h-4 mr-2 shrink-0" />
+								<SelectValue placeholder="Status" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="ALL">All Status</SelectItem>
+								<SelectItem value="PENDING">Pending</SelectItem>
+								<SelectItem value="CONFIRMED">Confirmed</SelectItem>
+								<SelectItem value="COMPLETED">Completed</SelectItem>
+								<SelectItem value="CANCELLED">Cancelled</SelectItem>
+							</SelectContent>
+						</Select>
+						<Select value={sortBy} onValueChange={setSortBy}>
+							<SelectTrigger className="w-full sm:w-[180px]">
+								<SelectValue placeholder="Sort by" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="date-desc">Date (Newest)</SelectItem>
+								<SelectItem value="date-asc">Date (Oldest)</SelectItem>
+								<SelectItem value="status-asc">Status (A-Z)</SelectItem>
+								<SelectItem value="status-desc">Status (Z-A)</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
 				</div>
 
 				{/* Date Range Filters */}
-				<div className="flex gap-2 flex-wrap">
+				<div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
 					<DatePicker
 						value={dateFromFilter}
 						onChange={setDateFromFilter}
 						placeholder="From Date"
-						className="w-[180px]"
+						className="w-full sm:w-[180px]"
 						disabled={!!dateFrom}
 					/>
 					<DatePicker
 						value={dateToFilter}
 						onChange={setDateToFilter}
 						placeholder="To Date"
-						className="w-[180px]"
+						className="w-full sm:w-[180px]"
 						disabled={!!dateTo}
 					/>
 					{(dateFromFilter || dateToFilter || statusFilter !== "ALL" || searchQuery) && !dateFrom && !dateTo && (
@@ -209,8 +216,8 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 					<div className="text-center py-8 text-muted-foreground">No appointments found</div>
 				) : (
 					<>
-						<div className="rounded-md border">
-							<Table>
+						<ResponsiveTableWrapper>
+							<Table className="min-w-[640px] md:min-w-0">
 								<TableHeader>
 									<TableRow>
 										<TableHead>Date & Time</TableHead>
@@ -225,28 +232,28 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 								<TableBody>
 									{appointments.map((appointment) => (
 										<TableRow key={appointment.id}>
-											<TableCell>
+											<TableCell data-label="Date & Time">
 												{format(new Date(appointment.date), "MMM dd, yyyy HH:mm")}
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Pet">
 												<div>
 													<div className="font-medium">{appointment.pet?.name}</div>
 													<div className="text-sm text-muted-foreground">{appointment.pet?.species}</div>
 												</div>
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Service">
 												<div>
 													<div className="font-medium">{appointment.service?.title}</div>
 													<div className="text-sm text-muted-foreground">{appointment.service?.type}</div>
 												</div>
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Owner">
 												{appointment.pet?.owner?.name || appointment.pet?.owner?.email || "N/A"}
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Staff">
 												{appointment.staff?.name || appointment.staff?.email || "Unassigned"}
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Status">
 												<div className="flex items-center gap-2">
 													<Badge className={statusColors[appointment.status] || ""}>
 														{appointment.status}
@@ -306,15 +313,23 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 												</div>
 											</TableCell>
 											{showActions && (
-												<TableCell className="text-right">
+												<TableCell className="text-right" data-label="">
 													<div className="flex justify-end gap-2">
-														<Button
-															variant="ghost"
-															size="sm"
-															onClick={() => handleView(appointment)}
-														>
-															<Eye className="w-4 h-4" />
-														</Button>
+														{detailBasePath ? (
+															<Button variant="ghost" size="sm" asChild>
+																<Link href={`${detailBasePath}/${appointment.id}`}>
+																	<Eye className="w-4 h-4" />
+																</Link>
+															</Button>
+														) : (
+															<Button
+																variant="ghost"
+																size="sm"
+																onClick={() => handleView(appointment)}
+															>
+																<Eye className="w-4 h-4" />
+															</Button>
+														)}
 														{canEdit && (
 															<Button
 																variant="ghost"
@@ -340,7 +355,7 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 									))}
 								</TableBody>
 							</Table>
-						</div>
+						</ResponsiveTableWrapper>
 
 						{/* Pagination */}
 						{pagination && pagination.pages > 1 && (

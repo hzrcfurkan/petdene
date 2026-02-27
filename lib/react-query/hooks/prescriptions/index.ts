@@ -46,6 +46,7 @@ export interface UsePrescriptionsParams {
 	petId?: string
 	issuedById?: string
 	medicineName?: string
+	search?: string
 	dateFrom?: string
 	dateTo?: string
 }
@@ -58,6 +59,7 @@ export function usePrescriptions(params?: UsePrescriptionsParams) {
 	if (params?.petId) queryParams.set("petId", params.petId)
 	if (params?.issuedById) queryParams.set("issuedById", params.issuedById)
 	if (params?.medicineName) queryParams.set("medicineName", params.medicineName)
+	if (params?.search) queryParams.set("search", params.search)
 	if (params?.dateFrom) queryParams.set("dateFrom", params.dateFrom)
 	if (params?.dateTo) queryParams.set("dateTo", params.dateTo)
 

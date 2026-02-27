@@ -1,6 +1,8 @@
 "use client"
 
 import { useState } from "react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useMedicalRecords, useDeleteMedicalRecord, type MedicalRecord } from "@/lib/react-query/hooks/medical-records"
 import { Button } from "@/components/ui/button"
 import {
@@ -22,6 +24,7 @@ import {
 	DialogTitle,
 	DialogTrigger,
 } from "@/components/ui/dialog"
+import { ResponsiveTableWrapper } from "@/components/ui/responsive-table"
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card"
 import { MedicalRecordForm } from "./MedicalRecordForm"
 import { PetTimeline } from "./PetTimeline"
@@ -34,6 +37,7 @@ interface MedicalRecordListProps {
 	title?: string
 	dateFrom?: string
 	dateTo?: string
+	search?: string
 	showActions?: boolean
 }
 
@@ -42,6 +46,7 @@ export function MedicalRecordList({
 	title,
 	dateFrom,
 	dateTo,
+	search,
 	showActions = true,
 }: MedicalRecordListProps) {
 	const [page, setPage] = useState(1)
@@ -50,6 +55,8 @@ export function MedicalRecordList({
 	const [editingRecord, setEditingRecord] = useState<MedicalRecord | null>(null)
 
 	const currentUser = currentUserClient()
+	const pathname = usePathname()
+	const detailBasePath = pathname?.startsWith("/admin") ? "/admin/medical-records" : pathname?.startsWith("/customer") ? "/customer/medical-records" : undefined
 	const { data, isLoading, refetch } = useMedicalRecords({
 		page,
 		limit: 10,
@@ -58,6 +65,7 @@ export function MedicalRecordList({
 		title,
 		dateFrom,
 		dateTo,
+		search,
 	})
 
 	const records = data?.records || []
@@ -142,7 +150,7 @@ export function MedicalRecordList({
 					</div>
 				</CardHeader>
 				<CardContent>
-					<div className="rounded-md border">
+					<ResponsiveTableWrapper>
 						<Table>
 							<TableHeader>
 								<TableRow>
@@ -156,7 +164,7 @@ export function MedicalRecordList({
 							<TableBody>
 								{records.length === 0 ? (
 									<TableRow>
-										<TableCell colSpan={showActions ? 5 : 4} className="text-center py-8">
+										<TableCell colSpan={showActions ? 5 : 4} className="text-center py-8" data-label="">
 											<div className="flex flex-col items-center gap-2">
 												<Stethoscope className="h-8 w-8 text-muted-foreground" />
 												<p className="text-sm text-muted-foreground">No medical records found</p>
@@ -186,13 +194,21 @@ export function MedicalRecordList({
 											{showActions && (
 												<TableCell className="text-right">
 													<div className="flex justify-end gap-2">
-														<Button
-															variant="ghost"
-															size="sm"
-															onClick={() => setViewingRecord(record)}
-														>
-															<Eye className="h-4 w-4" />
-														</Button>
+														{detailBasePath ? (
+															<Button variant="ghost" size="sm" asChild>
+																<Link href={`${detailBasePath}/${record.id}`}>
+																	<Eye className="h-4 w-4" />
+																</Link>
+															</Button>
+														) : (
+															<Button
+																variant="ghost"
+																size="sm"
+																onClick={() => setViewingRecord(record)}
+															>
+																<Eye className="h-4 w-4" />
+															</Button>
+														)}
 														{canEdit && (
 															<Button
 																variant="ghost"
@@ -219,7 +235,7 @@ export function MedicalRecordList({
 								)}
 							</TableBody>
 						</Table>
-					</div>
+					</ResponsiveTableWrapper>
 				</CardContent>
 			</Card>
 

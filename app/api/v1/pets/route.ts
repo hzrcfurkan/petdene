@@ -1,5 +1,6 @@
 import { canAccessResource, currentUserServer } from "@/lib/auth"
 import { prisma } from "@/lib/db/prisma"
+import { generatePatientNumber } from "@/lib/db/patient-number"
 import { type NextRequest, NextResponse } from "next/server"
 
 export async function GET(req: NextRequest) {
@@ -29,12 +30,15 @@ export async function GET(req: NextRequest) {
 			where.ownerId = ownerId
 		}
 
-		// Search filter for name, breed, or species
+		// Search filter for name, breed, species, patientNumber, or owner name/email
 		if (search) {
 			where.OR = [
+				{ patientNumber: { contains: search, mode: "insensitive" } },
 				{ name: { contains: search, mode: "insensitive" } },
 				{ breed: { contains: search, mode: "insensitive" } },
 				{ species: { contains: search, mode: "insensitive" } },
+				{ owner: { name: { contains: search, mode: "insensitive" } } },
+				{ owner: { email: { contains: search, mode: "insensitive" } } },
 			]
 		}
 
@@ -59,6 +63,7 @@ export async function GET(req: NextRequest) {
 				where,
 				select: {
 					id: true,
+					patientNumber: true,
 					name: true,
 					species: true,
 					breed: true,
@@ -82,6 +87,7 @@ export async function GET(req: NextRequest) {
 					_count: {
 						select: {
 							appointments: true,
+							visits: true,
 							vaccinations: true,
 							medicalLogs: true,
 							prescriptions: true,
@@ -157,9 +163,13 @@ export async function POST(req: NextRequest) {
 			finalOwnerId = currentUser.id
 		}
 
+		// Auto-generate unique Patient Number
+		const patientNumber = await generatePatientNumber()
+
 		// Create pet
 		const newPet = await prisma.pet.create({
 			data: {
+				patientNumber,
 				name,
 				species,
 				breed: breed || null,
@@ -174,6 +184,7 @@ export async function POST(req: NextRequest) {
 			},
 			select: {
 				id: true,
+				patientNumber: true,
 				name: true,
 				species: true,
 				breed: true,

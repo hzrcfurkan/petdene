@@ -21,6 +21,13 @@ export interface CreateStaffData {
 	password: string
 }
 
+export interface CreateCustomerData {
+	name: string
+	email: string
+	phone?: string
+	password?: string
+}
+
 /**
  * Hook providing mutation functions for user management
  */
@@ -58,7 +65,7 @@ export function useUserMutations() {
 		mutationFn: async (data: CreateStaffData) => {
 			return mutationFetcher("/api/v1/admin/users", {
 				method: "POST",
-				body: data,
+				body: { ...data, role: "STAFF" },
 			})
 		},
 		onSuccess: () => {
@@ -102,6 +109,18 @@ export function useUserMutations() {
 		 */
 		createStaff: async (data: CreateStaffData) => {
 			return createStaffMutation.mutateAsync(data)
+		},
+
+		/**
+		 * Create a new customer
+		 */
+		createCustomer: async (data: CreateCustomerData) => {
+			const result = await mutationFetcher("/api/v1/admin/users", {
+				method: "POST",
+				body: { ...data, role: "CUSTOMER" },
+			})
+			queryClient.invalidateQueries({ queryKey: ["admin", "users"] })
+			return result
 		},
 
 		/**

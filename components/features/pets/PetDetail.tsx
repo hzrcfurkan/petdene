@@ -36,9 +36,14 @@ export function PetDetail({ pet: initialPet }: PetDetailProps) {
 						</CardDescription>
 					</div>
 				</div>
-				<Badge variant="outline" className="text-lg px-3 py-1">
-					{pet.species}
-				</Badge>
+				<div className="flex items-center gap-2">
+					<Badge variant="secondary" className="text-sm">
+						{pet.patientNumber || "—"}
+					</Badge>
+					<Badge variant="outline" className="text-lg px-3 py-1">
+						{pet.species}
+					</Badge>
+				</div>
 			</div>
 
 			<Separator />
@@ -50,6 +55,12 @@ export function PetDetail({ pet: initialPet }: PetDetailProps) {
 						<CardTitle className="text-sm font-medium">Basic Information</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-2">
+						{pet.patientNumber && (
+							<div className="flex justify-between">
+								<span className="text-sm text-muted-foreground">Patient Number:</span>
+								<span className="text-sm font-medium">{pet.patientNumber}</span>
+							</div>
+						)}
 						{pet.gender && (
 							<div className="flex justify-between">
 								<span className="text-sm text-muted-foreground">Gender:</span>

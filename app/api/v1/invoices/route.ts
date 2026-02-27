@@ -22,20 +22,18 @@ export async function GET(req: NextRequest) {
 
 		const where: any = {}
 
-		// Customers only see invoices for their pets' appointments
+		// Customers only see invoices for their pets (appointment or visit)
 		if (currentUser.isCustomer) {
-			where.appointment = {
-				pet: {
-					ownerId: currentUser.id,
-				},
-			}
+			where.OR = [
+				{ appointment: { pet: { ownerId: currentUser.id } } },
+				{ visit: { pet: { ownerId: currentUser.id } } },
+			]
 		} else if (ownerId) {
 			// Staff/Admin can filter by owner
-			where.appointment = {
-				pet: {
-					ownerId,
-				},
-			}
+			where.OR = [
+				{ appointment: { pet: { ownerId } } },
+				{ visit: { pet: { ownerId } } },
+			]
 		}
 
 		if (appointmentId) {
@@ -64,6 +62,7 @@ export async function GET(req: NextRequest) {
 				select: {
 					id: true,
 					appointmentId: true,
+					visitId: true,
 					amount: true,
 					status: true,
 					createdAt: true,
@@ -91,6 +90,44 @@ export async function GET(req: NextRequest) {
 									id: true,
 									title: true,
 									price: true,
+								},
+							},
+						},
+					},
+					visit: {
+						select: {
+							id: true,
+							protocolNumber: true,
+							visitDate: true,
+							status: true,
+							totalAmount: true,
+							pet: {
+								select: {
+									id: true,
+									name: true,
+									species: true,
+									owner: {
+										select: {
+											id: true,
+											name: true,
+											email: true,
+										},
+									},
+								},
+							},
+							services: {
+								select: {
+									id: true,
+									quantity: true,
+									unitPrice: true,
+									total: true,
+									service: {
+										select: {
+											id: true,
+											title: true,
+											price: true,
+										},
+									},
 								},
 							},
 						},
@@ -151,15 +188,112 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { appointmentId, amount, status } = body
+		const { appointmentId, visitId, amount, status } = body
 
-		if (!appointmentId || amount === undefined) {
+		// Must have either appointmentId or visitId (protocol-based)
+		if (!appointmentId && !visitId) {
 			return NextResponse.json(
-				{ error: "Appointment ID and amount are required" },
+				{ error: "Either appointment ID or visit ID (protocol) is required" },
+				{ status: 400 }
+			)
+		}
+		if (appointmentId && visitId) {
+			return NextResponse.json(
+				{ error: "Provide either appointment ID or visit ID, not both" },
+				{ status: 400 }
+			)
+		}
+		if (amount === undefined) {
+			return NextResponse.json(
+				{ error: "Amount is required" },
 				{ status: 400 }
 			)
 		}
 
+		if (amount < 0) {
+			return NextResponse.json({ error: "Amount must be positive" }, { status: 400 })
+		}
+
+		const validStatuses = ["UNPAID", "PAID", "CANCELLED"]
+		if (status && !validStatuses.includes(status)) {
+			return NextResponse.json(
+				{ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` },
+				{ status: 400 }
+			)
+		}
+
+		if (visitId) {
+			// Create invoice from Visit (protocol)
+			const visit = await prisma.visit.findUnique({
+				where: { id: visitId },
+				select: {
+					id: true,
+					totalAmount: true,
+					pet: { select: { ownerId: true } },
+				},
+			})
+
+			if (!visit) {
+				return NextResponse.json({ error: "Visit (protocol) not found" }, { status: 404 })
+			}
+
+			const existingInvoice = await prisma.invoice.findUnique({
+				where: { visitId },
+			})
+
+			if (existingInvoice) {
+				return NextResponse.json(
+					{ error: "Invoice already exists for this protocol (visit)" },
+					{ status: 400 }
+				)
+			}
+
+			const invoice = await prisma.invoice.create({
+				data: {
+					visitId,
+					amount,
+					status: status || "UNPAID",
+				},
+				select: {
+					id: true,
+					appointmentId: true,
+					visitId: true,
+					amount: true,
+					status: true,
+					createdAt: true,
+					visit: {
+						select: {
+							id: true,
+							protocolNumber: true,
+							visitDate: true,
+							status: true,
+							totalAmount: true,
+							pet: {
+								select: {
+									id: true,
+									name: true,
+									species: true,
+									owner: {
+										select: { id: true, name: true, email: true },
+									},
+								},
+							},
+							services: {
+								select: {
+									service: {
+										select: { id: true, title: true, price: true },
+									},
+								},
+							},
+						},
+					},
+				},
+			})
+
+			return NextResponse.json(invoice, { status: 201 })
+		}
+
+		// Create invoice from Appointment (legacy)
 		const appointment = await prisma.appointment.findUnique({
 			where: { id: appointmentId },
 			select: {
@@ -184,18 +318,6 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		if (amount < 0) {
-			return NextResponse.json({ error: "Amount must be positive" }, { status: 400 })
-		}
-
-		const validStatuses = ["UNPAID", "PAID", "CANCELLED"]
-		if (status && !validStatuses.includes(status)) {
-			return NextResponse.json(
-				{ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` },
-				{ status: 400 }
-			)
-		}
-
 		const invoice = await prisma.invoice.create({
 			data: {
 				appointmentId,
@@ -205,6 +327,7 @@ export async function POST(req: NextRequest) {
 			select: {
 				id: true,
 				appointmentId: true,
+				visitId: true,
 				amount: true,
 				status: true,
 				createdAt: true,

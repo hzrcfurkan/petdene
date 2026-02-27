@@ -14,6 +14,7 @@ export async function GET(req: NextRequest) {
 		const petId = searchParams.get("petId")
 		const issuedById = searchParams.get("issuedById")
 		const medicineName = searchParams.get("medicineName")
+		const search = searchParams.get("search")
 		const dateFrom = searchParams.get("dateFrom")
 		const dateTo = searchParams.get("dateTo")
 		const page = Number.parseInt(searchParams.get("page") || "1")
@@ -59,15 +60,26 @@ export async function GET(req: NextRequest) {
 			where.medicineName = { contains: medicineName, mode: "insensitive" }
 		}
 
-		// Date range filtering
+		// Search by patient (pet) name or owner name/email
+		if (search && search.trim()) {
+			const searchTerm = search.trim()
+			where.AND = where.AND || []
+			where.AND.push({
+				OR: [
+					{ medicineName: { contains: searchTerm, mode: "insensitive" } },
+					{ pet: { name: { contains: searchTerm, mode: "insensitive" } } },
+					{ pet: { patientNumber: { contains: searchTerm, mode: "insensitive" } } },
+					{ pet: { owner: { name: { contains: searchTerm, mode: "insensitive" } } } },
+					{ pet: { owner: { email: { contains: searchTerm, mode: "insensitive" } } } },
+				],
+			})
+		}
+
+		// Date range filtering (inclusive: full start and end day)
 		if (dateFrom || dateTo) {
 			where.dateIssued = {}
-			if (dateFrom) {
-				where.dateIssued.gte = new Date(dateFrom)
-			}
-			if (dateTo) {
-				where.dateIssued.lte = new Date(dateTo)
-			}
+			if (dateFrom) where.dateIssued.gte = new Date(dateFrom + "T00:00:00.000Z")
+			if (dateTo) where.dateIssued.lte = new Date(dateTo + "T23:59:59.999Z")
 		}
 
 		let orderBy: any = { dateIssued: "desc" }

@@ -3,6 +3,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { ResponsiveTableWrapper } from "@/components/ui/responsive-table"
 import { format } from "date-fns"
 import { TrendingUp, TrendingDown, DollarSign, Calendar, Users, AlertCircle } from "lucide-react"
 
@@ -59,8 +60,8 @@ export function RecentTable({ title, data, columns, emptyMessage = "No data avai
 				{data.length === 0 ? (
 					<div className="text-center py-8 text-muted-foreground">{emptyMessage}</div>
 				) : (
-					<div className="rounded-md border">
-						<Table>
+					<ResponsiveTableWrapper>
+						<Table className="min-w-[400px] md:min-w-0">
 							<TableHeader>
 								<TableRow>
 									{columns.map((col) => (
@@ -72,7 +73,7 @@ export function RecentTable({ title, data, columns, emptyMessage = "No data avai
 								{data.slice(0, 5).map((item, index) => (
 									<TableRow key={index}>
 										{columns.map((col) => (
-											<TableCell key={col.key}>
+											<TableCell key={col.key} data-label={col.label}>
 												{col.render ? col.render(item) : item[col.key]}
 											</TableCell>
 										))}
@@ -80,7 +81,7 @@ export function RecentTable({ title, data, columns, emptyMessage = "No data avai
 								))}
 							</TableBody>
 						</Table>
-					</div>
+					</ResponsiveTableWrapper>
 				)}
 			</CardContent>
 		</Card>

@@ -34,7 +34,7 @@ export default function Home() {
 								All-in-One Pet Care Solution
 							</Badge>
 						</div>
-						<h1 className="text-5xl font-bold tracking-tight sm:text-6xl lg:text-7xl">
+						<h1 className="text-3xl font-bold tracking-tight sm:text-5xl lg:text-6xl xl:text-7xl">
 							Complete Care for Your
 							<span className="bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
 								{" "}
@@ -45,11 +45,16 @@ export default function Home() {
 							Manage appointments, track vaccinations, maintain medical records, and keep your pets healthy
 							all in one place. Professional pet care management made simple.
 						</p>
-						<div className="mt-10 flex items-center justify-center gap-4">
-							<Button asChild size="lg" className="gap-2">
+						<div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
+							<Button asChild size="lg" className="gap-2 w-full sm:w-auto">
+								<Link href="/book">
+									Book Appointment
+									<ArrowRight className="h-4 w-4" />
+								</Link>
+							</Button>
+							<Button asChild size="lg" variant="outline" className="gap-2 w-full sm:w-auto">
 								<Link href="/signup">
 									Get Started
-									<ArrowRight className="h-4 w-4" />
 								</Link>
 							</Button>
 							<Button asChild variant="outline" size="lg">

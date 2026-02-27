@@ -1,5 +1,7 @@
 "use client"
 
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,6 +15,7 @@ import { useVaccinations, useDeleteVaccination, type Vaccination } from "@/lib/r
 import { toast } from "sonner"
 import { format, isAfter } from "date-fns"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { ResponsiveTableWrapper } from "@/components/ui/responsive-table"
 import { VaccinationForm } from "./VaccinationForm"
 import { VaccinationDetail } from "./VaccinationDetail"
 import { currentUserClient } from "@/lib/auth/client"
@@ -34,6 +37,8 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 	const [isFormOpen, setIsFormOpen] = useState(false)
 
 	const currentUser = currentUserClient()
+	const pathname = usePathname()
+	const detailBasePath = pathname?.startsWith("/admin") ? "/admin/vaccinations" : pathname?.startsWith("/customer") ? "/customer/vaccinations" : undefined
 
 	const { data, refetch, isLoading } = useVaccinations({
 		page,
@@ -178,7 +183,7 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 					<div className="text-center py-8 text-muted-foreground">No vaccinations found</div>
 				) : (
 					<>
-						<div className="rounded-md border">
+						<ResponsiveTableWrapper>
 							<Table>
 								<TableHeader>
 									<TableRow>
@@ -202,7 +207,7 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 
 										return (
 											<TableRow key={vaccination.id}>
-												<TableCell>
+												<TableCell data-label="Vaccine Name">
 													<div className="font-medium">{vaccination.vaccineName}</div>
 													{vaccination.notes && (
 														<div className="text-sm text-muted-foreground line-clamp-1">
@@ -210,16 +215,16 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 														</div>
 													)}
 												</TableCell>
-												<TableCell>
+												<TableCell data-label="Pet">
 													<div>
 														<div className="font-medium">{vaccination.pet?.name}</div>
 														<div className="text-sm text-muted-foreground">{vaccination.pet?.species}</div>
 													</div>
 												</TableCell>
-												<TableCell>
+												<TableCell data-label="Date Given">
 													{format(new Date(vaccination.dateGiven), "MMM dd, yyyy")}
 												</TableCell>
-												<TableCell>
+												<TableCell data-label="Next Due">
 													{vaccination.nextDue ? (
 														<div className="flex items-center gap-2">
 															<span>{format(new Date(vaccination.nextDue), "MMM dd, yyyy")}</span>
@@ -234,19 +239,27 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 														<span className="text-muted-foreground">N/A</span>
 													)}
 												</TableCell>
-												<TableCell>
+												<TableCell data-label="Owner">
 													{vaccination.pet?.owner?.name || vaccination.pet?.owner?.email || "N/A"}
 												</TableCell>
 												{showActions && (
-													<TableCell className="text-right">
+													<TableCell className="text-right" data-label="">
 														<div className="flex justify-end gap-2">
-															<Button
-																variant="ghost"
-																size="sm"
-																onClick={() => handleView(vaccination)}
-															>
-																<Eye className="w-4 h-4" />
-															</Button>
+															{detailBasePath ? (
+																<Button variant="ghost" size="sm" asChild>
+																	<Link href={`${detailBasePath}/${vaccination.id}`}>
+																		<Eye className="w-4 h-4" />
+																	</Link>
+																</Button>
+															) : (
+																<Button
+																	variant="ghost"
+																	size="sm"
+																	onClick={() => handleView(vaccination)}
+																>
+																	<Eye className="w-4 h-4" />
+																</Button>
+															)}
 															{canEdit && (
 																<Button
 																	variant="ghost"
@@ -273,7 +286,7 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 									})}
 								</TableBody>
 							</Table>
-						</div>
+						</ResponsiveTableWrapper>
 
 						{/* Pagination */}
 						{pagination && pagination.pages > 1 && (

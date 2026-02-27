@@ -12,7 +12,7 @@ interface LayoutAuthProps {
 
 export default function LayoutAuth({ children, className }: LayoutAuthProps) {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-background/95 flex flex-col">
+    <div className="min-h-screen min-h-dvh bg-gradient-to-b from-background via-background to-background/95 flex flex-col">
       <header className="px-4 sm:px-6 py-4 sm:py-6 flex items-center justify-between">
         <Logo href="/" />
         <ThemeToggle variant="switch" />

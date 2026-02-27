@@ -8,6 +8,7 @@ import { AnalyticsCard, RecentTable, AlertCard } from "./DashboardAnalytics"
 import { format } from "date-fns"
 import { Calendar, PawPrint, Syringe, FileText, Clock, AlertCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { currentUserClient } from "@/lib/auth/client"
 import { CustomerAppointmentPopup } from "@/components/features/appointments/CustomerAppointmentPopup"
 
@@ -19,6 +20,7 @@ const statusColors: Record<string, string> = {
 }
 
 export function EnhancedCustomerDashboard() {
+	const { formatCurrency } = useCurrency()
 	const currentUser = currentUserClient()
 	const { data: appointmentsData, refetch: refetchAppointments } = useAppointments({ limit: 1000 })
 	const { data: petsData } = usePets({ ownerId: currentUser?.id, limit: 1000 })
@@ -156,7 +158,7 @@ export function EnhancedCustomerDashboard() {
 				/>
 				<AnalyticsCard
 					title="Total Spent"
-					value={`$${stats.totalSpent.toFixed(2)}`}
+					value={formatCurrency(stats.totalSpent)}
 					icon={<FileText className="h-4 w-4 text-muted-foreground" />}
 					description="All time"
 				/>
@@ -217,7 +219,7 @@ export function EnhancedCustomerDashboard() {
 						{
 							key: "amount",
 							label: "Amount",
-							render: (item) => `$${item.amount.toFixed(2)}`,
+							render: (item) => formatCurrency(item.amount),
 						},
 						{
 							key: "status",

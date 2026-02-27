@@ -1,5 +1,6 @@
 "use client"
 
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -20,6 +21,7 @@ interface AppointmentFormProps {
 }
 
 export function AppointmentForm({ appointment, onSuccess, onCancel }: AppointmentFormProps) {
+	const { formatCurrency } = useCurrency()
 	const [petId, setPetId] = useState(appointment?.petId || "")
 	const [serviceId, setServiceId] = useState(appointment?.serviceId || "")
 	const [staffId, setStaffId] = useState(appointment?.staffId || "")
@@ -127,7 +129,7 @@ export function AppointmentForm({ appointment, onSuccess, onCancel }: Appointmen
 						<SelectContent>
 							{services.map((service) => (
 								<SelectItem key={service.id} value={service.id}>
-									{service.title} - ${service.price}
+									{service.title} - {formatCurrency(service.price)}
 								</SelectItem>
 							))}
 						</SelectContent>

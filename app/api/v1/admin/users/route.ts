@@ -11,30 +11,36 @@ export async function GET(req: NextRequest) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role, "ADMIN")) {
-			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
-		}
-
+		// STAFF can only read CUSTOMER list (for visit owner selection); ADMIN+ for full access
 		const { searchParams } = new URL(req.url)
 		const roleFilter = searchParams.get("role")
+		if (!canAccessResource(currentUser.role, "ADMIN")) {
+			// STAFF can only read CUSTOMER list (for visit owner selection)
+			if (currentUser.role !== "STAFF" || roleFilter !== "CUSTOMER") {
+				return NextResponse.json({ error: "Forbidden" }, { status: 403 })
+			}
+		}
 		const page = Number.parseInt(searchParams.get("page") || "1")
 		const limit = Number.parseInt(searchParams.get("limit") || "10")
 		const sort = searchParams.get("sort") || "date-desc"
 		const search = searchParams.get("search") || ""
 		const skip = (page - 1) * limit
 
-		const where: any = {}
+		const where: any = { deletedAt: null }
 
 		// Only add role filter if it's not "ALL"
 		if (roleFilter && roleFilter !== "ALL") {
 			where.role = roleFilter
 		}
 
-		// Add search filter for name or email
+		// Add search filter for name, email, or phone
 		if (search) {
 			where.OR = [
 				{ name: { contains: search, mode: "insensitive" } },
 				{ email: { contains: search, mode: "insensitive" } },
+				...(search.replace(/\D/g, "").length >= 3
+					? [{ phone: { contains: search, mode: "insensitive" } }]
+					: []),
 			]
 		}
 
@@ -93,7 +99,7 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
-		const { name, email, phone, password } = await req.json()
+		const { name, email, phone, password, role } = await req.json()
 
 		// Check if user already exists
 		const existingUser = await prisma.user.findUnique({
@@ -104,15 +110,25 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "User already exists" }, { status: 400 })
 		}
 
-		const hashedPassword = await bcrypt.hash(password, 10)
+		const userRole = role === "CUSTOMER" ? "CUSTOMER" : "STAFF"
+		// STAFF requires password; CUSTOMER can have auto-generated temp password
+		let hashedPassword: string | null = null
+		if (password && password.trim()) {
+			hashedPassword = await bcrypt.hash(password, 10)
+		} else if (userRole === "STAFF") {
+			return NextResponse.json({ error: "Password is required for staff" }, { status: 400 })
+		} else if (userRole === "CUSTOMER") {
+			const tempPassword = Math.random().toString(36).slice(-12)
+			hashedPassword = await bcrypt.hash(tempPassword, 10)
+		}
 
-		const newStaff = await prisma.user.create({
+		const newUser = await prisma.user.create({
 			data: {
 				name,
 				email,
-				phone,
+				phone: phone || null,
 				password: hashedPassword,
-				role: "STAFF",
+				role: userRole,
 			},
 			select: {
 				id: true,
@@ -124,7 +140,7 @@ export async function POST(req: NextRequest) {
 			},
 		})
 
-		return NextResponse.json(newStaff, { status: 201 })
+		return NextResponse.json(newUser, { status: 201 })
 	} catch (error) {
 		console.error("[v0] Create staff error:", error)
 		return NextResponse.json({ error: "Failed to create staff member" }, { status: 500 })

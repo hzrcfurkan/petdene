@@ -5,11 +5,29 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { getRoleLabel, currentUserClient } from "@/lib/auth/client"
-import { Search, Shield } from "lucide-react"
+import { Search, Shield, Plus, Edit, Trash2 } from "lucide-react"
 import { useState } from "react"
 import { useUsers, useUserMutations } from "@/lib/react-query"
 import { toast } from "sonner"
 import { UserListSkeleton } from "@/components/skeletons"
+import {
+	Dialog,
+	DialogContent,
+	DialogDescription,
+	DialogHeader,
+	DialogTitle,
+	DialogTrigger,
+} from "@/components/ui/dialog"
+import { Label } from "@/components/ui/label"
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 
 interface User {
 	id: string
@@ -48,7 +66,11 @@ export function UserManagement() {
 
 	const currentUser = currentUserClient()
 	const [updatingId, setUpdatingId] = useState<string | null>(null)
-	const { updateUserRole } = useUserMutations()
+	const [isAddCustomerOpen, setIsAddCustomerOpen] = useState(false)
+	const [editingUser, setEditingUser] = useState<User | null>(null)
+	const [customerForm, setCustomerForm] = useState({ name: "", email: "", phone: "", password: "" })
+	const [editForm, setEditForm] = useState({ name: "", email: "", phone: "", password: "" })
+	const { updateUserRole, updateUser, deleteUser, createCustomer } = useUserMutations()
 
 	if (!currentUser) return null
 
@@ -85,14 +107,135 @@ export function UserManagement() {
 		setSearchQuery("")
 	}
 
+	const handleAddCustomer = async (e: React.FormEvent) => {
+		e.preventDefault()
+		try {
+			await createCustomer({
+				name: customerForm.name,
+				email: customerForm.email,
+				phone: customerForm.phone || undefined,
+				password: customerForm.password || undefined,
+			})
+			toast.success("Customer added successfully")
+			setIsAddCustomerOpen(false)
+			setCustomerForm({ name: "", email: "", phone: "", password: "" })
+			refetch()
+		} catch (error: any) {
+			toast.error(error?.info?.error || "Failed to add customer")
+		}
+	}
+
+	const handleEditCustomer = (user: User) => {
+		setEditingUser(user)
+		setEditForm({
+			name: user.name || "",
+			email: user.email,
+			phone: user.phone || "",
+			password: "",
+		})
+	}
+
+	const handleUpdateCustomer = async (e: React.FormEvent) => {
+		e.preventDefault()
+		if (!editingUser) return
+		try {
+			await updateUser(editingUser.id, {
+				name: editForm.name,
+				email: editForm.email,
+				phone: editForm.phone || undefined,
+				password: editForm.password || undefined,
+			})
+			toast.success("Customer updated successfully")
+			setEditingUser(null)
+			refetch()
+		} catch (error: any) {
+			toast.error(error?.info?.error || "Failed to update customer")
+		}
+	}
+
+	const handleDeleteCustomer = async (userId: string, userName: string) => {
+		try {
+			await deleteUser(userId)
+			toast.success("Customer removed (soft delete)")
+			refetch()
+		} catch (error: any) {
+			toast.error(error?.info?.error || "Failed to remove customer")
+		}
+	}
+
 	return (
 		<Card>
 			<CardHeader>
-				<CardTitle className="flex items-center gap-2">
-					<Shield className="w-5 h-5" />
-					User Management
-				</CardTitle>
-				<CardDescription>Manage user roles and permissions (Super Admin only)</CardDescription>
+				<div className="flex items-center justify-between">
+					<div>
+						<CardTitle className="flex items-center gap-2">
+							<Shield className="w-5 h-5" />
+							User Management
+						</CardTitle>
+						<CardDescription>Manage users, roles, and permissions</CardDescription>
+					</div>
+					{(roleFilter === "CUSTOMER" || roleFilter === "ALL") && (
+						<Dialog open={isAddCustomerOpen} onOpenChange={setIsAddCustomerOpen}>
+							<DialogTrigger asChild>
+								<Button size="sm" className="gap-2">
+									<Plus className="w-4 h-4" />
+									Add Customer
+								</Button>
+							</DialogTrigger>
+							<DialogContent>
+								<DialogHeader>
+									<DialogTitle>Add New Customer</DialogTitle>
+									<DialogDescription>Create a new customer account. Password is optional - a reset link can be sent.</DialogDescription>
+								</DialogHeader>
+								<form onSubmit={handleAddCustomer} className="space-y-4">
+									<div className="space-y-2">
+										<Label htmlFor="cust-name">Name *</Label>
+										<Input
+											id="cust-name"
+											placeholder="John Doe"
+											value={customerForm.name}
+											onChange={(e) => setCustomerForm({ ...customerForm, name: e.target.value })}
+											required
+										/>
+									</div>
+									<div className="space-y-2">
+										<Label htmlFor="cust-email">Email *</Label>
+										<Input
+											id="cust-email"
+											type="email"
+											placeholder="john@example.com"
+											value={customerForm.email}
+											onChange={(e) => setCustomerForm({ ...customerForm, email: e.target.value })}
+											required
+										/>
+									</div>
+									<div className="space-y-2">
+										<Label htmlFor="cust-phone">Phone</Label>
+										<Input
+											id="cust-phone"
+											placeholder="+90 555 123 4567"
+											value={customerForm.phone}
+											onChange={(e) => setCustomerForm({ ...customerForm, phone: e.target.value })}
+										/>
+									</div>
+									<div className="space-y-2">
+										<Label htmlFor="cust-password">Password (optional - leave blank to send reset link)</Label>
+										<Input
+											id="cust-password"
+											type="password"
+											placeholder="••••••••"
+											value={customerForm.password}
+											onChange={(e) => setCustomerForm({ ...customerForm, password: e.target.value })}
+										/>
+									</div>
+									<Button type="submit" className="w-full" disabled={!customerForm.name || !customerForm.email}>
+										Add Customer
+									</Button>
+								</form>
+							</DialogContent>
+						</Dialog>
+					)}
+				</div>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<div className="flex gap-2 flex-wrap">
@@ -180,6 +323,40 @@ export function UserManagement() {
 											<SelectItem value="SUPER_ADMIN">{getRoleLabel("SUPER_ADMIN")}</SelectItem>
 										</SelectContent>
 									</Select>
+									{user.role === "CUSTOMER" && user.id !== currentUserId && (
+										<>
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={() => handleEditCustomer(user)}
+												className="text-primary"
+											>
+												<Edit className="w-4 h-4" />
+											</Button>
+											<AlertDialog>
+												<AlertDialogTrigger asChild>
+													<Button variant="ghost" size="sm" className="text-destructive">
+														<Trash2 className="w-4 h-4" />
+													</Button>
+												</AlertDialogTrigger>
+												<AlertDialogContent>
+													<AlertDialogTitle>Delete Customer</AlertDialogTitle>
+													<AlertDialogDescription>
+														Are you sure you want to remove {user.name || user.email}? This will soft-delete the account. They will no longer be able to sign in.
+													</AlertDialogDescription>
+													<div className="flex gap-2 justify-end">
+														<AlertDialogCancel>Cancel</AlertDialogCancel>
+														<AlertDialogAction
+															onClick={() => handleDeleteCustomer(user.id, user.name || user.email)}
+															className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+														>
+															Delete
+														</AlertDialogAction>
+													</div>
+												</AlertDialogContent>
+											</AlertDialog>
+										</>
+									)}
 									{user.id === currentUserId && <span className="text-xs text-muted-foreground">(You)</span>}
 								</div>
 							</div>
@@ -208,6 +385,58 @@ export function UserManagement() {
 					</div>
 				)}
 			</CardContent>
+
+			{/* Edit Customer Dialog */}
+			<Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>Edit Customer</DialogTitle>
+						<DialogDescription>Update customer information</DialogDescription>
+					</DialogHeader>
+					{editingUser && (
+						<form onSubmit={handleUpdateCustomer} className="space-y-4">
+							<div className="space-y-2">
+								<Label htmlFor="edit-name">Name *</Label>
+								<Input
+									id="edit-name"
+									value={editForm.name}
+									onChange={(e) => setEditForm({ ...editForm, name: e.target.value })}
+									required
+								/>
+							</div>
+							<div className="space-y-2">
+								<Label htmlFor="edit-email">Email *</Label>
+								<Input
+									id="edit-email"
+									type="email"
+									value={editForm.email}
+									onChange={(e) => setEditForm({ ...editForm, email: e.target.value })}
+									required
+								/>
+							</div>
+							<div className="space-y-2">
+								<Label htmlFor="edit-phone">Phone</Label>
+								<Input
+									id="edit-phone"
+									value={editForm.phone}
+									onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+								/>
+							</div>
+							<div className="space-y-2">
+								<Label htmlFor="edit-password">New Password (leave blank to keep current)</Label>
+								<Input
+									id="edit-password"
+									type="password"
+									placeholder="••••••••"
+									value={editForm.password}
+									onChange={(e) => setEditForm({ ...editForm, password: e.target.value })}
+								/>
+							</div>
+							<Button type="submit" className="w-full">Update Customer</Button>
+						</form>
+					)}
+				</DialogContent>
+			</Dialog>
 		</Card>
 	)
 }

@@ -101,6 +101,41 @@ const ENV_VARIABLES = [
 		example: "re_your-api-key",
 		category: "Email",
 	},
+	{
+		name: "NEXT_PUBLIC_USD_TO_TRY",
+		required: false,
+		description: "Exchange rate: 1 USD = X TRY. Used for currency conversion when user selects USD. Default: 34",
+		example: "34",
+		category: "General",
+	},
+	{
+		name: "WHATSAPP_PHONE_NUMBER_ID",
+		required: false,
+		description: "WhatsApp Business Phone Number ID (from Meta Business Manager)",
+		example: "123456789012345",
+		category: "WhatsApp",
+	},
+	{
+		name: "WHATSAPP_ACCESS_TOKEN",
+		required: false,
+		description: "WhatsApp Cloud API access token (System User token recommended)",
+		example: "EAAxxxx...",
+		category: "WhatsApp",
+	},
+	{
+		name: "WHATSAPP_APPOINTMENT_TEMPLATE",
+		required: false,
+		description: "Template name for appointment reminders (create in Meta Business Manager)",
+		example: "appointment_reminder",
+		category: "WhatsApp",
+	},
+	{
+		name: "CRON_SECRET",
+		required: false,
+		description: "Secret for securing cron endpoints (set Authorization: Bearer <CRON_SECRET>)",
+		example: "your-cron-secret",
+		category: "Cron",
+	},
 ]
 
 export function EnvironmentVariables() {
@@ -220,7 +255,15 @@ NEXTAUTH_SECRET="your-generated-secret-key-minimum-32-characters-long"
 # NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY="pk_test_your-publishable-key"
 
 # Resend Email (OPTIONAL)
-# RESEND_API_KEY="re_your-api-key"`}
+# RESEND_API_KEY="re_your-api-key"
+
+# WhatsApp Reminders (OPTIONAL)
+# WHATSAPP_PHONE_NUMBER_ID="your-phone-number-id"
+# WHATSAPP_ACCESS_TOKEN="your-access-token"
+# WHATSAPP_APPOINTMENT_TEMPLATE="appointment_reminder"
+
+# Cron Security (OPTIONAL)
+# CRON_SECRET="your-cron-secret"`}
 							</code>
 						</div>
 						<p className="mt-4 text-xs text-muted-foreground">

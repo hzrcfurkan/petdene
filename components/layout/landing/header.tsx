@@ -1,7 +1,7 @@
 import { Logo } from "@/components/shared/Logo"
 import { HeaderActions } from "./header-actions"
 
-export default async function Header() {
+export default function Header() {
 	return (
 		<>
 			<header className="border-b border-border bg-card">

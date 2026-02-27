@@ -9,7 +9,7 @@ export default function SignUpPage() {
 		<LayoutAuth>
 			<Card className="w-full max-w-md">
 				<CardHeader className="text-center space-y-2">
-					<CardTitle className="text-3xl font-bold" style={{ fontFamily: "var(--font-space-grotesk)" }}>
+					<CardTitle className="text-3xl font-bold" style={{ fontFamily: "var(--font-plus-jakarta)" }}>
 						Create Account
 					</CardTitle>
 					<CardDescription>Sign up for your spa booking account</CardDescription>

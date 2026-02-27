@@ -1,117 +1,50 @@
 "use client"
 
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query"
-import { fetcher, mutationFetcher } from "../../fetcher"
+import { useQuery } from "@tanstack/react-query"
+import { fetcher } from "../../fetcher"
 
-export interface Payment {
+export interface UnpaidVisit {
 	id: string
-	invoiceId: string
-	method: string
-	transactionId?: string | null
-	stripePaymentIntentId?: string | null
-	stripeClientSecret?: string | null
-	amount: number
-	paidAt?: string | null
-	status: "PENDING" | "COMPLETED" | "FAILED" | "CANCELLED"
-	createdAt: string
-	updatedAt: string
-	invoice?: {
+	protocolNumber: number
+	visitDate: string
+	totalAmount: number
+	paidAmount: number
+	balance: number
+	pet: {
 		id: string
-		amount: number
-		status: string
-		appointment?: {
+		patientNumber?: string
+		name: string
+		species: string
+		owner: {
 			id: string
-			date: string
-			pet?: {
-				id: string
-				name: string
-				owner?: {
-					id: string
-					name: string | null
-					email: string
-				}
-			}
+			name: string | null
+			email: string
+			phone: string | null
 		}
 	}
 }
 
-export interface PaymentsResponse {
-	payments: Payment[]
-	pagination: {
-		total: number
-		page: number
-		limit: number
-		pages: number
-	}
+export interface CustomerBalance {
+	ownerId: string
+	ownerName: string
+	ownerEmail: string
+	totalDebt: number
+	visitCount: number
 }
 
-export interface CreatePaymentData {
-	invoiceId: string
-	method: "cash" | "stripe"
-	amount: number
-	transactionId?: string
-	paidAt?: string
+export interface UnpaidVisitsResponse {
+	unpaidVisits: UnpaidVisit[]
+	customerBalances: CustomerBalance[]
+	totalOutstanding: number
 }
 
-export interface StripePaymentIntentResponse {
-	clientSecret: string
-	paymentIntentId: string
-	paymentId: string
-}
-
-export function usePayments(params?: {
-	page?: number
-	limit?: number
-	sort?: string
-	invoiceId?: string
-	method?: string
-}) {
-	return useQuery({
-		queryKey: ["payments", params],
-		queryFn: () => {
-			const searchParams = new URLSearchParams()
-			if (params?.page) searchParams.set("page", params.page.toString())
-			if (params?.limit) searchParams.set("limit", params.limit.toString())
-			if (params?.sort) searchParams.set("sort", params.sort)
-			if (params?.invoiceId) searchParams.set("invoiceId", params.invoiceId)
-			if (params?.method) searchParams.set("method", params.method)
-
-			return fetcher<PaymentsResponse>(`/api/v1/payments?${searchParams.toString()}`)
-		},
+export function useUnpaidVisits(params?: { dateFrom?: string; dateTo?: string }) {
+	const queryParams = new URLSearchParams()
+	if (params?.dateFrom) queryParams.set("dateFrom", params.dateFrom)
+	if (params?.dateTo) queryParams.set("dateTo", params.dateTo)
+	const url = `/api/v1/payments/unpaid-visits${queryParams.toString() ? `?${queryParams.toString()}` : ""}`
+	return useQuery<UnpaidVisitsResponse>({
+		queryKey: ["payments", "unpaid", params],
+		queryFn: () => fetcher<UnpaidVisitsResponse>(url),
 	})
 }
-
-export function usePayment(id: string) {
-	return useQuery({
-		queryKey: ["payment", id],
-		queryFn: () => fetcher<Payment>(`/api/v1/payments/${id}`),
-		enabled: !!id,
-	})
-}
-
-export function useCreatePayment() {
-	const queryClient = useQueryClient()
-
-	return useMutation({
-		mutationFn: (data: CreatePaymentData) =>
-			mutationFetcher<Payment>("/api/v1/payments", {
-				method: "POST",
-				body: JSON.stringify(data),
-			}),
-		onSuccess: () => {
-			queryClient.invalidateQueries({ queryKey: ["payments"] })
-			queryClient.invalidateQueries({ queryKey: ["invoices"] })
-		},
-	})
-}
-
-export function useCreateStripePaymentIntent() {
-	return useMutation({
-		mutationFn: (invoiceId: string) =>
-			mutationFetcher<StripePaymentIntentResponse>("/api/v1/payments/stripe", {
-				method: "POST",
-				body: JSON.stringify({ invoiceId }),
-			}),
-	})
-}
-

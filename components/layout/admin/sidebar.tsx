@@ -34,7 +34,7 @@ export default function Sidebar() {
 	const getDashboardLink = () => {
 		switch (userRole) {
 			case "SUPER_ADMIN":
-				return "/admin/super"
+				return "/super"
 			case "ADMIN":
 				return "/admin"
 			case "STAFF":
@@ -97,8 +97,9 @@ export default function Sidebar() {
 				<Button
 					variant="ghost"
 					size="icon"
-					className="fixed top-4 left-4 z-50 lg:hidden"
+					className="fixed top-4 left-4 z-50 lg:hidden size-11 min-w-11"
 					onClick={() => setIsOpen(!isOpen)}
+					aria-label="Open menu"
 				>
 					<Menu className="h-6 w-6" />
 				</Button>

@@ -1,6 +1,6 @@
 "use client"
 
-import { LayoutDashboard, Users, Settings, User, Calendar, PawPrint, Sparkles, Syringe, Pill, FileText, Stethoscope, Upload } from "lucide-react"
+import { LayoutDashboard, Users, Settings, User, Calendar, PawPrint, Sparkles, Syringe, Pill, FileText, Stethoscope, Upload, ClipboardList, BarChart3, CreditCard } from "lucide-react"
 
 export interface NavItem {
 	label: string
@@ -31,7 +31,7 @@ export function getNavItems(role: string): NavItem[] {
 	const dashboardLink = (() => {
 		switch (role) {
 			case "SUPER_ADMIN":
-				return "/admin/super"
+				return "/super"
 			case "ADMIN":
 				return "/admin"
 			case "STAFF":
@@ -53,11 +53,18 @@ export function getNavItems(role: string): NavItem[] {
 	]
 
 	// Add role-specific admin items
-	if (role === "SUPER_ADMIN" || role === "ADMIN") {
+	if (role === "SUPER_ADMIN") {
 		items.push({
 			label: "User Management",
-			href: "/admin/roles",
+			href: "/super/roles",
 			icon: Users,
+		})
+	}
+	if (role === "SUPER_ADMIN" || role === "ADMIN") {
+		items.push({
+			label: "Visits",
+			href: "/admin/visits",
+			icon: ClipboardList,
 		})
 		items.push({
 			label: "Appointments",
@@ -95,14 +102,29 @@ export function getNavItems(role: string): NavItem[] {
 			icon: Stethoscope,
 		})
 		items.push({
+			label: "Payments",
+			href: "/admin/payments",
+			icon: CreditCard,
+		})
+		items.push({
 			label: "Invoices",
 			href: "/admin/invoices",
 			icon: FileText,
+		})
+		items.push({
+			label: "Reports",
+			href: "/admin/reports",
+			icon: BarChart3,
 		})
 	}
 
 	// Add appointments, pets, vaccinations, prescriptions, and invoices for staff
 	if (role === "STAFF") {
+		items.push({
+			label: "Visits",
+			href: "/admin/visits",
+			icon: ClipboardList,
+		})
 		items.push({
 			label: "Appointments",
 			href: "/admin/appointments",
@@ -129,9 +151,19 @@ export function getNavItems(role: string): NavItem[] {
 			icon: Stethoscope,
 		})
 		items.push({
+			label: "Payments",
+			href: "/admin/payments",
+			icon: CreditCard,
+		})
+		items.push({
 			label: "Invoices",
 			href: "/admin/invoices",
 			icon: FileText,
+		})
+		items.push({
+			label: "Reports",
+			href: "/admin/reports",
+			icon: BarChart3,
 		})
 	}
 
@@ -141,6 +173,11 @@ export function getNavItems(role: string): NavItem[] {
 			label: "My Pets",
 			href: "/customer/pets",
 			icon: PawPrint,
+		})
+		items.push({
+			label: "Visits",
+			href: "/customer/visits",
+			icon: ClipboardList,
 		})
 		items.push({
 			label: "Appointments",

@@ -1,19 +1,23 @@
 "use client"
 
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { DatePicker } from "@/components/ui/date-picker"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Plus, Eye, Edit, Trash2, Pill } from "lucide-react"
+import { Search, Plus, Eye, Edit, Trash2, Pill, Printer } from "lucide-react"
 import { useState } from "react"
 import { usePrescriptions, useDeletePrescription, type Prescription } from "@/lib/react-query/hooks/prescriptions"
 import { toast } from "sonner"
 import { format } from "date-fns"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { ResponsiveTableWrapper } from "@/components/ui/responsive-table"
 import { PrescriptionForm } from "./PrescriptionForm"
 import { PrescriptionDetail } from "./PrescriptionDetail"
+import { generatePrescriptionPDF } from "@/lib/utils/prescription-pdf"
 import { currentUserClient } from "@/lib/auth/client"
 
 interface PrescriptionListProps {
@@ -27,7 +31,7 @@ interface PrescriptionListProps {
 export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActions = true }: PrescriptionListProps) {
 	const [page, setPage] = useState(1)
 	const [sortBy, setSortBy] = useState<string>("date-desc")
-	const [medicineNameFilter, setMedicineNameFilter] = useState<string>("")
+	const [searchFilter, setSearchFilter] = useState<string>("")
 	const [dateFromFilter, setDateFromFilter] = useState(dateFrom || "")
 	const [dateToFilter, setDateToFilter] = useState(dateTo || "")
 	const [editingPrescription, setEditingPrescription] = useState<Prescription | null>(null)
@@ -35,6 +39,8 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 	const [isFormOpen, setIsFormOpen] = useState(false)
 
 	const currentUser = currentUserClient()
+	const pathname = usePathname()
+	const detailBasePath = pathname?.startsWith("/admin") ? "/admin/prescriptions" : pathname?.startsWith("/customer") ? "/customer/prescriptions" : undefined
 
 	const { data, refetch, isLoading } = usePrescriptions({
 		page,
@@ -42,7 +48,7 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 		sort: sortBy,
 		petId,
 		issuedById,
-		medicineName: medicineNameFilter || undefined,
+		search: searchFilter || undefined,
 		dateFrom: dateFrom || dateFromFilter || undefined,
 		dateTo: dateTo || dateToFilter || undefined,
 	})
@@ -70,6 +76,17 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 
 	const handleView = (prescription: Prescription) => {
 		setViewingPrescription(prescription)
+	}
+
+	const handlePrint = (prescription: Prescription, e?: React.MouseEvent) => {
+		e?.preventDefault()
+		e?.stopPropagation()
+		try {
+			generatePrescriptionPDF(prescription)
+			toast.success("Prescription PDF downloaded")
+		} catch (error: any) {
+			toast.error(error?.message || "Failed to generate PDF")
+		}
 	}
 
 	const handleFormSuccess = () => {
@@ -127,9 +144,9 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 						<div className="relative">
 							<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
-								placeholder="Search by medicine name..."
-								value={medicineNameFilter}
-								onChange={(e) => setMedicineNameFilter(e.target.value)}
+								placeholder="Search by patient, owner, or medicine..."
+								value={searchFilter}
+								onChange={(e) => setSearchFilter(e.target.value)}
 								className="pl-8"
 							/>
 						</div>
@@ -161,11 +178,11 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 						placeholder="To Date"
 						className="w-[180px]"
 					/>
-					{(dateFromFilter || dateToFilter || medicineNameFilter) && (
+					{(dateFromFilter || dateToFilter || searchFilter) && (
 						<Button variant="outline" onClick={() => {
 							setDateFromFilter("")
 							setDateToFilter("")
-							setMedicineNameFilter("")
+							setSearchFilter("")
 						}}>
 							Clear Filters
 						</Button>
@@ -179,7 +196,7 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 					<div className="text-center py-8 text-muted-foreground">No prescriptions found</div>
 				) : (
 					<>
-						<div className="rounded-md border">
+						<ResponsiveTableWrapper>
 							<Table>
 								<TableHeader>
 									<TableRow>
@@ -195,7 +212,7 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 								<TableBody>
 									{prescriptions.map((prescription) => (
 										<TableRow key={prescription.id}>
-											<TableCell>
+											<TableCell data-label="Medicine Name">
 												<div className="font-medium">{prescription.medicineName}</div>
 												{prescription.instructions && (
 													<div className="text-sm text-muted-foreground line-clamp-1">
@@ -203,34 +220,50 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 													</div>
 												)}
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Pet">
 												<div>
 													<div className="font-medium">{prescription.pet?.name}</div>
 													<div className="text-sm text-muted-foreground">{prescription.pet?.species}</div>
 												</div>
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Dosage">
 												{prescription.dosage || <span className="text-muted-foreground">N/A</span>}
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Date Issued">
 												{format(new Date(prescription.dateIssued), "MMM dd, yyyy")}
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Issued By">
 												{prescription.issuedBy?.name || prescription.issuedBy?.email || "N/A"}
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Owner">
 												{prescription.pet?.owner?.name || prescription.pet?.owner?.email || "N/A"}
 											</TableCell>
 											{showActions && (
-												<TableCell className="text-right">
+												<TableCell className="text-right" data-label="">
 													<div className="flex justify-end gap-2">
 														<Button
 															variant="ghost"
 															size="sm"
-															onClick={() => handleView(prescription)}
+															onClick={(e) => handlePrint(prescription, e)}
+															title="Print / Save PDF"
 														>
-															<Eye className="w-4 h-4" />
+															<Printer className="w-4 h-4" />
 														</Button>
+														{detailBasePath ? (
+															<Button variant="ghost" size="sm" asChild>
+																<Link href={`${detailBasePath}/${prescription.id}`}>
+																	<Eye className="w-4 h-4" />
+																</Link>
+															</Button>
+														) : (
+															<Button
+																variant="ghost"
+																size="sm"
+																onClick={() => handleView(prescription)}
+															>
+																<Eye className="w-4 h-4" />
+															</Button>
+														)}
 														{canEdit && (
 															<Button
 																variant="ghost"
@@ -256,7 +289,7 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 									))}
 								</TableBody>
 							</Table>
-						</div>
+						</ResponsiveTableWrapper>
 
 						{/* Pagination */}
 						{pagination && pagination.pages > 1 && (

@@ -1,5 +1,6 @@
 "use client"
 
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Button } from "@/components/ui/button"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -16,6 +17,7 @@ interface InlinePaymentFormProps {
 }
 
 export function InlinePaymentForm({ invoice, onSuccess }: InlinePaymentFormProps) {
+	const { formatCurrency } = useCurrency()
 	const [paymentMethod, setPaymentMethod] = useState<string>("")
 	const [isStripeDialogOpen, setIsStripeDialogOpen] = useState(false)
 	const [isCashDialogOpen, setIsCashDialogOpen] = useState(false)
@@ -123,7 +125,7 @@ export function InlinePaymentForm({ invoice, onSuccess }: InlinePaymentFormProps
 						<DialogHeader>
 							<DialogTitle className="text-xl">Record Cash Payment</DialogTitle>
 							<DialogDescription>
-								Invoice #{invoice.id.slice(0, 8).toUpperCase()} - ${invoice.amount.toFixed(2)}
+								Invoice #{invoice.id.slice(0, 8).toUpperCase()} - {formatCurrency(invoice.amount)}
 							</DialogDescription>
 						</DialogHeader>
 						<div className="space-y-4 py-4">
@@ -133,7 +135,7 @@ export function InlinePaymentForm({ invoice, onSuccess }: InlinePaymentFormProps
 										<p className="font-medium">Cash Payment Instructions:</p>
 										<ul className="list-disc list-inside space-y-1 ml-2 text-sm">
 											<li>Click "Confirm Cash Payment" to record this payment</li>
-											<li>Please bring the exact amount (${invoice.amount.toFixed(2)}) to the clinic</li>
+											<li>Please bring the exact amount ({formatCurrency(invoice.amount)}) to the clinic</li>
 											<li>Payment will be confirmed by staff when you arrive</li>
 										</ul>
 									</div>
@@ -142,7 +144,7 @@ export function InlinePaymentForm({ invoice, onSuccess }: InlinePaymentFormProps
 							<div className="rounded-lg border bg-muted/30 p-4">
 								<div className="flex items-center justify-between text-sm">
 									<span className="text-muted-foreground">Amount to Pay:</span>
-									<span className="text-lg font-bold">${invoice.amount.toFixed(2)}</span>
+									<span className="text-lg font-bold">{formatCurrency(invoice.amount)}</span>
 								</div>
 							</div>
 							<div className="flex flex-col-reverse sm:flex-row justify-end gap-3 pt-2">
@@ -188,7 +190,7 @@ export function InlinePaymentForm({ invoice, onSuccess }: InlinePaymentFormProps
 						<DialogHeader>
 							<DialogTitle className="text-xl">Complete Payment</DialogTitle>
 							<DialogDescription>
-								Pay for invoice #{invoice.id.slice(0, 8).toUpperCase()} - ${invoice.amount.toFixed(2)}
+								Pay for invoice #{invoice.id.slice(0, 8).toUpperCase()} - {formatCurrency(invoice.amount)}
 							</DialogDescription>
 						</DialogHeader>
 						{isLoadingIntent ? (

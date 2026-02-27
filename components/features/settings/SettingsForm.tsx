@@ -6,9 +6,12 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import type React from "react"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { toast } from "sonner"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
+import type { DisplayCurrency } from "@/lib/utils/currency"
 
 export function SettingsForm() {
 	const [currentPassword, setCurrentPassword] = useState("")
@@ -18,6 +21,24 @@ export function SettingsForm() {
 	const [emailNotifications, setEmailNotifications] = useState(true)
 	const [smsNotifications, setSmsNotifications] = useState(false)
 	const [promotionalEmails, setPromotionalEmails] = useState(false)
+	const [currencyPreference, setCurrencyPreference] = useState<DisplayCurrency>("TRY")
+	const { setCurrency } = useCurrency()
+
+	useEffect(() => {
+		fetch("/api/v1/user/settings")
+			.then((res) => (res.ok ? res.json() : null))
+			.then((data) => {
+				if (data) {
+					setEmailNotifications(data.emailNotifications ?? true)
+					setSmsNotifications(data.smsNotifications ?? false)
+					setPromotionalEmails(data.promotionalEmails ?? false)
+					if (data.currencyPreference === "USD" || data.currencyPreference === "TRY") {
+						setCurrencyPreference(data.currencyPreference)
+					}
+				}
+			})
+			.catch(() => {})
+	}, [])
 
 	const handlePasswordChange = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault()
@@ -65,10 +86,12 @@ export function SettingsForm() {
 					emailNotifications,
 					smsNotifications,
 					promotionalEmails,
+					currencyPreference,
 				}),
 			})
 
 			if (!res.ok) throw new Error("Failed to save preferences")
+			setCurrency(currencyPreference)
 			toast.success("Preferences saved successfully")
 		} catch (error) {
 			toast.error("Failed to save preferences")
@@ -134,10 +157,32 @@ export function SettingsForm() {
 			<TabsContent value="preferences">
 				<Card>
 					<CardHeader>
-						<CardTitle>Notification Preferences</CardTitle>
-						<CardDescription>Manage how you receive notifications and communications</CardDescription>
+						<CardTitle>Preferences</CardTitle>
+						<CardDescription>Manage your display and notification preferences</CardDescription>
 					</CardHeader>
 					<CardContent className="space-y-6">
+						<div className="space-y-2">
+							<Label htmlFor="currency">Display Currency</Label>
+							<p className="text-sm text-muted-foreground">
+								All prices are converted and shown in your selected currency
+							</p>
+							<Select
+								value={currencyPreference}
+								onValueChange={(v) => setCurrencyPreference(v as DisplayCurrency)}
+							>
+								<SelectTrigger id="currency" className="w-[200px]">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="TRY">Turkish Lira (₺)</SelectItem>
+									<SelectItem value="USD">US Dollar ($)</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+
+						<div className="border-t pt-6">
+							<h4 className="font-medium mb-4">Notification Preferences</h4>
+							<div className="space-y-6">
 						<div className="flex items-center justify-between">
 							<div className="space-y-1">
 								<Label htmlFor="email-notifications">Email Notifications</Label>
@@ -160,6 +205,8 @@ export function SettingsForm() {
 								<p className="text-sm text-muted-foreground">Receive special offers and promotions</p>
 							</div>
 							<Switch id="promotional-emails" checked={promotionalEmails} onCheckedChange={setPromotionalEmails} />
+						</div>
+							</div>
 						</div>
 
 						<Button onClick={handlePreferencesSave} className="w-full">

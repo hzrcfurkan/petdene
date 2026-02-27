@@ -2,7 +2,7 @@
  * Authentication module exports
  * 
  * Note: Server-only exports (authOptions, getAuthSession, currentUserServer) 
- * are marked with "server-only" in their source files.
+ * should only be used in server components and API routes.
  * Client components should import currentUserClient directly.
  */
 export { authOptions, getAuthSession } from "./auth"

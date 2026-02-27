@@ -17,6 +17,7 @@ import {
 	TrendingUp,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 
 const statusColors: Record<string, string> = {
 	PENDING: "bg-yellow-100 text-yellow-800",
@@ -26,6 +27,7 @@ const statusColors: Record<string, string> = {
 }
 
 export function EnhancedSuperAdminDashboard() {
+	const { formatCurrency } = useCurrency()
 	const { data: usersResponse } = useStats()
 	const { data: appointmentsData } = useAppointments({ limit: 1000 })
 	const { data: petsData } = usePets({ limit: 1000 })
@@ -144,7 +146,7 @@ export function EnhancedSuperAdminDashboard() {
 	const alerts = useMemo(() => {
 		const alertItems: string[] = []
 		if (businessStats.unpaidInvoices > 0) {
-			alertItems.push(`$${businessStats.unpaidAmount.toFixed(2)} in unpaid invoices`)
+			alertItems.push(`${formatCurrency(businessStats.unpaidAmount)} in unpaid invoices`)
 		}
 		if (userStats.newUsers > 0) {
 			alertItems.push(`${userStats.newUsers} new users in the last 30 days`)
@@ -192,9 +194,9 @@ export function EnhancedSuperAdminDashboard() {
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<AnalyticsCard
 					title="Total Revenue"
-					value={`$${businessStats.totalRevenue.toFixed(2)}`}
+					value={formatCurrency(businessStats.totalRevenue)}
 					icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
-					description={`$${businessStats.monthlyRevenue.toFixed(2)} this month`}
+					description={`${formatCurrency(businessStats.monthlyRevenue)} this month`}
 				/>
 				<AnalyticsCard
 					title="Total Appointments"
@@ -229,7 +231,7 @@ export function EnhancedSuperAdminDashboard() {
 			/>
 
 			{/* Recent Data Tables */}
-			<div className="grid gap-4 md:grid-cols-2">
+			<div className="grid gap-4 md:grid-cols-1">
 				<RecentTable
 					title="Recent Users"
 					data={recentUsers}
@@ -287,7 +289,7 @@ export function EnhancedSuperAdminDashboard() {
 						{
 							key: "amount",
 							label: "Amount",
-							render: (item) => `$${item.amount.toFixed(2)}`,
+							render: (item) => formatCurrency(item.amount),
 						},
 						{
 							key: "status",

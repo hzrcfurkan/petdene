@@ -1,0 +1,699 @@
+<h1>Pet Care Management System - Complete Professional Veterinary & Grooming Business Solution</h1>
+
+<h2>Summary</h2>
+<p>
+	A comprehensive, full-stack pet care management system designed to streamline operations for veterinary clinics,
+	pet grooming services, and animal care facilities. This modern web application provides complete management
+	capabilities for pet owners, staff members, administrators, and super administrators. Built with Next.js 16,
+	React 19, TypeScript, Prisma ORM, and PostgreSQL, it offers a robust, scalable solution for managing pets,
+	appointments, medical records, billing, and more.
+</p>
+
+<h2>Key Highlights</h2>
+<ul>
+	<li>Multi-role access control system (Customer, Staff, Admin, Super Admin)</li>
+	<li>Complete pet profile management with medical history tracking</li>
+	<li>Advanced appointment scheduling and management system</li>
+	<li>Integrated billing and payment processing with Stripe</li>
+	<li>Comprehensive medical records and prescription management</li>
+	<li>Vaccination tracking with automatic due date reminders</li>
+	<li>Service catalog management for various pet care services</li>
+	<li>Invoice generation and PDF export capabilities</li>
+	<li>Responsive design with dark mode support</li>
+	<li>Secure authentication with NextAuth.js</li>
+	<li>Cloudinary integration for image uploads</li>
+	<li>Real-time data synchronization with TanStack Query</li>
+	<li>Role-based dashboard views tailored to each user type</li>
+	<li>Bulk import functionality for pets and services</li>
+	<li>Advanced analytics and reporting features</li>
+</ul>
+
+<h2>Features</h2>
+
+<h3>Customer Features</h3>
+<ul>
+	<li><strong>Pet Management</strong>
+		<ul>
+			<li>Add, edit, and manage multiple pet profiles</li>
+			<li>Upload pet photos and images</li>
+			<li>Track pet information (species, breed, age, weight, color, gender)</li>
+			<li>View complete pet medical history</li>
+			<li>Access vaccination records and schedules</li>
+		</ul>
+	</li>
+	<li><strong>Appointment Booking</strong>
+		<ul>
+			<li>Book appointments for various pet services</li>
+			<li>View appointment history and upcoming appointments</li>
+			<li>Track appointment status (Pending, Confirmed, Completed, Cancelled)</li>
+			<li>Receive appointment notifications and reminders</li>
+		</ul>
+	</li>
+	<li><strong>Medical Records</strong>
+		<ul>
+			<li>View complete medical history for all pets</li>
+			<li>Access diagnosis and treatment information</li>
+			<li>Review medical notes and records</li>
+		</ul>
+	</li>
+	<li><strong>Prescriptions</strong>
+		<ul>
+			<li>View prescribed medications for pets</li>
+			<li>Access dosage and administration instructions</li>
+			<li>Track prescription history</li>
+		</ul>
+	</li>
+	<li><strong>Vaccination Tracking</strong>
+		<ul>
+			<li>View vaccination records</li>
+			<li>Track next due dates for vaccinations</li>
+			<li>Receive vaccination reminders</li>
+		</ul>
+	</li>
+	<li><strong>Billing & Payments</strong>
+		<ul>
+			<li>View invoices for appointments</li>
+			<li>Make secure online payments via Stripe</li>
+			<li>Track payment history</li>
+			<li>Download invoice PDFs</li>
+		</ul>
+	</li>
+	<li><strong>Profile Management</strong>
+		<ul>
+			<li>Update personal information</li>
+			<li>Manage account settings</li>
+			<li>Change password and security settings</li>
+		</ul>
+	</li>
+</ul>
+
+<h3>Admin Features</h3>
+<ul>
+	<li><strong>User Management</strong>
+		<ul>
+			<li>Manage all user accounts (Customers, Staff, Admins)</li>
+			<li>Assign and modify user roles</li>
+			<li>View user activity and statistics</li>
+			<li>Enable/disable user accounts</li>
+		</ul>
+	</li>
+	<li><strong>Pet Management</strong>
+		<ul>
+			<li>View and manage all pets in the system</li>
+			<li>Edit pet information on behalf of customers</li>
+			<li>Access complete pet medical histories</li>
+			<li>Bulk import pets from CSV/Excel files</li>
+		</ul>
+	</li>
+	<li><strong>Service Catalog Management</strong>
+		<ul>
+			<li>Create and manage pet service offerings</li>
+			<li>Set service prices and durations</li>
+			<li>Upload service images</li>
+			<li>Activate/deactivate services</li>
+			<li>Organize services by type (grooming, vet-checkup, bath, boarding, training)</li>
+		</ul>
+	</li>
+	<li><strong>Appointment Management</strong>
+		<ul>
+			<li>View all appointments across the system</li>
+			<li>Assign staff members to appointments</li>
+			<li>Update appointment statuses</li>
+			<li>Manage appointment schedules</li>
+			<li>Bulk import appointments</li>
+		</ul>
+	</li>
+	<li><strong>Medical Records Administration</strong>
+		<ul>
+			<li>View all medical records</li>
+			<li>Create and edit medical records</li>
+			<li>Manage diagnosis and treatment information</li>
+		</ul>
+	</li>
+	<li><strong>Prescription Management</strong>
+		<ul>
+			<li>View all prescriptions</li>
+			<li>Create prescriptions for any pet</li>
+			<li>Track prescription history</li>
+		</ul>
+	</li>
+	<li><strong>Vaccination Management</strong>
+		<ul>
+			<li>View all vaccination records</li>
+			<li>Add and update vaccination information</li>
+			<li>Set next due dates</li>
+		</ul>
+	</li>
+	<li><strong>Financial Management</strong>
+		<ul>
+			<li>View all invoices and payment records</li>
+			<li>Generate financial reports</li>
+			<li>Track revenue and outstanding payments</li>
+			<li>Export financial data</li>
+		</ul>
+	</li>
+	<li><strong>Analytics & Reporting</strong>
+		<ul>
+			<li>Dashboard with key statistics and metrics</li>
+			<li>Revenue analytics and charts</li>
+			<li>Appointment statistics</li>
+			<li>Service performance metrics</li>
+			<li>User activity reports</li>
+		</ul>
+	</li>
+	<li><strong>Role Management</strong>
+		<ul>
+			<li>Manage role assignments</li>
+			<li>Configure role-based permissions</li>
+		</ul>
+	</li>
+</ul>
+
+<h3>Staff Features</h3>
+<ul>
+	<li><strong>Appointment Management</strong>
+		<ul>
+			<li>View assigned appointments</li>
+			<li>Update appointment status</li>
+			<li>Add appointment notes</li>
+			<li>View appointment calendar and schedule</li>
+		</ul>
+	</li>
+	<li><strong>Pet Information Access</strong>
+		<ul>
+			<li>View pet profiles and medical history</li>
+			<li>Access vaccination records</li>
+			<li>Review previous appointments</li>
+		</ul>
+	</li>
+	<li><strong>Medical Records</strong>
+		<ul>
+			<li>Create and update medical records</li>
+			<li>Add diagnosis and treatment information</li>
+			<li>Document medical notes</li>
+		</ul>
+	</li>
+	<li><strong>Prescription Management</strong>
+		<ul>
+			<li>Create prescriptions for pets</li>
+			<li>Issue medications with dosage instructions</li>
+			<li>View prescription history</li>
+		</ul>
+	</li>
+	<li><strong>Vaccination Records</strong>
+		<ul>
+			<li>Record vaccinations</li>
+			<li>Update vaccination schedules</li>
+			<li>Set next due dates</li>
+		</ul>
+	</li>
+	<li><strong>Dashboard</strong>
+		<ul>
+			<li>View daily schedule and appointments</li>
+			<li>Access quick statistics</li>
+			<li>View assigned tasks</li>
+		</ul>
+	</li>
+</ul>
+
+<h2>Technical Features</h2>
+<ul>
+	<li><strong>Modern Tech Stack</strong>
+		<ul>
+			<li>Next.js 16 with App Router architecture</li>
+			<li>React 19 with latest features</li>
+			<li>TypeScript for type safety</li>
+			<li>Prisma ORM for database management</li>
+			<li>PostgreSQL database</li>
+		</ul>
+	</li>
+	<li><strong>Authentication & Security</strong>
+		<ul>
+			<li>NextAuth.js for secure authentication</li>
+			<li>Role-based access control (RBAC)</li>
+			<li>JWT token management</li>
+			<li>Password hashing with bcryptjs</li>
+			<li>Email verification system</li>
+			<li>Password reset functionality</li>
+		</ul>
+	</li>
+	<li><strong>Payment Integration</strong>
+		<ul>
+			<li>Stripe payment gateway integration</li>
+			<li>Secure payment processing</li>
+			<li>Payment intent management</li>
+			<li>Multiple payment methods support</li>
+		</ul>
+	</li>
+	<li><strong>File Management</strong>
+		<ul>
+			<li>Cloudinary integration for image uploads</li>
+			<li>Automatic image optimization</li>
+			<li>Secure file storage</li>
+		</ul>
+	</li>
+	<li><strong>Data Management</strong>
+		<ul>
+			<li>TanStack Query (React Query) for data fetching</li>
+			<li>Optimistic updates</li>
+			<li>Automatic cache management</li>
+			<li>Real-time data synchronization</li>
+		</ul>
+	</li>
+	<li><strong>Form Handling</strong>
+		<ul>
+			<li>React Hook Form for form management</li>
+			<li>Yup validation schemas</li>
+			<li>Form validation and error handling</li>
+		</ul>
+	</li>
+	<li><strong>UI Components</strong>
+		<ul>
+			<li>Radix UI components for accessibility</li>
+			<li>Tailwind CSS for styling</li>
+			<li>Dark mode support</li>
+			<li>Responsive design</li>
+			<li>Custom UI component library</li>
+		</ul>
+	</li>
+	<li><strong>Document Generation</strong>
+		<ul>
+			<li>jsPDF for PDF generation</li>
+			<li>Invoice PDF export</li>
+			<li>Printable medical records</li>
+		</ul>
+	</li>
+	<li><strong>Date & Time Management</strong>
+		<ul>
+			<li>date-fns for date manipulation</li>
+			<li>React Day Picker for date selection</li>
+			<li>Time picker components</li>
+		</ul>
+	</li>
+	<li><strong>Email Services</strong>
+		<ul>
+			<li>Resend integration for transactional emails</li>
+			<li>Email notifications</li>
+			<li>Password reset emails</li>
+		</ul>
+	</li>
+	<li><strong>Analytics</strong>
+		<ul>
+			<li>Vercel Analytics integration</li>
+			<li>Recharts for data visualization</li>
+			<li>Dashboard statistics and charts</li>
+		</ul>
+	</li>
+	<li><strong>API Architecture</strong>
+		<ul>
+			<li>RESTful API design</li>
+			<li>Next.js API routes</li>
+			<li>Type-safe API endpoints</li>
+			<li>Error handling middleware</li>
+		</ul>
+	</li>
+	<li><strong>Database Features</strong>
+		<ul>
+			<li>Prisma migrations</li>
+			<li>Database seeding</li>
+			<li>Referential integrity with cascading deletes</li>
+			<li>Optimized queries</li>
+		</ul>
+	</li>
+</ul>
+
+<h2>Why Buy This Product?</h2>
+<ul>
+	<li><strong>Complete Solution</strong>: Everything you need to run a pet care business in one integrated system
+	</li>
+	<li><strong>Time Saving</strong>: Automate appointment scheduling, billing, and record-keeping to save hours
+		daily</li>
+	<li><strong>Professional Image</strong>: Modern, polished interface that impresses customers and builds trust
+	</li>
+	<li><strong>Scalable Architecture</strong>: Built to grow with your business, from small clinics to large
+		operations</li>
+	<li><strong>Multi-User Support</strong>: Designed for teams with role-based access for staff, admins, and
+		customers</li>
+	<li><strong>Comprehensive Features</strong>: All essential features included - no need for multiple systems</li>
+	<li><strong>Secure & Reliable</strong>: Enterprise-grade security with secure authentication and data protection
+	</li>
+	<li><strong>Payment Ready</strong>: Integrated Stripe payment processing for immediate revenue collection</li>
+	<li><strong>Mobile Responsive</strong>: Works seamlessly on desktop, tablet, and mobile devices</li>
+	<li><strong>Easy to Customize</strong>: Well-structured codebase makes it easy to add custom features</li>
+	<li><strong>Modern Technology</strong>: Built with latest technologies ensuring long-term support and updates
+	</li>
+	<li><strong>Documentation Included</strong>: Comprehensive documentation and code comments for easy maintenance
+	</li>
+	<li><strong>Cost Effective</strong>: One-time purchase eliminates recurring subscription fees</li>
+	<li><strong>Support & Updates</strong>: Regular updates and bug fixes included</li>
+	<li><strong>Proven Architecture</strong>: Built following industry best practices and design patterns</li>
+</ul>
+
+<h2>What's Included</h2>
+<ul>
+	<li><strong>Complete Source Code</strong>
+		<ul>
+			<li>Full Next.js application source code</li>
+			<li>All React components and pages</li>
+			<li>API routes and backend logic</li>
+			<li>Database schema and migrations</li>
+		</ul>
+	</li>
+	<li><strong>Database Schema</strong>
+		<ul>
+			<li>Prisma schema file with all models</li>
+			<li>Database migration files</li>
+			<li>Seed script for initial data</li>
+		</ul>
+	</li>
+	<li><strong>UI Components Library</strong>
+		<ul>
+			<li>50+ reusable UI components</li>
+			<li>Form components with validation</li>
+			<li>Data display components (tables, cards, charts)</li>
+			<li>Navigation and layout components</li>
+		</ul>
+	</li>
+	<li><strong>Feature Modules</strong>
+		<ul>
+			<li>Pet management module</li>
+			<li>Appointment scheduling system</li>
+			<li>Medical records management</li>
+			<li>Prescription system</li>
+			<li>Vaccination tracking</li>
+			<li>Invoice and billing system</li>
+			<li>Payment processing integration</li>
+			<li>Service catalog management</li>
+			<li>User management system</li>
+			<li>Role-based access control</li>
+		</ul>
+	</li>
+	<li><strong>Authentication System</strong>
+		<ul>
+			<li>Complete authentication flow</li>
+			<li>Sign up, sign in, password reset</li>
+			<li>Email verification</li>
+			<li>Session management</li>
+		</ul>
+	</li>
+	<li><strong>Dashboard Views</strong>
+		<ul>
+			<li>Customer dashboard</li>
+			<li>Staff dashboard</li>
+			<li>Admin dashboard</li>
+			<li>Super Admin dashboard</li>
+		</ul>
+	</li>
+	<li><strong>Documentation</strong>
+		<ul>
+			<li>Project structure documentation</li>
+			<li>Delivery plan and roadmap</li>
+			<li>Deployment guides</li>
+			<li>Code comments and inline documentation</li>
+		</ul>
+	</li>
+	<li><strong>Configuration Files</strong>
+		<ul>
+			<li>Package.json with all dependencies</li>
+			<li>TypeScript configuration</li>
+			<li>Tailwind CSS configuration</li>
+			<li>Next.js configuration</li>
+			<li>ESLint configuration</li>
+		</ul>
+	</li>
+	<li><strong>Integration Examples</strong>
+		<ul>
+			<li>Stripe payment integration</li>
+			<li>Cloudinary image upload</li>
+			<li>Email service integration</li>
+			<li>Analytics integration</li>
+		</ul>
+	</li>
+</ul>
+
+<h2>Requirements</h2>
+<h3>Server Requirements</h3>
+<ul>
+	<li>Node.js 18.x or higher</li>
+	<li>npm 9.x or higher (or yarn/pnpm equivalent)</li>
+	<li>PostgreSQL 14.x or higher</li>
+	<li>Minimum 2GB RAM (4GB recommended)</li>
+	<li>Minimum 10GB disk space</li>
+</ul>
+
+<h3>Development Requirements</h3>
+<ul>
+	<li>Git for version control</li>
+	<li>Code editor (VS Code recommended)</li>
+	<li>TypeScript knowledge (helpful but not required)</li>
+</ul>
+
+<h3>External Services (Optional but Recommended)</h3>
+<ul>
+	<li>Stripe account for payment processing</li>
+	<li>Cloudinary account for image storage</li>
+	<li>Resend account for email services</li>
+	<li>Vercel account for deployment (or alternative hosting)</li>
+	<li>PostgreSQL database (managed service recommended)</li>
+</ul>
+
+<h3>Environment Variables Required</h3>
+<ul>
+	<li>DATABASE_URL - PostgreSQL connection string</li>
+	<li>DIRECT_URL - Direct PostgreSQL connection (for migrations)</li>
+	<li>NEXTAUTH_SECRET - Secret key for NextAuth.js</li>
+	<li>NEXTAUTH_URL - Application URL</li>
+	<li>STRIPE_SECRET_KEY - Stripe API secret key (optional)</li>
+	<li>STRIPE_PUBLISHABLE_KEY - Stripe publishable key (optional)</li>
+	<li>CLOUDINARY_CLOUD_NAME - Cloudinary cloud name (optional)</li>
+	<li>CLOUDINARY_API_KEY - Cloudinary API key (optional)</li>
+	<li>CLOUDINARY_API_SECRET - Cloudinary API secret (optional)</li>
+	<li>RESEND_API_KEY - Resend API key (optional)</li>
+</ul>
+
+<h2>Installation</h2>
+<h3>Step 1: Clone or Download the Project</h3>
+<p>Download the project files and extract them to your desired directory.</p>
+
+<h3>Step 2: Install Dependencies</h3>
+<p>Navigate to the project directory and install all required dependencies:</p>
+<pre><code>npm install</code></pre>
+<p>or</p>
+<pre><code>yarn install</code></pre>
+<p>or</p>
+<pre><code>pnpm install</code></pre>
+
+<h3>Step 3: Set Up Environment Variables</h3>
+<p>Create a <code>.env</code> file in the root directory and add all required environment variables:</p>
+<pre><code>DATABASE_URL="postgresql://user:password@localhost:5432/petcare"
+DIRECT_URL="postgresql://user:password@localhost:5432/petcare"
+NEXTAUTH_SECRET="your-secret-key-here"
+NEXTAUTH_URL="http://localhost:3000"
+STRIPE_SECRET_KEY="sk_test_..."
+STRIPE_PUBLISHABLE_KEY="pk_test_..."
+CLOUDINARY_CLOUD_NAME="your-cloud-name"
+CLOUDINARY_API_KEY="your-api-key"
+CLOUDINARY_API_SECRET="your-api-secret"
+RESEND_API_KEY="re_..."</code></pre>
+
+<h3>Step 4: Set Up Database</h3>
+<p>Create a PostgreSQL database and update the DATABASE_URL in your .env file. Then run migrations:</p>
+<pre><code>npx prisma migrate dev</code></pre>
+<p>Or for production:</p>
+<pre><code>npx prisma migrate deploy</code></pre>
+
+<h3>Step 5: Generate Prisma Client</h3>
+<p>Generate the Prisma client:</p>
+<pre><code>npx prisma generate</code></pre>
+
+<h3>Step 6: Seed Database (Optional)</h3>
+<p>Populate the database with initial data:</p>
+<pre><code>npm run db:seed</code></pre>
+<p>or</p>
+<pre><code>npx tsx prisma/seed.ts</code></pre>
+
+<h3>Step 7: Run Development Server</h3>
+<p>Start the development server:</p>
+<pre><code>npm run dev</code></pre>
+<p>The application will be available at <code>http://localhost:3000</code></p>
+
+<h3>Step 8: Build for Production</h3>
+<p>To create a production build:</p>
+<pre><code>npm run build</code></pre>
+<p>Then start the production server:</p>
+<pre><code>npm start</code></pre>
+
+<h3>Deployment Options</h3>
+<ul>
+	<li><strong>Vercel</strong>: Recommended for Next.js applications. Connect your GitHub repository and deploy
+		automatically.</li>
+	<li><strong>Other Platforms</strong>: Can be deployed to any Node.js hosting platform (Railway, Render, AWS,
+		etc.)</li>
+	<li><strong>Database</strong>: Use managed PostgreSQL services like Vercel Postgres, Supabase, or Neon</li>
+</ul>
+
+<h2>Browser Support</h2>
+<p>The application is built with modern web standards and supports the following browsers:</p>
+<ul>
+	<li><strong>Chrome</strong>: Latest 2 versions</li>
+	<li><strong>Firefox</strong>: Latest 2 versions</li>
+	<li><strong>Safari</strong>: Latest 2 versions</li>
+	<li><strong>Edge</strong>: Latest 2 versions</li>
+	<li><strong>Opera</strong>: Latest 2 versions</li>
+	<li><strong>Mobile Browsers</strong>: iOS Safari, Chrome Mobile, Firefox Mobile</li>
+</ul>
+<p><strong>Note</strong>: The application requires JavaScript to be enabled. Modern browser features are used, so
+	older browsers (Internet Explorer) are not supported.</p>
+
+<h2>Credits & Technologies</h2>
+<h3>Core Technologies</h3>
+<ul>
+	<li><strong>Next.js 16</strong> - React framework for production</li>
+	<li><strong>React 19</strong> - JavaScript library for building user interfaces</li>
+	<li><strong>TypeScript</strong> - Typed superset of JavaScript</li>
+	<li><strong>Prisma</strong> - Next-generation ORM for Node.js and TypeScript</li>
+	<li><strong>PostgreSQL</strong> - Advanced open-source relational database</li>
+</ul>
+
+<h3>UI & Styling</h3>
+<ul>
+	<li><strong>Radix UI</strong> - Low-level UI primitives with accessibility built-in</li>
+	<li><strong>Tailwind CSS</strong> - Utility-first CSS framework</li>
+	<li><strong>Lucide React</strong> - Beautiful & consistent icon toolkit</li>
+	<li><strong>next-themes</strong> - Perfect dark mode in 2 lines of code</li>
+</ul>
+
+<h3>Forms & Validation</h3>
+<ul>
+	<li><strong>React Hook Form</strong> - Performant, flexible and extensible forms</li>
+	<li><strong>Yup</strong> - JavaScript schema builder for value parsing and validation</li>
+	<li><strong>@hookform/resolvers</strong> - Validation resolver adapters</li>
+</ul>
+
+<h3>Data Fetching & State</h3>
+<ul>
+	<li><strong>TanStack Query (React Query)</strong> - Powerful data synchronization for React</li>
+	<li><strong>React Query</strong> - Hooks for fetching, caching and updating asynchronous data</li>
+</ul>
+
+<h3>Authentication</h3>
+<ul>
+	<li><strong>NextAuth.js</strong> - Complete open-source authentication solution</li>
+	<li><strong>bcryptjs</strong> - Optimized bcrypt for JavaScript</li>
+	<li><strong>jsonwebtoken</strong> - JSON Web Token implementation</li>
+</ul>
+
+<h3>Payment Processing</h3>
+<ul>
+	<li><strong>Stripe</strong> - Online payment processing platform</li>
+	<li><strong>@stripe/stripe-js</strong> - Stripe.js library</li>
+</ul>
+
+<h3>File Management</h3>
+<ul>
+	<li><strong>Cloudinary</strong> - Cloud-based image and video management</li>
+	<li><strong>next-cloudinary</strong> - Next.js integration for Cloudinary</li>
+</ul>
+
+<h3>Date & Time</h3>
+<ul>
+	<li><strong>date-fns</strong> - Modern JavaScript date utility library</li>
+	<li><strong>react-day-picker</strong> - Flexible date picker component</li>
+</ul>
+
+<h3>Document Generation</h3>
+<ul>
+	<li><strong>jsPDF</strong> - Client-side PDF generation</li>
+</ul>
+
+<h3>Email Services</h3>
+<ul>
+	<li><strong>Resend</strong> - Email API for developers</li>
+</ul>
+
+<h3>Charts & Visualization</h3>
+<ul>
+	<li><strong>Recharts</strong> - Redefined chart library built with React and D3</li>
+</ul>
+
+<h3>Notifications</h3>
+<ul>
+	<li><strong>Sonner</strong> - Beautiful toast notifications</li>
+</ul>
+
+<h3>Analytics</h3>
+<ul>
+	<li><strong>Vercel Analytics</strong> - Web analytics for Next.js</li>
+</ul>
+
+<h3>Utilities</h3>
+<ul>
+	<li><strong>clsx</strong> - Tiny utility for constructing className strings</li>
+	<li><strong>tailwind-merge</strong> - Merge Tailwind CSS classes without style conflicts</li>
+	<li><strong>class-variance-authority</strong> - Build type-safe component variants</li>
+</ul>
+
+<h2>Additional Information</h2>
+
+<h3>Project Structure</h3>
+<p>
+	The project follows Next.js 16 App Router conventions with a well-organized structure:
+	feature-based component organization, separate API routes, shared utilities, and
+	comprehensive type definitions. All code is written in TypeScript for type safety
+	and better developer experience.
+</p>
+
+<h3>Security Features</h3>
+<ul>
+	<li>Role-based access control (RBAC) implementation</li>
+	<li>Secure password hashing</li>
+	<li>JWT token-based authentication</li>
+	<li>API route protection</li>
+	<li>Input validation and sanitization</li>
+	<li>SQL injection prevention via Prisma</li>
+	<li>XSS protection</li>
+	<li>CSRF protection via NextAuth</li>
+</ul>
+
+<h3>Performance Optimizations</h3>
+<ul>
+	<li>Server-side rendering (SSR) where appropriate</li>
+	<li>Static site generation (SSG) for public pages</li>
+	<li>Image optimization with Next.js Image component</li>
+	<li>Code splitting and lazy loading</li>
+	<li>Efficient data fetching with React Query</li>
+	<li>Database query optimization</li>
+</ul>
+
+<h3>Accessibility</h3>
+<ul>
+	<li>WCAG 2.1 compliant components</li>
+	<li>Keyboard navigation support</li>
+	<li>Screen reader compatibility</li>
+	<li>ARIA labels and roles</li>
+	<li>Focus management</li>
+</ul>
+
+<h3>Customization</h3>
+<p>
+	The codebase is designed to be easily customizable. You can modify colors, branding,
+	add new features, integrate additional services, and extend functionality according to
+	your specific business needs. The modular architecture makes it simple to add or remove
+	features without affecting the core system.
+</p>
+
+<h3>Support & Maintenance</h3>
+<p>
+	The project includes comprehensive documentation, code comments, and follows best practices
+	for maintainability. Regular updates ensure compatibility with the latest versions of
+	dependencies and security patches.
+</p>
+
+<h3>License</h3>
+<p>Please refer to the license file included with the project for usage terms and conditions.</p>
+
+<h3>Contact & Support</h3>
+<p>
+	For questions, support, or customization requests, please refer to the project documentation
+	or contact the development team.
+</p>

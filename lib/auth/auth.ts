@@ -1,5 +1,3 @@
-import "server-only"
-
 import { prisma } from "@/lib/db/prisma"
 import { PrismaAdapter } from "@auth/prisma-adapter"
 import { baseUrl } from "@/lib/utils/base-url"
@@ -51,8 +49,8 @@ export const authOptions: NextAuthOptions = {
 					where: { email },
 				})
 
-				// Check if user exists
-				if (!user) {
+				// Check if user exists and is not soft-deleted
+				if (!user || user.deletedAt) {
 					throw new Error("No account found with this email")
 				}
 
@@ -103,10 +101,10 @@ export const authOptions: NextAuthOptions = {
 						// PrismaAdapter creates the user, so it should exist now
 						const dbUser = await prisma.user.findUnique({
 							where: { email: user.email },
-							select: { role: true, id: true },
+							select: { role: true, id: true, deletedAt: true },
 						})
 						
-						if (dbUser) {
+						if (dbUser && !dbUser.deletedAt) {
 							// If role is missing, set default role
 							if (!dbUser.role) {
 								await prisma.user.update({
@@ -136,9 +134,9 @@ export const authOptions: NextAuthOptions = {
 				try {
 					const dbUser = await prisma.user.findUnique({
 						where: { email: token.email as string },
-						select: { role: true, id: true },
+						select: { role: true, id: true, deletedAt: true },
 					})
-					if (dbUser) {
+					if (dbUser && !dbUser.deletedAt) {
 						token.role = dbUser.role || "CUSTOMER"
 						token.id = dbUser.id
 					}

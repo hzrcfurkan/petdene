@@ -1,5 +1,7 @@
 "use client"
 
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -12,6 +14,7 @@ import { usePets, useDeletePet, type Pet } from "@/lib/react-query/hooks/pets"
 import { toast } from "sonner"
 import { format } from "date-fns"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { ResponsiveTableWrapper } from "@/components/ui/responsive-table"
 import { PetForm } from "./PetForm"
 import { PetDetail } from "./PetDetail"
 import { currentUserClient } from "@/lib/auth/client"
@@ -32,6 +35,8 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 	const [isFormOpen, setIsFormOpen] = useState(false)
 
 	const currentUser = currentUserClient()
+	const pathname = usePathname()
+	const detailBasePath = pathname?.startsWith("/admin") ? "/admin/pets" : pathname?.startsWith("/customer") ? "/customer/pets" : undefined
 
 	const { data, refetch, isLoading } = usePets({
 		page,
@@ -81,8 +86,8 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 	return (
 		<Card>
 			<CardHeader>
-				<div className="flex items-center justify-between">
-					<div>
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+					<div className="min-w-0">
 						<CardTitle className="flex items-center gap-2">
 							<PawPrint className="w-5 h-5" />
 							Pets
@@ -119,43 +124,45 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 			</CardHeader>
 			<CardContent className="space-y-4">
 				{/* Filters */}
-				<div className="flex gap-2 flex-wrap">
-					<div className="flex-1 min-w-[200px]">
+				<div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+					<div className="w-full min-w-0 sm:flex-1 sm:min-w-[200px]">
 						<div className="relative">
 							<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
-								placeholder="Search by name, breed, species..."
+								placeholder="Search by patient #, name, breed, species..."
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 								className="pl-8"
 							/>
 						</div>
 					</div>
-					<Select value={speciesFilter} onValueChange={setSpeciesFilter} disabled={!!species}>
-						<SelectTrigger className="w-[180px]">
-							<Filter className="w-4 h-4 mr-2" />
-							<SelectValue placeholder="Species" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="ALL">All Species</SelectItem>
-							{speciesOptions.map((spec) => (
-								<SelectItem key={spec} value={spec}>
-									{spec}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
-					<Select value={sortBy} onValueChange={setSortBy}>
-						<SelectTrigger className="w-[180px]">
-							<SelectValue placeholder="Sort by" />
-						</SelectTrigger>
-						<SelectContent>
-							<SelectItem value="name-asc">Name (A-Z)</SelectItem>
-							<SelectItem value="name-desc">Name (Z-A)</SelectItem>
-							<SelectItem value="date-asc">Date (Oldest)</SelectItem>
-							<SelectItem value="date-desc">Date (Newest)</SelectItem>
-						</SelectContent>
-					</Select>
+					<div className="flex gap-2 flex-wrap">
+						<Select value={speciesFilter} onValueChange={setSpeciesFilter} disabled={!!species}>
+							<SelectTrigger className="w-full sm:w-[180px]">
+								<Filter className="w-4 h-4 mr-2 shrink-0" />
+								<SelectValue placeholder="Species" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="ALL">All Species</SelectItem>
+								{speciesOptions.map((spec) => (
+									<SelectItem key={spec} value={spec}>
+										{spec}
+									</SelectItem>
+								))}
+							</SelectContent>
+						</Select>
+						<Select value={sortBy} onValueChange={setSortBy}>
+							<SelectTrigger className="w-full sm:w-[180px]">
+								<SelectValue placeholder="Sort by" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="name-asc">Name (A-Z)</SelectItem>
+								<SelectItem value="name-desc">Name (Z-A)</SelectItem>
+								<SelectItem value="date-asc">Date (Oldest)</SelectItem>
+								<SelectItem value="date-desc">Date (Newest)</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
 				</div>
 
 				{(speciesFilter !== "ALL" || searchQuery) && !species && (
@@ -174,10 +181,11 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 					<div className="text-center py-8 text-muted-foreground">No pets found</div>
 				) : (
 					<>
-						<div className="rounded-md border">
-							<Table>
+						<ResponsiveTableWrapper>
+							<Table className="min-w-[640px] md:min-w-0">
 								<TableHeader>
 									<TableRow>
+										<TableHead>Patient #</TableHead>
 										<TableHead>Name</TableHead>
 										<TableHead>Species</TableHead>
 										<TableHead>Breed</TableHead>
@@ -190,7 +198,10 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 								<TableBody>
 									{pets.map((pet) => (
 										<TableRow key={pet.id}>
-											<TableCell>
+											<TableCell data-label="Patient #">
+												<Badge variant="secondary">{pet.patientNumber || "—"}</Badge>
+											</TableCell>
+											<TableCell data-label="Name">
 												<div className="flex items-center gap-2">
 													{pet.image && (
 														<img
@@ -226,13 +237,21 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 											{showActions && (
 												<TableCell className="text-right">
 													<div className="flex justify-end gap-2">
-														<Button
-															variant="ghost"
-															size="sm"
-															onClick={() => handleView(pet)}
-														>
-															<Eye className="w-4 h-4" />
-														</Button>
+														{detailBasePath ? (
+															<Button variant="ghost" size="sm" asChild>
+																<Link href={`${detailBasePath}/${pet.id}`}>
+																	<Eye className="w-4 h-4" />
+																</Link>
+															</Button>
+														) : (
+															<Button
+																variant="ghost"
+																size="sm"
+																onClick={() => handleView(pet)}
+															>
+																<Eye className="w-4 h-4" />
+															</Button>
+														)}
 														{canEdit && (
 															<Button
 																variant="ghost"
@@ -258,15 +277,15 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 									))}
 								</TableBody>
 							</Table>
-						</div>
+						</ResponsiveTableWrapper>
 
 						{/* Pagination */}
 						{pagination && pagination.pages > 1 && (
-							<div className="flex items-center justify-between">
-								<div className="text-sm text-muted-foreground">
+							<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+								<div className="text-sm text-muted-foreground order-2 sm:order-1">
 									Showing {((page - 1) * 10) + 1} to {Math.min(page * 10, pagination.total)} of {pagination.total} pets
 								</div>
-								<div className="flex gap-2">
+								<div className="flex gap-2 order-1 sm:order-2">
 									<Button
 										variant="outline"
 										size="sm"

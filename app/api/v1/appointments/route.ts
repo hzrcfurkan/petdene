@@ -63,14 +63,14 @@ export async function GET(req: NextRequest) {
 			where.status = status
 		}
 
-		// Date range filtering
+		// Date range filtering (inclusive: full start and end day)
 		if (dateFrom || dateTo) {
 			where.date = {}
 			if (dateFrom) {
-				where.date.gte = new Date(dateFrom)
+				where.date.gte = new Date(dateFrom + "T00:00:00.000Z")
 			}
 			if (dateTo) {
-				where.date.lte = new Date(dateTo)
+				where.date.lte = new Date(dateTo + "T23:59:59.999Z")
 			}
 		}
 

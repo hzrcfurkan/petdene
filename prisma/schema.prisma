@@ -34,21 +34,24 @@ model Session {
 }
 
 model User {
-    id            String         @id @default(uuid())
-    name          String?
-    email         String         @unique
-    emailVerified DateTime?
-    password      String? // Optional for OAuth users
-    role          String         @default("CUSTOMER") // SUPER_ADMIN, ADMIN, STAFF, or CUSTOMER
-    phone         String?
-    image         String?
-    createdAt     DateTime       @default(now())
-    updatedAt     DateTime       @updatedAt
+    id                 String         @id @default(uuid())
+    name               String?
+    email              String         @unique
+    emailVerified      DateTime?
+    password           String?  // Optional for OAuth users
+    role               String         @default("CUSTOMER") // SUPER_ADMIN, ADMIN, STAFF, or CUSTOMER
+    phone              String?
+    image              String?
+    currencyPreference String?        @default("TRY") // USD or TRY - prices stored in TRY, converted for display
+    deletedAt          DateTime?      // Soft delete
+    createdAt          DateTime       @default(now())
+    updatedAt          DateTime       @updatedAt
     accounts      Account[]
     sessions      Session[]
     pets          Pet[]
     appointments  Appointment[]
     prescriptions Prescription[]
+    visits        Visit[]
 }
 
 model VerificationToken {
@@ -64,26 +67,28 @@ model VerificationToken {
 // -----------------------------
 
 model Pet {
-    id          String    @id @default(uuid())
-    ownerId     String
-    name        String
-    species     String // Dog, Cat, Bird, etc.
-    breed       String?
-    gender      String? // Male/Female
-    age         Int?
-    dateOfBirth DateTime?
-    weight      Float?
-    color       String?
-    image       String?
-    notes       String?
-    createdAt   DateTime  @default(now())
-    updatedAt   DateTime  @updatedAt
+    id            String    @id @default(uuid())
+    patientNumber String    @unique // Auto-generated: PAT-000001
+    ownerId       String
+    name          String
+    species       String // Dog, Cat, Bird, etc.
+    breed         String?
+    gender        String? // Male/Female
+    age           Int?
+    dateOfBirth   DateTime?
+    weight        Float?
+    color         String?
+    image         String?
+    notes         String?
+    createdAt     DateTime  @default(now())
+    updatedAt     DateTime  @updatedAt
 
     owner         User            @relation(fields: [ownerId], references: [id], onDelete: Cascade)
     vaccinations  Vaccination[]
     medicalLogs   MedicalRecord[]
     prescriptions Prescription[]
     appointments  Appointment[]
+    visits        Visit[]
 }
 
 model PetService {
@@ -99,6 +104,63 @@ model PetService {
     updatedAt   DateTime @updatedAt
 
     appointments Appointment[]
+    visitServices VisitService[]
+}
+
+// Visit = central transaction unit when patient comes to clinic
+model Visit {
+    id             String    @id @default(uuid())
+    protocolNumber Int       @unique // Sequential: 1, 2, 3...
+    petId          String
+    appointmentId  String?   // Optional link to scheduled appointment
+    staffId        String?
+    visitDate      DateTime
+    status         String    @default("IN_PROGRESS") // IN_PROGRESS, COMPLETED, CANCELLED
+    totalAmount    Float     @default(0)
+    paidAmount     Float     @default(0)
+    notes          String?
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime  @updatedAt
+
+    pet         Pet           @relation(fields: [petId], references: [id], onDelete: Cascade)
+    appointment Appointment?   @relation(fields: [appointmentId], references: [id], onDelete: SetNull)
+    staff       User?         @relation(fields: [staffId], references: [id])
+    services    VisitService[]
+    medicalRecord MedicalRecord?
+    payments    VisitPayment[]
+    invoice     Invoice?
+}
+
+// Services added to a Visit (with quantity and unit price)
+model VisitService {
+    id         String   @id @default(uuid())
+    visitId    String
+    serviceId String
+    quantity  Int      @default(1)
+    unitPrice Float
+    total     Float    // quantity * unitPrice
+    notes     String?
+    createdAt DateTime @default(now())
+
+    visit   Visit      @relation(fields: [visitId], references: [id], onDelete: Cascade)
+    service PetService @relation(fields: [serviceId], references: [id], onDelete: Restrict)
+}
+
+// Multiple payments per Visit (partial/full)
+model VisitPayment {
+    id                    String    @id @default(uuid())
+    visitId               String
+    method                String // cash, card, stripe
+    amount                Float
+    transactionId         String?
+    stripePaymentIntentId  String?
+    stripeClientSecret    String?
+    status                String    @default("COMPLETED") // PENDING, COMPLETED, FAILED, CANCELLED
+    paidAt                DateTime  @default(now())
+    notes                 String?
+    createdAt             DateTime  @default(now())
+
+    visit Visit @relation(fields: [visitId], references: [id], onDelete: Cascade)
 }
 
 model Appointment {
@@ -116,6 +178,7 @@ model Appointment {
     service PetService @relation(fields: [serviceId], references: [id], onDelete: Cascade)
     staff   User?      @relation(fields: [staffId], references: [id])
     invoice Invoice?
+    visits  Visit[]    // Visit created when patient actually arrives
 }
 
 model Vaccination {
@@ -130,15 +193,22 @@ model Vaccination {
 }
 
 model MedicalRecord {
-    id          String   @id @default(uuid())
-    petId       String
-    title       String
-    description String?
-    diagnosis   String?
-    treatment   String?
-    date        DateTime @default(now())
+    id                   String   @id @default(uuid())
+    petId                String
+    visitId              String?  @unique // Epicrisis linked to Visit
+    title                String
+    description          String?
+    diagnosis            String?
+    treatment            String?
+    date                 DateTime @default(now())
+    // Epicrisis fields (when linked to Visit)
+    complaints           String?
+    examinationNotes     String?
+    treatmentsPerformed  String?
+    recommendations      String?
 
-    pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+    pet   Pet    @relation(fields: [petId], references: [id], onDelete: Cascade)
+    visit Visit? @relation(fields: [visitId], references: [id], onDelete: SetNull)
 }
 
 model Prescription {
@@ -156,14 +226,16 @@ model Prescription {
 
 model Invoice {
     id            String   @id @default(uuid())
-    appointmentId String   @unique
+    appointmentId String?  @unique // Optional: invoice from scheduled appointment
+    visitId       String?  @unique // Optional: invoice from visit (protocol)
     amount        Float
     status        String   @default("UNPAID") // UNPAID, PAID, CANCELLED, PARTIAL
     notes         String?
     createdAt     DateTime @default(now())
     updatedAt     DateTime @updatedAt
 
-    appointment Appointment @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+    appointment Appointment? @relation(fields: [appointmentId], references: [id], onDelete: Cascade)
+    visit       Visit?      @relation(fields: [visitId], references: [id], onDelete: Cascade)
     payment     Payment?
 }
 

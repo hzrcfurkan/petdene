@@ -2,15 +2,27 @@
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
-import { Pill, Calendar, PawPrint, User, Mail, FileText, Stethoscope } from "lucide-react"
+import { Button } from "@/components/ui/button"
+import { Pill, Calendar, PawPrint, User, Mail, FileText, Stethoscope, Printer } from "lucide-react"
 import { format } from "date-fns"
 import { type Prescription } from "@/lib/react-query/hooks/prescriptions"
+import { generatePrescriptionPDF } from "@/lib/utils/prescription-pdf"
+import { toast } from "sonner"
 
 interface PrescriptionDetailProps {
 	prescription: Prescription
 }
 
 export function PrescriptionDetail({ prescription }: PrescriptionDetailProps) {
+	const handlePrint = () => {
+		try {
+			generatePrescriptionPDF(prescription)
+			toast.success("Prescription PDF downloaded")
+		} catch (error: any) {
+			toast.error(error?.message || "Failed to generate PDF")
+		}
+	}
+
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
@@ -21,6 +33,10 @@ export function PrescriptionDetail({ prescription }: PrescriptionDetailProps) {
 						Prescription Record
 					</CardDescription>
 				</div>
+				<Button variant="outline" size="sm" onClick={handlePrint}>
+					<Printer className="w-4 h-4 mr-2" />
+					Print / Save PDF
+				</Button>
 			</div>
 
 			<Separator />

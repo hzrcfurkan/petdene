@@ -1,18 +1,24 @@
 "use client"
 
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
+import {
+	ChartConfig,
+	ChartContainer,
+	ChartLegend,
+	ChartLegendContent,
+	ChartTooltip,
+	ChartTooltipContent,
+} from "@/components/ui/chart"
 import {
 	Bar,
 	BarChart,
 	CartesianGrid,
 	Cell,
-	Legend,
 	Line,
 	LineChart,
 	Pie,
 	PieChart,
-	ResponsiveContainer,
-	Tooltip,
 	XAxis,
 	YAxis,
 } from "recharts"
@@ -30,7 +36,54 @@ interface DashboardChartsProps {
 	serviceData?: ChartData[]
 }
 
-const COLORS = ["#3b82f6", "#10b981", "#f59e0b", "#ef4444", "#8b5cf6", "#ec4899"]
+const CHART_COLORS = [
+	"var(--chart-1)",
+	"var(--chart-2)",
+	"var(--chart-3)",
+	"var(--chart-4)",
+	"var(--chart-5)",
+] as const
+
+const appointmentsChartConfig = {
+	value: {
+		label: "Appointments",
+		color: "var(--chart-1)",
+	},
+	name: {
+		label: "Date",
+	},
+} satisfies ChartConfig
+
+const revenueChartConfig = {
+	value: {
+		label: "Revenue",
+		color: "var(--chart-2)",
+	},
+	name: {
+		label: "Period",
+	},
+} satisfies ChartConfig
+
+const createStatusChartConfig = (statusData: ChartData[]) =>
+	({
+		value: { label: "Count", color: "var(--chart-1)" },
+		...Object.fromEntries(
+			statusData.map((item, i) => [
+				item.name,
+				{ label: item.name, color: CHART_COLORS[i % CHART_COLORS.length] },
+			])
+		),
+	}) satisfies ChartConfig
+
+const serviceChartConfig = {
+	value: {
+		label: "Bookings",
+		color: "var(--chart-4)",
+	},
+	name: {
+		label: "Service",
+	},
+} satisfies ChartConfig
 
 export function DashboardCharts({
 	appointmentsData = [],
@@ -38,8 +91,9 @@ export function DashboardCharts({
 	statusData = [],
 	serviceData = [],
 }: DashboardChartsProps) {
+	const { formatCurrency } = useCurrency()
 	return (
-		<div className="grid gap-4 md:grid-cols-3">
+		<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
 			{/* Appointments Over Time */}
 			{appointmentsData.length > 0 && (
 				<Card>
@@ -48,16 +102,34 @@ export function DashboardCharts({
 						<CardDescription>Appointment trends by date</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<ResponsiveContainer width="100%" height={300}>
-							<LineChart data={appointmentsData}>
-								<CartesianGrid strokeDasharray="3 3" />
-								<XAxis dataKey="name" />
-								<YAxis />
-								<Tooltip />
-								<Legend />
-								<Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={2} />
+						<ChartContainer
+							config={appointmentsChartConfig}
+							className="aspect-auto h-[280px] w-full"
+						>
+							<LineChart
+								data={appointmentsData}
+								margin={{ left: 12, right: 12, top: 12, bottom: 0 }}
+							>
+								<CartesianGrid strokeDasharray="3 3" vertical={false} />
+								<XAxis
+									dataKey="name"
+									tickLine={false}
+									axisLine={false}
+									tickMargin={8}
+								/>
+								<YAxis hide />
+								<ChartTooltip content={<ChartTooltipContent indicator="line" />} />
+								<ChartLegend content={<ChartLegendContent />} />
+								<Line
+									type="monotone"
+									dataKey="value"
+									stroke="var(--color-value)"
+									strokeWidth={2}
+									dot={{ fill: "var(--color-value)", r: 3 }}
+									activeDot={{ r: 5 }}
+								/>
 							</LineChart>
-						</ResponsiveContainer>
+						</ChartContainer>
 					</CardContent>
 				</Card>
 			)}
@@ -70,16 +142,53 @@ export function DashboardCharts({
 						<CardDescription>Revenue by period</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<ResponsiveContainer width="100%" height={300}>
-							<BarChart data={revenueData}>
-								<CartesianGrid strokeDasharray="3 3" />
-								<XAxis dataKey="name" />
-								<YAxis />
-								<Tooltip formatter={(value) => `$${value.toFixed(2)}`} />
-								<Legend />
-								<Bar dataKey="value" fill="#10b981" />
+						<ChartContainer
+							config={revenueChartConfig}
+							className="aspect-auto h-[280px] w-full"
+						>
+							<BarChart
+								data={revenueData}
+								margin={{ left: 12, right: 12, top: 12, bottom: 0 }}
+							>
+								<CartesianGrid strokeDasharray="3 3" vertical={false} />
+								<XAxis
+									dataKey="name"
+									tickLine={false}
+									axisLine={false}
+									tickMargin={8}
+								/>
+								<YAxis hide />
+								<ChartTooltip
+									content={
+										<ChartTooltipContent
+											formatter={(value, name, item) => (
+												<>
+													<div
+														className="shrink-0 rounded-[2px] h-2.5 w-2.5"
+														style={{
+															backgroundColor:
+																item.color || (item.payload as { fill?: string })?.fill || "var(--chart-2)",
+														}}
+													/>
+													<div className="flex flex-1 justify-between leading-none items-center">
+														<span className="text-muted-foreground">{name}</span>
+														<span className="text-foreground font-mono font-medium tabular-nums">
+															{formatCurrency(Number(value))}
+														</span>
+													</div>
+												</>
+											)}
+										/>
+									}
+								/>
+								<ChartLegend content={<ChartLegendContent />} />
+								<Bar
+									dataKey="value"
+									fill="var(--color-value)"
+									radius={[4, 4, 0, 0]}
+								/>
 							</BarChart>
-						</ResponsiveContainer>
+						</ChartContainer>
 					</CardContent>
 				</Card>
 			)}
@@ -92,25 +201,53 @@ export function DashboardCharts({
 						<CardDescription>Distribution of appointment statuses</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<ResponsiveContainer width="100%" height={300}>
+						<ChartContainer
+							config={createStatusChartConfig(statusData)}
+							className="aspect-auto mx-auto h-[280px] w-full max-w-[280px]"
+						>
 							<PieChart>
+								<ChartTooltip
+									content={
+										<ChartTooltipContent
+											hideIndicator
+											formatter={(value, name) => {
+												const total = statusData.reduce((a, b) => a + b.value, 0)
+												const numVal = typeof value === "number" ? value : Number(value)
+												const pct = total > 0 ? Math.round((numVal / total) * 100) : 0
+												return (
+													<div className="flex flex-1 justify-between leading-none items-center">
+														<span className="text-muted-foreground">{name}</span>
+														<span className="text-foreground font-mono font-medium tabular-nums">
+															{numVal} ({pct}%)
+														</span>
+													</div>
+												)
+											}}
+										/>
+									}
+								/>
 								<Pie
 									data={statusData}
 									cx="50%"
 									cy="50%"
-									labelLine={false}
-									label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-									outerRadius={80}
-									fill="#8884d8"
+									innerRadius={50}
+									outerRadius={90}
+									paddingAngle={2}
 									dataKey="value"
+									nameKey="name"
+									strokeWidth={1}
+									stroke="var(--border)"
 								>
-									{statusData.map((entry, index) => (
-										<Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+									{statusData.map((_, index) => (
+										<Cell
+											key={`cell-${index}`}
+											fill={CHART_COLORS[index % CHART_COLORS.length]}
+										/>
 									))}
 								</Pie>
-								<Tooltip />
+								<ChartLegend content={<ChartLegendContent nameKey="name" />} />
 							</PieChart>
-						</ResponsiveContainer>
+						</ChartContainer>
 					</CardContent>
 				</Card>
 			)}
@@ -123,20 +260,37 @@ export function DashboardCharts({
 						<CardDescription>Most booked services</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<ResponsiveContainer width="100%" height={300}>
-							<BarChart data={serviceData} layout="vertical">
-								<CartesianGrid strokeDasharray="3 3" />
-								<XAxis type="number" />
-								<YAxis dataKey="name" type="category" width={100} />
-								<Tooltip />
-								<Legend />
-								<Bar dataKey="value" fill="#8b5cf6" />
+						<ChartContainer
+							config={serviceChartConfig}
+							className="aspect-auto h-[280px] w-full"
+						>
+							<BarChart
+								data={serviceData}
+								layout="vertical"
+								margin={{ left: 12, right: 12, top: 0, bottom: 0 }}
+							>
+								<CartesianGrid strokeDasharray="3 3" horizontal={false} />
+								<XAxis type="number" tickLine={false} axisLine={false} />
+								<YAxis
+									dataKey="name"
+									type="category"
+									width={100}
+									tickLine={false}
+									axisLine={false}
+									tickMargin={8}
+								/>
+								<ChartTooltip content={<ChartTooltipContent />} />
+								<ChartLegend content={<ChartLegendContent />} />
+								<Bar
+									dataKey="value"
+									fill="var(--color-value)"
+									radius={[0, 4, 4, 0]}
+								/>
 							</BarChart>
-						</ResponsiveContainer>
+						</ChartContainer>
 					</CardContent>
 				</Card>
 			)}
 		</div>
 	)
 }
-

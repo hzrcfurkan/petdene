@@ -18,6 +18,7 @@ export async function GET(
 			where: { id },
 			select: {
 				id: true,
+				patientNumber: true,
 				name: true,
 				species: true,
 				breed: true,
@@ -170,6 +171,7 @@ export async function PUT(
 			data: updateData,
 			select: {
 				id: true,
+				patientNumber: true,
 				name: true,
 				species: true,
 				breed: true,

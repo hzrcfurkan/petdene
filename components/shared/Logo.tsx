@@ -24,7 +24,7 @@ export function Logo({ href = "/", showText = true, className, textClassName }: 
 						"text-lg sm:text-xl font-semibold tracking-tight text-foreground",
 						textClassName
 					)}
-					style={{ fontFamily: "var(--font-space-grotesk)" }}
+					style={{ fontFamily: "var(--font-plus-jakarta)" }}
 				>
 					Pet Care
 				</span>

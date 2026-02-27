@@ -6,7 +6,7 @@ import { EnhancedSuperAdminDashboard } from "@/components/features/dashboard"
 export function SuperAdminDashboard() {
 	const pathname = usePathname()
 
-	if (pathname !== "/admin/super") {
+	if (pathname !== "/super") {
 		return null
 	}
 

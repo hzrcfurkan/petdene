@@ -143,7 +143,7 @@ export async function POST(req: NextRequest) {
 			)
 		}
 
-		// Fetch invoice with appointment details
+		// Fetch invoice with appointment or visit details
 		const invoice = await prisma.invoice.findUnique({
 			where: { id: invoiceId },
 			select: {
@@ -151,6 +151,17 @@ export async function POST(req: NextRequest) {
 				amount: true,
 				status: true,
 				appointment: {
+					select: {
+						id: true,
+						pet: {
+							select: {
+								id: true,
+								ownerId: true,
+							},
+						},
+					},
+				},
+				visit: {
 					select: {
 						id: true,
 						pet: {
@@ -224,9 +235,10 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Role-based access control
+		const ownerId = invoice.appointment?.pet?.ownerId ?? invoice.visit?.pet?.ownerId
 		if (currentUser.isCustomer) {
 			// Customers can only pay for their own invoices
-			if (invoice.appointment.pet.ownerId !== currentUser.id) {
+			if (ownerId !== currentUser.id) {
 				return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 			}
 			// Customers can only use cash or stripe (not manual entry)

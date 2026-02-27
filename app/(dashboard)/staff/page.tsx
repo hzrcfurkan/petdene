@@ -8,7 +8,7 @@ export default async function StaffPage() {
 
 	if (!currentUser) redirect("/signin")
 
-	if (currentUser.isSuperAdmin) redirect("/admin/super")
+	if (currentUser.isSuperAdmin) redirect("/super")
 	if (currentUser.isAdmin) redirect("/admin")
 	if (!currentUser.isStaff) redirect("/customer")
 

@@ -5,11 +5,11 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { useCreateInvoice, useUpdateInvoice, type Invoice } from "@/lib/react-query/hooks/invoices"
+import { useVisits } from "@/lib/react-query/hooks/visits"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
-import { fetcher } from "@/lib/react-query/fetcher"
-import { useQuery } from "@tanstack/react-query"
-import { currentUserClient } from "@/lib/auth/client"
+import { format } from "date-fns"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 
 interface InvoiceFormProps {
 	invoice?: Invoice | null
@@ -18,66 +18,54 @@ interface InvoiceFormProps {
 }
 
 export function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFormProps) {
-	const [appointmentId, setAppointmentId] = useState(invoice?.appointmentId || "")
+	const { formatCurrency } = useCurrency()
+	const [visitId, setVisitId] = useState(invoice?.visitId || "")
 	const [amount, setAmount] = useState(invoice?.amount.toString() || "")
 	const [status, setStatus] = useState<"UNPAID" | "PAID" | "CANCELLED">(invoice?.status || "UNPAID")
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
-	const currentUser = currentUserClient()
-	const { mutate: createInvoice } = useCreateInvoice()
-	const { mutate: updateInvoice } = useUpdateInvoice()
+	const createInvoiceMutation = useCreateInvoice()
+	const updateInvoiceMutation = useUpdateInvoice()
 
-	// Fetch appointments without invoices (for creating new invoices)
-	// Allow CONFIRMED and COMPLETED appointments to be invoiced
-	const { data: appointmentsData, isLoading: isLoadingAppointments } = useQuery({
-		queryKey: ["appointments", "without-invoices"],
-		queryFn: async () => {
-			// Fetch both CONFIRMED and COMPLETED appointments
-			const [confirmedData, completedData] = await Promise.all([
-				fetcher<{ appointments: any[] }>("/api/v1/appointments?limit=1000&status=CONFIRMED"),
-				fetcher<{ appointments: any[] }>("/api/v1/appointments?limit=1000&status=COMPLETED"),
-			])
-			// Combine and filter out appointments that already have invoices
-			const allAppointments = [
-				...(confirmedData?.appointments || []),
-				...(completedData?.appointments || []),
-			]
-			return {
-				appointments: allAppointments.filter((appointment) => !appointment.invoice),
-			}
-		},
-		enabled: !invoice && !!currentUser,
+	// Fetch visits without invoices (protocols available for invoicing)
+	const { data: visitsData, isLoading: isLoadingVisits } = useVisits({
+		limit: 500,
+		sort: "protocol-desc",
+		forInvoice: true,
 	})
 
-	// Get appointments that don't have invoices
-	const appointments = appointmentsData?.appointments || []
+	const visits = visitsData?.visits || []
 
-	// Auto-populate amount when appointment is selected
+	// Auto-populate amount when visit (protocol) is selected
 	useEffect(() => {
-		if (!invoice && appointmentId && appointments.length > 0) {
-			const selectedAppointment = appointments.find((apt) => apt.id === appointmentId)
-			if (selectedAppointment?.service?.price && !amount) {
-				setAmount(selectedAppointment.service.price.toString())
+		if (!invoice && visitId && visits.length > 0) {
+			const selectedVisit = visits.find((v) => v.id === visitId)
+			if (selectedVisit?.totalAmount != null && selectedVisit.totalAmount > 0 && !amount) {
+				setAmount(selectedVisit.totalAmount.toString())
 			}
 		}
-	}, [appointmentId, appointments, invoice, amount])
+	}, [visitId, visits, invoice, amount])
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
 		setIsSubmitting(true)
 
 		try {
-			const data = {
-				appointmentId,
-				amount: parseFloat(amount),
-				status,
-			}
-
 			if (invoice) {
-				await updateInvoice({ id: invoice.id, data })
+				await updateInvoiceMutation.mutateAsync({
+					id: invoice.id,
+					data: {
+						amount: parseFloat(amount),
+						status,
+					},
+				})
 				toast.success("Invoice updated successfully")
 			} else {
-				await createInvoice(data)
+				await createInvoiceMutation.mutateAsync({
+					visitId,
+					amount: parseFloat(amount),
+					status,
+				})
 				toast.success("Invoice created successfully")
 			}
 			onSuccess()
@@ -88,48 +76,22 @@ export function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFormProps) 
 		}
 	}
 
-	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
-			<div className="grid gap-4 md:grid-cols-2">
-				{!invoice && (
-					<div className="space-y-2">
-						<Label htmlFor="appointmentId">Appointment *</Label>
-						{isLoadingAppointments ? (
-							<Select disabled>
-								<SelectTrigger id="appointmentId">
-									<SelectValue placeholder="Loading appointments..." />
-								</SelectTrigger>
-							</Select>
-						) : appointments.length === 0 ? (
-							<div className="space-y-2">
-								<Select disabled>
-									<SelectTrigger id="appointmentId">
-										<SelectValue placeholder="No appointments available" />
-									</SelectTrigger>
-								</Select>
-								<p className="text-sm text-muted-foreground">
-									No appointments available for invoicing. Appointments must be CONFIRMED or COMPLETED and not already have an invoice.
-								</p>
-							</div>
-						) : (
-							<Select value={appointmentId} onValueChange={setAppointmentId} required>
-								<SelectTrigger id="appointmentId">
-									<SelectValue placeholder="Select an appointment" />
-								</SelectTrigger>
-								<SelectContent>
-									{appointments.map((appointment) => (
-										<SelectItem key={appointment.id} value={appointment.id}>
-											{appointment.pet?.name} - {appointment.service?.title} ({new Date(appointment.date).toLocaleDateString()}) - {appointment.status}
-										</SelectItem>
-									))}
-								</SelectContent>
-							</Select>
-						)}
-					</div>
-				)}
-
+	// Edit mode: invoice already exists
+	if (invoice) {
+		return (
+			<form onSubmit={handleSubmit} className="space-y-6">
 				<div className="space-y-2">
-					<Label htmlFor="amount">Amount ($) *</Label>
+					<Label className="text-sm font-medium">Source</Label>
+					<p className="text-sm text-muted-foreground py-2">
+						{invoice.visit
+							? `Protocol PRO-${invoice.visit.protocolNumber} • ${invoice.visit.pet?.name}`
+							: invoice.appointment
+								? `${invoice.appointment.pet?.name} - ${invoice.appointment.service?.title}`
+								: "—"}
+					</p>
+				</div>
+				<div className="space-y-2">
+					<Label htmlFor="amount" className="text-sm font-medium">Amount *</Label>
 					<Input
 						id="amount"
 						type="number"
@@ -139,13 +101,100 @@ export function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFormProps) 
 						onChange={(e) => setAmount(e.target.value)}
 						required
 						placeholder="0.00"
+						className="w-full h-11"
+					/>
+				</div>
+				<div className="space-y-2">
+					<Label htmlFor="status" className="text-sm font-medium">Status *</Label>
+					<Select value={status} onValueChange={(value: "UNPAID" | "PAID" | "CANCELLED") => setStatus(value)} required>
+						<SelectTrigger id="status" className="w-full h-11">
+							<SelectValue placeholder="Select status" />
+						</SelectTrigger>
+						<SelectContent>
+							<SelectItem value="UNPAID">Unpaid</SelectItem>
+							<SelectItem value="PAID">Paid</SelectItem>
+							<SelectItem value="CANCELLED">Cancelled</SelectItem>
+						</SelectContent>
+					</Select>
+				</div>
+				<div className="flex justify-end gap-3 pt-2">
+					<Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
+						Cancel
+					</Button>
+					<Button type="submit" disabled={isSubmitting}>
+						{isSubmitting ? "Saving..." : "Update"} Invoice
+					</Button>
+				</div>
+			</form>
+		)
+	}
+
+	// Create mode: select protocol (visit)
+	return (
+		<form onSubmit={handleSubmit} className="space-y-6">
+			{/* Protocol selection - full width */}
+			<div className="space-y-2">
+				<Label htmlFor="visitId" className="text-sm font-medium">
+					Protocol (Visit) *
+				</Label>
+				{isLoadingVisits ? (
+					<Select disabled>
+						<SelectTrigger id="visitId" className="w-full h-11">
+							<SelectValue placeholder="Loading protocols..." />
+						</SelectTrigger>
+					</Select>
+				) : visits.length === 0 ? (
+					<div className="space-y-2">
+						<Select disabled>
+							<SelectTrigger id="visitId" className="w-full h-11">
+								<SelectValue placeholder="No protocols available" />
+							</SelectTrigger>
+						</Select>
+						<p className="text-sm text-muted-foreground">
+							No visits (protocols) available for invoicing. Create a visit first, add services, and ensure it doesn&apos;t already have an invoice.
+						</p>
+					</div>
+				) : (
+					<Select value={visitId} onValueChange={setVisitId} required>
+						<SelectTrigger id="visitId" className="w-full h-11">
+							<SelectValue placeholder="Select a protocol" />
+						</SelectTrigger>
+						<SelectContent>
+							{visits.map((visit) => (
+								<SelectItem key={visit.id} value={visit.id}>
+									PRO-{visit.protocolNumber} • {visit.pet?.name} • {format(new Date(visit.visitDate), "MMM dd, yyyy")} • {formatCurrency(visit.totalAmount)}
+								</SelectItem>
+							))}
+						</SelectContent>
+					</Select>
+				)}
+			</div>
+
+			{/* Amount & Status - full width stacked */}
+			<div className="space-y-4">
+				<div className="space-y-2">
+					<Label htmlFor="amount" className="text-sm font-medium">
+						Amount *
+					</Label>
+					<Input
+						id="amount"
+						type="number"
+						step="0.01"
+						min="0"
+						value={amount}
+						onChange={(e) => setAmount(e.target.value)}
+						required
+						placeholder="0.00"
+						className="w-full h-11"
 					/>
 				</div>
 
 				<div className="space-y-2">
-					<Label htmlFor="status">Status *</Label>
+					<Label htmlFor="status" className="text-sm font-medium">
+						Status *
+					</Label>
 					<Select value={status} onValueChange={(value: "UNPAID" | "PAID" | "CANCELLED") => setStatus(value)} required>
-						<SelectTrigger id="status">
+						<SelectTrigger id="status" className="w-full h-11">
 							<SelectValue placeholder="Select status" />
 						</SelectTrigger>
 						<SelectContent>
@@ -157,21 +206,15 @@ export function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFormProps) 
 				</div>
 			</div>
 
-			{invoice && (
-				<div className="text-sm text-muted-foreground">
-					<p>Appointment: {invoice.appointment?.pet?.name} - {invoice.appointment?.service?.title}</p>
-				</div>
-			)}
-
-			<div className="flex justify-end gap-2">
+			{/* Actions */}
+			<div className="flex justify-end gap-3 pt-2">
 				<Button type="button" variant="outline" onClick={onCancel} disabled={isSubmitting}>
 					Cancel
 				</Button>
-				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? "Saving..." : invoice ? "Update" : "Create"} Invoice
+				<Button type="submit" disabled={isSubmitting || !visitId || visits.length === 0}>
+					{isSubmitting ? "Creating..." : "Create"} Invoice
 				</Button>
 			</div>
 		</form>
 	)
 }
-

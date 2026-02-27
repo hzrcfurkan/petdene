@@ -9,6 +9,7 @@ import { Calendar, Clock, User, Mail, Phone, DollarSign, FileText, CheckCircle2,
 import { format } from "date-fns"
 import { type Appointment, useUpdateAppointment } from "@/lib/react-query/hooks/appointments"
 import { currentUserClient } from "@/lib/auth/client"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
 
@@ -25,6 +26,7 @@ const statusColors: Record<string, string> = {
 }
 
 export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDetailProps) {
+	const { formatCurrency } = useCurrency()
 	const currentUser = currentUserClient()
 	const { mutate: updateAppointment, isPending } = useUpdateAppointment()
 	const [selectedStatus, setSelectedStatus] = useState(appointment.status)
@@ -169,7 +171,7 @@ export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDe
 						{appointment.service?.price && (
 							<div className="text-sm font-medium mt-2 flex items-center gap-1">
 								<DollarSign className="w-4 h-4" />
-								{appointment.service.price.toFixed(2)}
+								{formatCurrency(appointment.service.price)}
 							</div>
 						)}
 					</CardContent>
@@ -235,7 +237,7 @@ export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDe
 						</CardHeader>
 						<CardContent>
 							<div className="text-lg font-semibold">
-								${appointment.invoice.amount.toFixed(2)}
+								{formatCurrency(appointment.invoice.amount)}
 							</div>
 							<Badge className="mt-2" variant={appointment.invoice.status === "PAID" ? "default" : "secondary"}>
 								{appointment.invoice.status}

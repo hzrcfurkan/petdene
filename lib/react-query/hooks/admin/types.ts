@@ -32,7 +32,7 @@ export interface StaffResponse {
 }
 
 export interface StatsResponse {
-	users: Array<{ role: string }>
+	users: User[]
 	pagination: { total: number }
 }
 

@@ -41,6 +41,7 @@ export interface UseMedicalRecordsParams {
 	title?: string
 	dateFrom?: string
 	dateTo?: string
+	search?: string
 }
 
 export function useMedicalRecords(params?: UseMedicalRecordsParams) {
@@ -52,6 +53,7 @@ export function useMedicalRecords(params?: UseMedicalRecordsParams) {
 	if (params?.title) queryParams.set("title", params.title)
 	if (params?.dateFrom) queryParams.set("dateFrom", params.dateFrom)
 	if (params?.dateTo) queryParams.set("dateTo", params.dateTo)
+	if (params?.search) queryParams.set("search", params.search)
 
 	const url = `/api/v1/medical-records${queryParams.toString() ? `?${queryParams.toString()}` : ""}`
 

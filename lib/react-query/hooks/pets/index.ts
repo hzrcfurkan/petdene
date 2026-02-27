@@ -5,6 +5,7 @@ import { fetcher, mutationFetcher } from "../../fetcher"
 
 export interface Pet {
 	id: string
+	patientNumber?: string
 	ownerId: string
 	name: string
 	species: string

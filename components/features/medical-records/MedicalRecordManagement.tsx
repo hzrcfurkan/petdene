@@ -5,11 +5,13 @@ import { PetTimeline } from "./PetTimeline"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useMedicalRecords } from "@/lib/react-query/hooks/medical-records"
-import { Stethoscope, Calendar, Clock } from "lucide-react"
+import { Stethoscope, Calendar, Clock, Search } from "lucide-react"
 import { currentUserClient } from "@/lib/auth/client"
 import { useState } from "react"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Label } from "@/components/ui/label"
+import { Input } from "@/components/ui/input"
+import { Button } from "@/components/ui/button"
 import { fetcher } from "@/lib/react-query/fetcher"
 import { useQuery } from "@tanstack/react-query"
 
@@ -17,6 +19,9 @@ export function MedicalRecordManagement() {
 	const currentUser = currentUserClient()
 	const isAdmin = currentUser && (currentUser.isAdmin || currentUser.isSuperAdmin || currentUser.isStaff)
 	const [selectedPetId, setSelectedPetId] = useState<string>("")
+	const [search, setSearch] = useState("")
+	const [dateFrom, setDateFrom] = useState("")
+	const [dateTo, setDateTo] = useState("")
 
 	const { data: allData } = useMedicalRecords({ limit: 1000, sort: "date-desc" })
 	const { data: recentData } = useMedicalRecords({ limit: 100, sort: "date-desc" })
@@ -113,14 +118,61 @@ export function MedicalRecordManagement() {
 					</TabsList>
 
 					<TabsContent value="all" className="space-y-4">
-						<MedicalRecordList showActions={true} />
+						<div className="space-y-4">
+							<div className="flex flex-wrap items-end gap-4 rounded-lg border p-4">
+								<div className="flex-1 min-w-[200px]">
+									<Label className="text-xs">Search (pet, owner, date, record type)</Label>
+									<div className="relative mt-2">
+										<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+										<Input
+											placeholder="Search by pet name, owner, title, diagnosis..."
+											value={search}
+											onChange={(e) => setSearch(e.target.value)}
+											className="pl-9"
+										/>
+									</div>
+								</div>
+								<div className="space-y-2">
+									<Label className="text-xs">Start Date</Label>
+									<Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+								</div>
+								<div className="space-y-2">
+									<Label className="text-xs">End Date</Label>
+									<Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+								</div>
+								{(search || dateFrom || dateTo) && (
+									<Button variant="ghost" size="sm" onClick={() => { setSearch(""); setDateFrom(""); setDateTo(""); }}>
+										Clear
+									</Button>
+								)}
+							</div>
+							<MedicalRecordList showActions={true} search={search} dateFrom={dateFrom || undefined} dateTo={dateTo || undefined} />
+						</div>
 					</TabsContent>
 
 					<TabsContent value="recent" className="space-y-4">
-						<MedicalRecordList
-							dateFrom={thirtyDaysAgo.toISOString().split("T")[0]}
-							showActions={true}
-						/>
+						<div className="space-y-4">
+							<div className="flex flex-wrap items-end gap-4 rounded-lg border p-4">
+								<div className="flex-1 min-w-[200px]">
+									<Label className="text-xs">Search</Label>
+									<div className="relative mt-2">
+										<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+										<Input
+											placeholder="Search by pet, owner, title..."
+											value={search}
+											onChange={(e) => setSearch(e.target.value)}
+											className="pl-9"
+										/>
+									</div>
+								</div>
+								<Button variant="ghost" size="sm" onClick={() => setSearch("")}>Clear</Button>
+							</div>
+							<MedicalRecordList
+								dateFrom={thirtyDaysAgo.toISOString().split("T")[0]}
+								search={search}
+								showActions={true}
+							/>
+						</div>
 					</TabsContent>
 
 					<TabsContent value="timeline" className="space-y-4">
@@ -169,7 +221,36 @@ export function MedicalRecordManagement() {
 					</TabsList>
 
 					<TabsContent value="list" className="space-y-4">
-						<MedicalRecordList showActions={false} />
+						<div className="space-y-4">
+							<div className="flex flex-wrap items-end gap-4 rounded-lg border p-4">
+								<div className="flex-1 min-w-[200px]">
+									<Label className="text-xs">Search</Label>
+									<div className="relative mt-2">
+										<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+										<Input
+											placeholder="Search by pet name, title, diagnosis..."
+											value={search}
+											onChange={(e) => setSearch(e.target.value)}
+											className="pl-9"
+										/>
+									</div>
+								</div>
+								<div className="space-y-2">
+									<Label className="text-xs">Start Date</Label>
+									<Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
+								</div>
+								<div className="space-y-2">
+									<Label className="text-xs">End Date</Label>
+									<Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
+								</div>
+								{(search || dateFrom || dateTo) && (
+									<Button variant="ghost" size="sm" onClick={() => { setSearch(""); setDateFrom(""); setDateTo(""); }}>
+										Clear
+									</Button>
+								)}
+							</div>
+							<MedicalRecordList showActions={false} search={search} dateFrom={dateFrom || undefined} dateTo={dateTo || undefined} />
+						</div>
 					</TabsContent>
 
 					<TabsContent value="timeline" className="space-y-4">

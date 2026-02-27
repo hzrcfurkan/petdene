@@ -6,11 +6,11 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { DatePicker } from "@/components/ui/date-picker"
+import { SearchSelect } from "@/components/ui/search-select"
 import { useCreatePrescription, useUpdatePrescription, type Prescription } from "@/lib/react-query/hooks/prescriptions"
+import { usePets } from "@/lib/react-query/hooks/pets"
 import { toast } from "sonner"
 import { useState } from "react"
-import { fetcher } from "@/lib/react-query/fetcher"
-import { useQuery } from "@tanstack/react-query"
 import { currentUserClient } from "@/lib/auth/client"
 
 interface PrescriptionFormProps {
@@ -30,19 +30,24 @@ export function PrescriptionForm({ prescription, onSuccess, onCancel }: Prescrip
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	const currentUser = currentUserClient()
+	const [petSearch, setPetSearch] = useState("")
 	const { mutate: createPrescription } = useCreatePrescription()
 	const { mutate: updatePrescription } = useUpdatePrescription()
 
-	// Fetch pets (filtered by owner if customer)
-	const { data: petsData } = useQuery({
-		queryKey: ["pets", currentUser?.role === "CUSTOMER" ? currentUser.id : undefined],
-		queryFn: () => fetcher<{ pets: any[] }>(
-			`/api/v1/pets?limit=100${currentUser?.role === "CUSTOMER" ? `&ownerId=${currentUser.id}` : ""}`
-		),
-		enabled: !!currentUser,
+	// Fetch pets with search (patient name, owner name/email)
+	const { data: petsData, isLoading: isLoadingPets } = usePets({
+		limit: 100,
+		sort: "name-asc",
+		search: petSearch || undefined,
+		ownerId: currentUser?.role === "CUSTOMER" ? currentUser.id : undefined,
 	})
 
 	const pets = petsData?.pets || []
+	const petOptions = pets.map((pet) => ({
+		value: pet.id,
+		label: `${pet.name} (${pet.species})${pet.patientNumber ? ` • ${pet.patientNumber}` : ""}`,
+		subLabel: pet.owner ? `${pet.owner.name || pet.owner.email}` : undefined,
+	}))
 
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault()
@@ -76,19 +81,30 @@ export function PrescriptionForm({ prescription, onSuccess, onCancel }: Prescrip
 		<form onSubmit={handleSubmit} className="space-y-4">
 			<div className="grid gap-4 md:grid-cols-2">
 				<div className="space-y-2">
-					<Label htmlFor="petId">Pet *</Label>
-					<Select value={petId} onValueChange={setPetId} required>
-						<SelectTrigger id="petId">
-							<SelectValue placeholder="Select a pet" />
-						</SelectTrigger>
-						<SelectContent>
-							{pets.map((pet) => (
-								<SelectItem key={pet.id} value={pet.id}>
-									{pet.name} ({pet.species})
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
+					<Label htmlFor="petId">Patient (Pet) *</Label>
+					<SearchSelect
+						options={petOptions}
+						value={petId}
+						onValueChange={setPetId}
+						placeholder="Search by patient or owner name..."
+						searchPlaceholder="Search by patient name, owner name, or email..."
+						emptyText={isLoadingPets ? "Loading..." : "No patients found. Try a different search."}
+						onSearchChange={setPetSearch}
+						loading={isLoadingPets}
+						renderOption={(opt) => {
+							const pet = pets.find((p) => p.id === opt.value)
+							return (
+								<div className="flex flex-col">
+									<span>{pet?.name} ({pet?.species})</span>
+									{pet?.owner && (
+										<span className="text-xs text-muted-foreground">
+											Owner: {pet.owner.name || pet.owner.email}
+										</span>
+									)}
+								</div>
+							)
+						}}
+					/>
 				</div>
 
 				<div className="space-y-2">

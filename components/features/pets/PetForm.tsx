@@ -6,6 +6,7 @@ import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import { DatePicker } from "@/components/ui/date-picker"
+import { SearchSelect, type SearchSelectOption } from "@/components/ui/search-select"
 import { useCreatePet, useUpdatePet, type Pet } from "@/lib/react-query/hooks/pets"
 import { toast } from "sonner"
 import { useState, useEffect } from "react"
@@ -43,14 +44,37 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 	const { mutate: createPet } = useCreatePet()
 	const { mutate: updatePet } = useUpdatePet()
 
-	// Fetch users for owner selection (admin/staff only)
-	const { data: usersData } = useQuery({
-		queryKey: ["admin", "users"],
-		queryFn: () => fetcher<{ users: any[] }>("/api/v1/admin/users?role=CUSTOMER&limit=100"),
+	// Fetch users for owner selection with search (admin/staff only)
+	const [ownerSearch, setOwnerSearch] = useState("")
+	const { data: usersData, isLoading: ownersLoading } = useQuery({
+		queryKey: ["admin", "owners", ownerSearch],
+		queryFn: () =>
+			fetcher<{ users: any[] }>(
+				`/api/v1/admin/users?role=CUSTOMER&search=${encodeURIComponent(ownerSearch)}&limit=50`
+			),
 		enabled: currentUser ? (currentUser.isAdmin || currentUser.isSuperAdmin || currentUser.isStaff) : false,
 	})
 
 	const users = usersData?.users || []
+	const ownerOptions: SearchSelectOption[] = (() => {
+		const fromUsers = users.map((u: any) => ({
+			value: u.id,
+			label: u.name || u.email || "Unknown",
+			subLabel: u.phone ? `${u.email} • ${u.phone}` : u.email,
+		}))
+		// When editing, ensure current owner is in options even if not in search results
+		if (pet?.owner && ownerId && !fromUsers.some((o) => o.value === ownerId)) {
+			return [
+				{
+					value: pet.owner.id,
+					label: pet.owner.name || pet.owner.email || "Unknown",
+					subLabel: pet.owner.phone ? `${pet.owner.email} • ${pet.owner.phone}` : pet.owner.email,
+				},
+				...fromUsers,
+			]
+		}
+		return fromUsers
+	})()
 
 	useEffect(() => {
 		if (currentUser?.role === "CUSTOMER" && !pet) {
@@ -200,18 +224,24 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 				{(currentUser?.isAdmin || currentUser?.isSuperAdmin || currentUser?.isStaff) && (
 					<div className="space-y-2">
 						<Label htmlFor="ownerId">Owner</Label>
-						<Select value={ownerId} onValueChange={setOwnerId}>
-							<SelectTrigger id="ownerId">
-								<SelectValue placeholder="Select owner" />
-							</SelectTrigger>
-							<SelectContent>
-								{users.map((user) => (
-									<SelectItem key={user.id} value={user.id}>
-										{user.name || user.email}
-									</SelectItem>
-								))}
-							</SelectContent>
-						</Select>
+						<SearchSelect
+							options={ownerOptions}
+							value={ownerId}
+							onValueChange={setOwnerId}
+							placeholder="Search by owner name, email, or phone..."
+							searchPlaceholder="Search by name, email, or phone..."
+							emptyText="No owner found. Try different search."
+							onSearchChange={setOwnerSearch}
+							loading={ownersLoading}
+							renderOption={(opt) => (
+								<>
+									<span className="font-medium">{opt.label}</span>
+									{opt.subLabel && (
+										<span className="ml-2 text-muted-foreground text-xs">{opt.subLabel}</span>
+									)}
+								</>
+							)}
+						/>
 					</div>
 				)}
 

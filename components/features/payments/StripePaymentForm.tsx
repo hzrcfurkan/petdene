@@ -8,6 +8,7 @@ import { loadStripe, type Stripe, type StripeElements } from "@stripe/stripe-js"
 import { CreditCard, Loader2, Shield } from "lucide-react"
 import { useEffect, useRef, useState } from "react"
 import { toast } from "sonner"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 
 const stripePromise = loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY || "")
 
@@ -19,6 +20,7 @@ interface StripePaymentFormProps {
 }
 
 export function StripePaymentForm({ invoice, onSuccess, onCancel, clientSecret }: StripePaymentFormProps) {
+	const { formatCurrency } = useCurrency()
 	const [stripe, setStripe] = useState<Stripe | null>(null)
 	const [elements, setElements] = useState<StripeElements | null>(null)
 	const [isProcessing, setIsProcessing] = useState(false)
@@ -192,7 +194,7 @@ export function StripePaymentForm({ invoice, onSuccess, onCancel, clientSecret }
 			<div className="rounded-lg border bg-muted/30 p-4">
 				<div className="flex items-center justify-between text-sm">
 					<span className="text-muted-foreground">Amount to Pay:</span>
-					<span className="text-lg font-bold">${invoice.amount.toFixed(2)}</span>
+					<span className="text-lg font-bold">{formatCurrency(invoice.amount)}</span>
 				</div>
 			</div>
 
@@ -221,7 +223,7 @@ export function StripePaymentForm({ invoice, onSuccess, onCancel, clientSecret }
 					) : (
 						<>
 							<CreditCard className="mr-2 h-4 w-4" />
-							Pay ${invoice.amount.toFixed(2)}
+							Pay {formatCurrency(invoice.amount)}
 						</>
 					)}
 				</Button>

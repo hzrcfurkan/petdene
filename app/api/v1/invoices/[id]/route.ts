@@ -18,6 +18,7 @@ export async function GET(
 			select: {
 				id: true,
 				appointmentId: true,
+				visitId: true,
 				amount: true,
 				status: true,
 				createdAt: true,
@@ -50,6 +51,40 @@ export async function GET(
 						},
 					},
 				},
+				visit: {
+					select: {
+						id: true,
+						protocolNumber: true,
+						visitDate: true,
+						status: true,
+						totalAmount: true,
+						pet: {
+							select: {
+								id: true,
+								name: true,
+								species: true,
+								ownerId: true,
+								owner: {
+									select: {
+										id: true,
+										name: true,
+										email: true,
+									},
+								},
+							},
+						},
+						services: {
+							select: {
+								quantity: true,
+								unitPrice: true,
+								total: true,
+								service: {
+									select: { id: true, title: true, price: true },
+								},
+							},
+						},
+					},
+				},
 				payment: {
 					select: {
 						id: true,
@@ -76,10 +111,8 @@ export async function GET(
 			invoice.status = "PAID"
 		}
 
-		if (
-			currentUser.isCustomer &&
-			invoice.appointment?.pet.ownerId !== currentUser.id
-		) {
+		const ownerId = invoice.appointment?.pet?.ownerId ?? invoice.visit?.pet?.ownerId
+		if (currentUser.isCustomer && ownerId !== currentUser.id) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 

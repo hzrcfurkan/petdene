@@ -5,7 +5,8 @@ import { fetcher, mutationFetcher } from "../../fetcher"
 
 export interface Invoice {
 	id: string
-	appointmentId: string
+	appointmentId?: string | null
+	visitId?: string | null
 	amount: number
 	status: "UNPAID" | "PAID" | "CANCELLED"
 	createdAt: string
@@ -28,6 +29,29 @@ export interface Invoice {
 			title: string
 			price: number
 		}
+	}
+	visit?: {
+		id: string
+		protocolNumber: number
+		visitDate: string
+		status: string
+		totalAmount: number
+		pet: {
+			id: string
+			name: string
+			species: string
+			owner?: {
+				id: string
+				name: string | null
+				email: string
+			}
+		}
+		services?: Array<{
+			quantity: number
+			unitPrice: number
+			total: number
+			service: { id: string; title: string; price: number }
+		}>
 	}
 	payment?: {
 		id: string
@@ -92,13 +116,15 @@ export function useCreateInvoice() {
 
 	return useMutation({
 		mutationFn: (data: {
-			appointmentId: string
+			appointmentId?: string
+			visitId?: string
 			amount: number
 			status?: "UNPAID" | "PAID" | "CANCELLED"
 		}) => mutationFetcher<Invoice>("/api/v1/invoices", { method: "POST", body: data }),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["invoices"] })
 			queryClient.invalidateQueries({ queryKey: ["appointments"] })
+			queryClient.invalidateQueries({ queryKey: ["visits"] })
 		},
 	})
 }
@@ -132,6 +158,23 @@ export function useDeleteInvoice() {
 		mutationFn: (id: string) => mutationFetcher(`/api/v1/invoices/${id}`, { method: "DELETE" }),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["invoices"] })
+			queryClient.invalidateQueries({ queryKey: ["appointments"] })
+		},
+	})
+}
+
+export function useMarkInvoicePaid(invoiceId: string) {
+	const queryClient = useQueryClient()
+
+	return useMutation({
+		mutationFn: (data?: { method?: string; notes?: string }) =>
+			mutationFetcher(`/api/v1/invoices/${invoiceId}/mark-paid`, {
+				method: "POST",
+				body: data || {},
+			}),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["invoices"] })
+			queryClient.invalidateQueries({ queryKey: ["invoices", invoiceId] })
 			queryClient.invalidateQueries({ queryKey: ["appointments"] })
 		},
 	})

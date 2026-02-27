@@ -6,8 +6,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { useInvoices } from "@/lib/react-query/hooks/invoices"
 import { FileText, DollarSign, CheckCircle, XCircle } from "lucide-react"
 import { useMemo } from "react"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 
 export function InvoiceManagement() {
+	const { formatCurrency } = useCurrency()
 	const { data: allData, isLoading: isLoadingAll } = useInvoices({ limit: 1000, sort: "date-desc" })
 	const { data: unpaidData, isLoading: isLoadingUnpaid } = useInvoices({ status: "UNPAID", limit: 100, sort: "date-asc" })
 	const { data: paidData, isLoading: isLoadingPaid } = useInvoices({ status: "PAID", limit: 100, sort: "date-desc" })
@@ -50,7 +52,7 @@ export function InvoiceManagement() {
 					<CardContent>
 						<div className="text-2xl font-bold">{stats.unpaid}</div>
 						<p className="text-xs text-muted-foreground">
-							${stats.unpaidAmount.toFixed(2)} pending
+							{formatCurrency(stats.unpaidAmount)} pending
 						</p>
 					</CardContent>
 				</Card>
@@ -63,7 +65,7 @@ export function InvoiceManagement() {
 					<CardContent>
 						<div className="text-2xl font-bold">{stats.paid}</div>
 						<p className="text-xs text-muted-foreground">
-							${stats.paidAmount.toFixed(2)} collected
+							{formatCurrency(stats.paidAmount)} collected
 						</p>
 					</CardContent>
 				</Card>
@@ -74,7 +76,7 @@ export function InvoiceManagement() {
 						<DollarSign className="h-4 w-4 text-blue-600" />
 					</CardHeader>
 					<CardContent>
-						<div className="text-2xl font-bold">${stats.totalAmount.toFixed(2)}</div>
+						<div className="text-2xl font-bold">{formatCurrency(stats.totalAmount)}</div>
 						<p className="text-xs text-muted-foreground">All invoices</p>
 					</CardContent>
 				</Card>

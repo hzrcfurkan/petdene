@@ -1,5 +1,8 @@
 "use client"
 
+import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -13,6 +16,7 @@ import { usePetServices, useDeletePetService, useUpdatePetService, type PetServi
 import { toast } from "sonner"
 import { format } from "date-fns"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { ResponsiveTableWrapper } from "@/components/ui/responsive-table"
 import { PetServiceForm } from "./PetServiceForm"
 import { PetServiceDetail } from "./PetServiceDetail"
 import { currentUserClient } from "@/lib/auth/client"
@@ -26,6 +30,7 @@ interface PetServiceListProps {
 const serviceTypes = ["grooming", "vet-checkup", "bath", "boarding", "training"]
 
 export function PetServiceList({ type, active, showActions = true }: PetServiceListProps) {
+	const { formatCurrency } = useCurrency()
 	const [page, setPage] = useState(1)
 	const [sortBy, setSortBy] = useState<string>("date-desc")
 	const [typeFilter, setTypeFilter] = useState<string>(type || "ALL")
@@ -36,6 +41,8 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 	const [isFormOpen, setIsFormOpen] = useState(false)
 
 	const currentUser = currentUserClient()
+	const pathname = usePathname()
+	const detailBasePath = pathname?.startsWith("/admin") ? "/admin/pet-services" : undefined
 
 	const { data, refetch, isLoading } = usePetServices({
 		page,
@@ -97,8 +104,8 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 	return (
 		<Card>
 			<CardHeader>
-				<div className="flex items-center justify-between">
-					<div>
+				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+					<div className="min-w-0">
 						<CardTitle className="flex items-center gap-2">
 							<Sparkles className="w-5 h-5" />
 							Pet Services
@@ -135,8 +142,8 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 			</CardHeader>
 			<CardContent className="space-y-4">
 				{/* Filters */}
-				<div className="flex gap-2 flex-wrap">
-					<div className="flex-1 min-w-[200px]">
+				<div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+					<div className="w-full min-w-0 sm:flex-1 sm:min-w-[200px]">
 						<div className="relative">
 							<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
@@ -147,9 +154,10 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 							/>
 						</div>
 					</div>
+					<div className="flex gap-2 flex-wrap">
 					<Select value={typeFilter} onValueChange={setTypeFilter} disabled={!!type}>
-						<SelectTrigger className="w-[180px]">
-							<Filter className="w-4 h-4 mr-2" />
+						<SelectTrigger className="w-full sm:w-[180px]">
+							<Filter className="w-4 h-4 mr-2 shrink-0" />
 							<SelectValue placeholder="Type" />
 						</SelectTrigger>
 						<SelectContent>
@@ -162,7 +170,7 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 						</SelectContent>
 					</Select>
 					<Select value={activeFilter} onValueChange={setActiveFilter} disabled={active !== undefined}>
-						<SelectTrigger className="w-[180px]">
+						<SelectTrigger className="w-full sm:w-[180px]">
 							<SelectValue placeholder="Status" />
 						</SelectTrigger>
 						<SelectContent>
@@ -172,7 +180,7 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 						</SelectContent>
 					</Select>
 					<Select value={sortBy} onValueChange={setSortBy}>
-						<SelectTrigger className="w-[180px]">
+						<SelectTrigger className="w-full sm:w-[180px]">
 							<SelectValue placeholder="Sort by" />
 						</SelectTrigger>
 						<SelectContent>
@@ -184,6 +192,7 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 							<SelectItem value="date-desc">Date (Newest)</SelectItem>
 						</SelectContent>
 					</Select>
+					</div>
 				</div>
 
 				{(typeFilter !== "ALL" || activeFilter !== "ALL" || searchQuery) && !type && active === undefined && (
@@ -203,8 +212,8 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 					<div className="text-center py-8 text-muted-foreground">No services found</div>
 				) : (
 					<>
-						<div className="rounded-md border">
-							<Table>
+						<ResponsiveTableWrapper>
+							<Table className="min-w-[600px] md:min-w-0">
 								<TableHeader>
 									<TableRow>
 										<TableHead>Title</TableHead>
@@ -219,7 +228,7 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 								<TableBody>
 									{services.map((service) => (
 										<TableRow key={service.id}>
-											<TableCell>
+											<TableCell data-label="Title">
 												<div className="flex items-center gap-2">
 													{service.image && (
 														<img
@@ -238,21 +247,21 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 													</div>
 												</div>
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Type">
 												<Badge variant="outline">
 													{service.type.charAt(0).toUpperCase() + service.type.slice(1).replace("-", " ")}
 												</Badge>
 											</TableCell>
-											<TableCell>
-												<div className="font-medium">${service.price.toFixed(2)}</div>
+											<TableCell data-label="Price">
+												<div className="font-medium">{formatCurrency(service.price)}</div>
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Duration">
 												{service.duration ? `${service.duration} min` : "N/A"}
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Appointments">
 												{service._count?.appointments || 0}
 											</TableCell>
-											<TableCell>
+											<TableCell data-label="Status">
 												<div className="flex items-center gap-2">
 													<Badge className={service.active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
 														{service.active ? "Active" : "Inactive"}
@@ -267,15 +276,23 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 												</div>
 											</TableCell>
 											{showActions && (
-												<TableCell className="text-right">
+												<TableCell className="text-right" data-label="">
 													<div className="flex justify-end gap-2">
-														<Button
-															variant="ghost"
-															size="sm"
-															onClick={() => handleView(service)}
-														>
-															<Eye className="w-4 h-4" />
-														</Button>
+														{detailBasePath ? (
+															<Button variant="ghost" size="sm" asChild>
+																<Link href={`${detailBasePath}/${service.id}`}>
+																	<Eye className="w-4 h-4" />
+																</Link>
+															</Button>
+														) : (
+															<Button
+																variant="ghost"
+																size="sm"
+																onClick={() => handleView(service)}
+															>
+																<Eye className="w-4 h-4" />
+															</Button>
+														)}
 														{canEdit && (
 															<Button
 																variant="ghost"
@@ -301,7 +318,7 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 									))}
 								</TableBody>
 							</Table>
-						</div>
+						</ResponsiveTableWrapper>
 
 						{/* Pagination */}
 						{pagination && pagination.pages > 1 && (

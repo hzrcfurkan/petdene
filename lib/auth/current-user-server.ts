@@ -1,5 +1,3 @@
-import "server-only"
-
 import { getAuthSession } from "@/lib/auth"
 import { prisma } from "@/lib/db/prisma"
 import { normalizeRole, type UserRole } from './rbac'

@@ -83,8 +83,10 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
-		await prisma.user.delete({
+		// Soft delete - set deletedAt
+		await prisma.user.update({
 			where: { id },
+			data: { deletedAt: new Date() },
 		})
 
 		return NextResponse.json({ success: true })

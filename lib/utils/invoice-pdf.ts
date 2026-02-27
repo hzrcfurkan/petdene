@@ -3,15 +3,16 @@
 import { jsPDF } from "jspdf"
 import { type Invoice } from "@/lib/react-query/hooks/invoices"
 import { format } from "date-fns"
+import { formatCurrency, type DisplayCurrency } from "@/lib/utils/currency"
 
-export function generateInvoicePDF(invoice: Invoice) {
+export function generateInvoicePDF(invoice: Invoice, displayCurrency: DisplayCurrency = "TRY") {
 	// Validate invoice data
 	if (!invoice) {
 		throw new Error("Invoice data is required")
 	}
 
-	if (!invoice.appointment) {
-		throw new Error("Invoice appointment data is missing. Please refresh and try again.")
+	if (!invoice.appointment && !invoice.visit) {
+		throw new Error("Invoice data is missing. Please refresh and try again.")
 	}
 
 	// Ensure we're on the client side
@@ -88,22 +89,24 @@ export function generateInvoicePDF(invoice: Invoice) {
 
 	yPos += 8
 
-	if (invoice.appointment?.pet?.owner) {
+	const owner = invoice.visit?.pet?.owner ?? invoice.appointment?.pet?.owner
+	if (owner) {
 		doc.setFont("helvetica", "normal")
 		doc.setFontSize(11)
-		doc.text(invoice.appointment.pet.owner.name || "Customer", margin, yPos)
+		doc.text(owner.name || "Customer", margin, yPos)
 		yPos += 6
-		doc.text(invoice.appointment.pet.owner.email, margin, yPos)
+		doc.text(owner.email, margin, yPos)
 		yPos += 10
 	}
 
 	// Pet Information
-	if (invoice.appointment?.pet) {
+	const pet = invoice.visit?.pet ?? invoice.appointment?.pet
+	if (pet) {
 		doc.setFont("helvetica", "bold")
 		doc.setFontSize(11)
 		doc.text("Pet:", margin, yPos)
 		doc.setFont("helvetica", "normal")
-		doc.text(`${invoice.appointment.pet.name} (${invoice.appointment.pet.species})`, margin + 15, yPos)
+		doc.text(`${pet.name} (${pet.species})`, margin + 15, yPos)
 		yPos += 10
 	}
 
@@ -125,18 +128,25 @@ export function generateInvoicePDF(invoice: Invoice) {
 
 	yPos += 12
 
-	// Service Row
+	// Service Row(s)
 	doc.setFont("helvetica", "normal")
 	doc.setFontSize(10)
-	const serviceTitle = invoice.appointment?.service?.title || "Service"
-	doc.text(serviceTitle, margin + 5, yPos)
-
-	if (invoice.appointment?.date) {
-		doc.text(format(new Date(invoice.appointment.date), "MMM dd, yyyy"), margin + 100, yPos)
+	if (invoice.visit) {
+		const serviceTitle = `Protocol PRO-${invoice.visit.protocolNumber}`
+		doc.text(serviceTitle, margin + 5, yPos)
+		if (invoice.visit.visitDate) {
+			doc.text(format(new Date(invoice.visit.visitDate), "MMM dd, yyyy"), margin + 100, yPos)
+		}
+	} else {
+		const serviceTitle = invoice.appointment?.service?.title || "Service"
+		doc.text(serviceTitle, margin + 5, yPos)
+		if (invoice.appointment?.date) {
+			doc.text(format(new Date(invoice.appointment.date), "MMM dd, yyyy"), margin + 100, yPos)
+		}
 	}
 
 	doc.setFont("helvetica", "bold")
-	doc.text(`$${invoice.amount.toFixed(2)}`, pageWidth - margin - 5, yPos, { align: "right" })
+	doc.text(formatCurrency(invoice.amount, displayCurrency), pageWidth - margin - 5, yPos, { align: "right" })
 
 	yPos += 15
 
@@ -149,14 +159,14 @@ export function generateInvoicePDF(invoice: Invoice) {
 	doc.setFont("helvetica", "normal")
 	doc.setFontSize(10)
 	doc.text("Subtotal:", pageWidth - margin - 50, yPos, { align: "right" })
-	doc.text(`$${invoice.amount.toFixed(2)}`, pageWidth - margin - 5, yPos, { align: "right" })
+	doc.text(formatCurrency(invoice.amount, displayCurrency), pageWidth - margin - 5, yPos, { align: "right" })
 
 	yPos += 8
 
 	doc.setFont("helvetica", "bold")
 	doc.setFontSize(12)
 	doc.text("Total:", pageWidth - margin - 50, yPos, { align: "right" })
-	doc.text(`$${invoice.amount.toFixed(2)}`, pageWidth - margin - 5, yPos, { align: "right" })
+	doc.text(formatCurrency(invoice.amount, displayCurrency), pageWidth - margin - 5, yPos, { align: "right" })
 
 	yPos += 20
 
@@ -171,7 +181,7 @@ export function generateInvoicePDF(invoice: Invoice) {
 		doc.setFontSize(10)
 		doc.text(`Method: ${invoice.payment.method}`, margin, yPos)
 		yPos += 6
-		doc.text(`Amount: $${invoice.payment.amount.toFixed(2)}`, margin, yPos)
+		doc.text(`Amount: ${formatCurrency(invoice.payment.amount, displayCurrency)}`, margin, yPos)
 		yPos += 6
 
 		if (invoice.payment.paidAt) {

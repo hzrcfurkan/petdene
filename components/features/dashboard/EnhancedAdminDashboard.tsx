@@ -18,6 +18,7 @@ import {
 	Clock,
 } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { AppointmentList } from "@/components/features/appointments/AppointmentList"
 
 const statusColors: Record<string, string> = {
@@ -28,6 +29,7 @@ const statusColors: Record<string, string> = {
 }
 
 export function EnhancedAdminDashboard() {
+	const { formatCurrency } = useCurrency()
 	const { data: appointmentsData } = useAppointments({ limit: 1000 })
 	const { data: petsData } = usePets({ limit: 1000 })
 	const { data: invoicesData } = useInvoices({ limit: 1000 })
@@ -155,7 +157,7 @@ export function EnhancedAdminDashboard() {
 			alertItems.push(`${stats.overdueVaccinations} vaccinations are overdue`)
 		}
 		if (stats.unpaidInvoices > 0) {
-			alertItems.push(`$${stats.unpaidAmount.toFixed(2)} in unpaid invoices`)
+			alertItems.push(`${formatCurrency(stats.unpaidAmount)} in unpaid invoices`)
 		}
 		return alertItems
 	}, [stats])
@@ -163,7 +165,7 @@ export function EnhancedAdminDashboard() {
 	return (
 		<div className="space-y-6">
 			{/* Analytics Cards */}
-			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+			<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
 				<AnalyticsCard
 					title="Total Appointments"
 					value={stats.totalAppointments}
@@ -172,9 +174,9 @@ export function EnhancedAdminDashboard() {
 				/>
 				<AnalyticsCard
 					title="Total Revenue"
-					value={`$${stats.totalRevenue.toFixed(2)}`}
+					value={formatCurrency(stats.totalRevenue)}
 					icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
-					description={`$${stats.monthlyRevenue.toFixed(2)} this month`}
+					description={`${formatCurrency(stats.monthlyRevenue)} this month`}
 				/>
 				<AnalyticsCard
 					title="Total Pets"
@@ -204,7 +206,7 @@ export function EnhancedAdminDashboard() {
 			/>
 
 			{/* Recent Data Tables */}
-			<div className="grid gap-4 md:grid-cols-2">
+			<div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
 				<RecentTable
 					title="Recent Appointments"
 					data={recentAppointments}
@@ -247,7 +249,7 @@ export function EnhancedAdminDashboard() {
 						{
 							key: "amount",
 							label: "Amount",
-							render: (item) => `$${item.amount.toFixed(2)}`,
+							render: (item) => formatCurrency(item.amount),
 						},
 						{
 							key: "status",
@@ -296,7 +298,7 @@ export function EnhancedAdminDashboard() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{stats.unpaidInvoices}</div>
-						<p className="text-xs text-muted-foreground">${stats.unpaidAmount.toFixed(2)}</p>
+						<p className="text-xs text-muted-foreground">{formatCurrency(stats.unpaidAmount)}</p>
 					</CardContent>
 				</Card>
 
