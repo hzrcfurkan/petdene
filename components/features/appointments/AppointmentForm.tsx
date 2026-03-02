@@ -28,7 +28,7 @@ export function AppointmentForm({ appointment, onSuccess, onCancel }: Appointmen
 	const [date, setDate] = useState(
 		appointment?.date ? new Date(appointment.date).toISOString().slice(0, 16) : ""
 	)
-	const [status, setStatus] = useState(appointment?.status || "PENDING")
+	const [status, setStatus] = useState(appointment?.status || "Beklemede")
 	const [notes, setNotes] = useState(appointment?.notes || "")
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -88,14 +88,14 @@ export function AppointmentForm({ appointment, onSuccess, onCancel }: Appointmen
 						: {}),
 				}
 				await updateAppointment({ id: appointment.id, data: updateData })
-				toast.success("Appointment updated successfully")
+				toast.success("Randevu başarıyla güncellendi")
 			} else {
 				await createAppointment(data)
-				toast.success("Appointment created successfully")
+				toast.success("Randevu başarıyla oluşturuldu")
 			}
 			onSuccess()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to save appointment")
+			toast.error(error?.info?.error || "Randevu kaydedilemedi")
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -108,7 +108,7 @@ export function AppointmentForm({ appointment, onSuccess, onCancel }: Appointmen
 					<Label htmlFor="petId">Pet *</Label>
 					<Select value={petId} onValueChange={setPetId} required>
 						<SelectTrigger id="petId">
-							<SelectValue placeholder="Select a pet" />
+							<SelectValue placeholder="Hasta seçin" />
 						</SelectTrigger>
 						<SelectContent>
 							{pets.map((pet) => (
@@ -124,7 +124,7 @@ export function AppointmentForm({ appointment, onSuccess, onCancel }: Appointmen
 					<Label htmlFor="serviceId">Service *</Label>
 					<Select value={serviceId} onValueChange={setServiceId} required>
 						<SelectTrigger id="serviceId">
-							<SelectValue placeholder="Select a service" />
+							<SelectValue placeholder="Hizmet seçin" />
 						</SelectTrigger>
 						<SelectContent>
 							{services.map((service) => (
@@ -141,7 +141,7 @@ export function AppointmentForm({ appointment, onSuccess, onCancel }: Appointmen
 						<Label htmlFor="staffId">Staff Member</Label>
 						<Select value={staffId || undefined} onValueChange={(value) => setStaffId(value || "")}>
 							<SelectTrigger id="staffId">
-								<SelectValue placeholder="Unassigned" />
+								<SelectValue placeholder="Atanmamış" />
 							</SelectTrigger>
 							<SelectContent>
 								{staff.map((member) => (
@@ -160,7 +160,7 @@ export function AppointmentForm({ appointment, onSuccess, onCancel }: Appointmen
 						id="date"
 						value={date}
 						onChange={setDate}
-						placeholder="Select date and time"
+						placeholder="Tarih ve saat seçin"
 						required
 					/>
 				</div>
@@ -170,24 +170,24 @@ export function AppointmentForm({ appointment, onSuccess, onCancel }: Appointmen
 						<Label htmlFor="status">Status *</Label>
 						<Select value={status} onValueChange={setStatus} required>
 							<SelectTrigger id="status">
-								<SelectValue placeholder="Select status" />
+								<SelectValue placeholder="Durum seçin" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="PENDING">PENDING</SelectItem>
-								<SelectItem value="CONFIRMED">CONFIRMED (Approved)</SelectItem>
-								<SelectItem value="COMPLETED">COMPLETED</SelectItem>
-								<SelectItem value="CANCELLED">CANCELLED</SelectItem>
+								<SelectItem value="Beklemede">PENDING</SelectItem>
+								<SelectItem value="Onaylandı">CONFIRMED (Approved)</SelectItem>
+								<SelectItem value="Tamamlandı">COMPLETED</SelectItem>
+								<SelectItem value="İptal Edildi">CANCELLED</SelectItem>
 							</SelectContent>
 						</Select>
 						<p className="text-xs text-muted-foreground">
-							{status === "CONFIRMED" && "An invoice will be automatically created"}
+							{status === "Onaylandı" && "Fatura otomatik oluşturulacak"}
 						</p>
 					</div>
 				)}
 			</div>
 
 			<div className="space-y-2">
-				<Label htmlFor="notes">Notes</Label>
+				<Label htmlFor="notes">Notlar</Label>
 				<Textarea
 					id="notes"
 					value={notes}
@@ -202,7 +202,7 @@ export function AppointmentForm({ appointment, onSuccess, onCancel }: Appointmen
 					Cancel
 				</Button>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? "Saving..." : appointment ? "Update" : "Create"} Appointment
+					{isSubmitting ? "Kaydediliyor..." : appointment ? "Güncelle" : "Oluştur"} Appointment
 				</Button>
 			</div>
 		</form>

@@ -21,8 +21,8 @@ interface PetFormProps {
 	onCancel: () => void
 }
 
-const speciesOptions = ["Dog", "Cat", "Bird", "Rabbit", "Hamster", "Fish", "Other"]
-const genderOptions = ["Male", "Female"]
+const speciesOptions = ["Köpek", "Kedi", "Kuş", "Tavşan", "Hamster", "Balık", "Diğer"]
+const genderOptions = ["Erkek", "Dişi"]
 
 export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 	const [name, setName] = useState(pet?.name || "")
@@ -59,7 +59,7 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 	const ownerOptions: SearchSelectOption[] = (() => {
 		const fromUsers = users.map((u: any) => ({
 			value: u.id,
-			label: u.name || u.email || "Unknown",
+			label: u.name || u.email || "Bilinmiyor",
 			subLabel: u.phone ? `${u.email} • ${u.phone}` : u.email,
 		}))
 		// When editing, ensure current owner is in options even if not in search results
@@ -67,7 +67,7 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 			return [
 				{
 					value: pet.owner.id,
-					label: pet.owner.name || pet.owner.email || "Unknown",
+					label: pet.owner.name || pet.owner.email || "Bilinmiyor",
 					subLabel: pet.owner.phone ? `${pet.owner.email} • ${pet.owner.phone}` : pet.owner.email,
 				},
 				...fromUsers,
@@ -107,14 +107,14 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 
 			if (pet) {
 				await updatePet({ id: pet.id, data })
-				toast.success("Pet updated successfully")
+				toast.success("Hasta başarıyla güncellendi")
 			} else {
 				await createPet(data)
-				toast.success("Pet created successfully")
+				toast.success("Hasta başarıyla oluşturuldu")
 			}
 			onSuccess()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to save pet")
+			toast.error(error?.info?.error || "Hasta kaydedilemedi")
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -130,7 +130,7 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 						value={name}
 						onChange={(e) => setName(e.target.value)}
 						required
-						placeholder="Pet name"
+						placeholder="Hasta adı"
 					/>
 				</div>
 
@@ -138,7 +138,7 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 					<Label htmlFor="species">Species *</Label>
 					<Select value={species} onValueChange={setSpecies} required>
 						<SelectTrigger id="species">
-							<SelectValue placeholder="Select species" />
+							<SelectValue placeholder="Tür seçin" />
 						</SelectTrigger>
 						<SelectContent>
 							{speciesOptions.map((spec) => (
@@ -151,7 +151,7 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 				</div>
 
 				<div className="space-y-2">
-					<Label htmlFor="breed">Breed</Label>
+					<Label htmlFor="breed">Irk</Label>
 					<Input
 						id="breed"
 						value={breed}
@@ -161,10 +161,10 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 				</div>
 
 				<div className="space-y-2">
-					<Label htmlFor="gender">Gender</Label>
+					<Label htmlFor="gender">Cinsiyet</Label>
 					<Select value={gender || undefined} onValueChange={(value) => setGender(value || "")}>
 						<SelectTrigger id="gender">
-							<SelectValue placeholder="Select gender" />
+							<SelectValue placeholder="Cinsiyet seçin" />
 						</SelectTrigger>
 						<SelectContent>
 							{genderOptions.map((gen) => (
@@ -184,7 +184,7 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 						min="0"
 						value={age}
 						onChange={(e) => setAge(e.target.value)}
-						placeholder="Age in years"
+						placeholder="Yaş (yıl)"
 					/>
 				</div>
 
@@ -194,7 +194,7 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 						id="dateOfBirth"
 						value={dateOfBirth}
 						onChange={setDateOfBirth}
-						placeholder="Select date of birth"
+						placeholder="Doğum tarihi seçin"
 					/>
 				</div>
 
@@ -207,12 +207,12 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 						min="0"
 						value={weight}
 						onChange={(e) => setWeight(e.target.value)}
-						placeholder="Weight in kg"
+						placeholder="Ağırlık (kg)"
 					/>
 				</div>
 
 				<div className="space-y-2">
-					<Label htmlFor="color">Color</Label>
+					<Label htmlFor="color">Renk</Label>
 					<Input
 						id="color"
 						value={color}
@@ -223,7 +223,7 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 
 				{(currentUser?.isAdmin || currentUser?.isSuperAdmin || currentUser?.isStaff) && (
 					<div className="space-y-2">
-						<Label htmlFor="ownerId">Owner</Label>
+						<Label htmlFor="ownerId">Sahip</Label>
 						<SearchSelect
 							options={ownerOptions}
 							value={ownerId}
@@ -258,7 +258,7 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 			</div>
 
 			<div className="space-y-2">
-				<Label htmlFor="notes">Notes</Label>
+				<Label htmlFor="notes">Notlar</Label>
 				<Textarea
 					id="notes"
 					value={notes}
@@ -273,7 +273,7 @@ export function PetForm({ pet, onSuccess, onCancel }: PetFormProps) {
 					Cancel
 				</Button>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? "Saving..." : pet ? "Update" : "Create"} Pet
+					{isSubmitting ? "Kaydediliyor..." : pet ? "Güncelle" : "Oluştur"} Pet
 				</Button>
 			</div>
 		</form>

@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
 		if (serviceId) {
 			where.serviceId = serviceId
 		}
-		if (staffId && canAccessResource(currentUser.role as any, "STAFF")) {
+		if (staffId && canAccessResource(currentUser.role as any, "Personel")) {
 			where.staffId = staffId
 		}
 		if (status) {
@@ -217,7 +217,7 @@ export async function POST(req: NextRequest) {
 
 		// Validate date is in the future (unless admin/staff setting status to COMPLETED)
 		const appointmentDate = new Date(date)
-		if (appointmentDate < new Date() && status !== "COMPLETED") {
+		if (appointmentDate < new Date() && status !== "Tamamlandı") {
 			return NextResponse.json(
 				{ error: "Appointment date must be in the future" },
 				{ status: 400 }
@@ -225,7 +225,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Validate status if provided (only STAFF/ADMIN/SUPER_ADMIN can set status)
-		let appointmentStatus = "PENDING"
+		let appointmentStatus = "Beklemede"
 		if (status !== undefined) {
 			if (currentUser.isCustomer) {
 				return NextResponse.json(
@@ -234,7 +234,7 @@ export async function POST(req: NextRequest) {
 				)
 			}
 
-			const validStatuses = ["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"]
+			const validStatuses = ["Beklemede", "Onaylandı", "Tamamlandı", "İptal Edildi"]
 			if (!validStatuses.includes(status)) {
 				return NextResponse.json(
 					{
@@ -248,7 +248,7 @@ export async function POST(req: NextRequest) {
 
 		// Verify staff exists if provided (only STAFF/ADMIN/SUPER_ADMIN can assign staff)
 		if (staffId) {
-			if (!canAccessResource(currentUser.role as any, "STAFF")) {
+			if (!canAccessResource(currentUser.role as any, "Personel")) {
 				return NextResponse.json(
 					{ error: "Only staff can assign staff members" },
 					{ status: 403 }
@@ -264,7 +264,7 @@ export async function POST(req: NextRequest) {
 				return NextResponse.json({ error: "Staff member not found" }, { status: 404 })
 			}
 
-			if (!["STAFF", "ADMIN", "SUPER_ADMIN"].includes(staff.role)) {
+			if (!["Personel", "Admin", "Süper Admin"].includes(staff.role)) {
 				return NextResponse.json(
 					{ error: "Assigned user must be staff, admin, or super admin" },
 					{ status: 400 }
@@ -291,7 +291,7 @@ export async function POST(req: NextRequest) {
 					lt: appointmentEnd,
 				},
 				status: {
-					in: ["PENDING", "CONFIRMED"],
+					in: ["Beklemede", "Onaylandı"],
 				},
 			},
 		})
@@ -363,7 +363,7 @@ export async function POST(req: NextRequest) {
 		})
 
 		// Auto-generate invoice when status is CONFIRMED
-		if (appointmentStatus === "CONFIRMED") {
+		if (appointmentStatus === "Onaylandı") {
 			// Get service price
 			const service = await prisma.petService.findUnique({
 				where: { id: serviceId },
@@ -375,7 +375,7 @@ export async function POST(req: NextRequest) {
 					data: {
 						appointmentId: newAppointment.id,
 						amount: service.price,
-						status: "UNPAID",
+						status: "Ödenmedi",
 					},
 				})
 			}
@@ -441,7 +441,7 @@ export async function POST(req: NextRequest) {
 	} catch (error) {
 		console.error("[Appointments API] POST error:", error)
 		return NextResponse.json(
-			{ error: "Failed to create appointment" },
+			{ error: "Randevu oluşturulamadı" },
 			{ status: 500 }
 		)
 	}

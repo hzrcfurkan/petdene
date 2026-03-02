@@ -134,11 +134,11 @@ export function AppointmentImport() {
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead>Pet</TableHead>
-											<TableHead>Service</TableHead>
-											<TableHead>Date</TableHead>
+											<TableHead>Hasta</TableHead>
+											<TableHead>Hizmet</TableHead>
+											<TableHead>Tarih</TableHead>
 											<TableHead>Time</TableHead>
-											<TableHead>Staff</TableHead>
+											<TableHead>Personel</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>

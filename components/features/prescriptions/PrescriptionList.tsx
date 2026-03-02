@@ -85,7 +85,7 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 			generatePrescriptionPDF(prescription)
 			toast.success("Prescription PDF downloaded")
 		} catch (error: any) {
-			toast.error(error?.message || "Failed to generate PDF")
+			toast.error(error?.message || "PDF oluşturulamadı")
 		}
 	}
 
@@ -153,7 +153,7 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 					</div>
 					<Select value={sortBy} onValueChange={setSortBy}>
 						<SelectTrigger className="w-[180px]">
-							<SelectValue placeholder="Sort by" />
+							<SelectValue placeholder="Sırala" />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="date-asc">Date (Oldest)</SelectItem>
@@ -201,18 +201,18 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 								<TableHeader>
 									<TableRow>
 										<TableHead>Medicine Name</TableHead>
-										<TableHead>Pet</TableHead>
+										<TableHead>Hasta</TableHead>
 										<TableHead>Dosage</TableHead>
 										<TableHead>Date Issued</TableHead>
 										<TableHead>Issued By</TableHead>
-										<TableHead>Owner</TableHead>
-										{showActions && <TableHead className="text-right">Actions</TableHead>}
+										<TableHead>Sahip</TableHead>
+										{showActions && <TableHead className="text-right">İşlemler</TableHead>}
 									</TableRow>
 								</TableHeader>
 								<TableBody>
 									{prescriptions.map((prescription) => (
 										<TableRow key={prescription.id}>
-											<TableCell data-label="Medicine Name">
+											<TableCell data-label="İlaç Adı">
 												<div className="font-medium">{prescription.medicineName}</div>
 												{prescription.instructions && (
 													<div className="text-sm text-muted-foreground line-clamp-1">
@@ -220,13 +220,13 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 													</div>
 												)}
 											</TableCell>
-											<TableCell data-label="Pet">
+											<TableCell data-label="Hasta">
 												<div>
 													<div className="font-medium">{prescription.pet?.name}</div>
 													<div className="text-sm text-muted-foreground">{prescription.pet?.species}</div>
 												</div>
 											</TableCell>
-											<TableCell data-label="Dosage">
+											<TableCell data-label="Doz">
 												{prescription.dosage || <span className="text-muted-foreground">N/A</span>}
 											</TableCell>
 											<TableCell data-label="Date Issued">
@@ -235,7 +235,7 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 											<TableCell data-label="Issued By">
 												{prescription.issuedBy?.name || prescription.issuedBy?.email || "N/A"}
 											</TableCell>
-											<TableCell data-label="Owner">
+											<TableCell data-label="Sahip">
 												{prescription.pet?.owner?.name || prescription.pet?.owner?.email || "N/A"}
 											</TableCell>
 											{showActions && (

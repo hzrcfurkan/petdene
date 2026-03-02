@@ -17,14 +17,14 @@ export async function POST(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role as any, "STAFF")) {
+		if (!canAccessResource(currentUser.role as any, "Personel")) {
 			return NextResponse.json({ error: "Forbidden. Admin or Staff required." }, { status: 403 })
 		}
 
 		const body = await req.json().catch(() => ({}))
-		const { method = "cash", notes } = body
+		const { method = "nakit", notes } = body
 
-		const validMethods = ["cash", "card", "stripe"]
+		const validMethods = ["nakit", "kart", "stripe"]
 		if (!validMethods.includes(method)) {
 			return NextResponse.json(
 				{ error: `Invalid method. Must be one of: ${validMethods.join(", ")}` },
@@ -46,14 +46,14 @@ export async function POST(
 			return NextResponse.json({ error: "Invoice not found" }, { status: 404 })
 		}
 
-		if (invoice.status === "PAID") {
+		if (invoice.status === "Ödendi") {
 			return NextResponse.json(
 				{ error: "Invoice is already paid" },
 				{ status: 400 }
 			)
 		}
 
-		if (invoice.payment?.status === "COMPLETED") {
+		if (invoice.payment?.status === "Tamamlandı") {
 			return NextResponse.json(
 				{ error: "Payment already completed for this invoice" },
 				{ status: 400 }
@@ -68,7 +68,7 @@ export async function POST(
 					data: {
 						method,
 						amount: invoice.amount,
-						status: "COMPLETED",
+						status: "Tamamlandı",
 						paidAt: new Date(),
 					},
 				})
@@ -78,14 +78,14 @@ export async function POST(
 						invoiceId,
 						method,
 						amount: invoice.amount,
-						status: "COMPLETED",
+						status: "Tamamlandı",
 						paidAt: new Date(),
 					},
 				})
 			}
 			await tx.invoice.update({
 				where: { id: invoiceId },
-				data: { status: "PAID" },
+				data: { status: "Ödendi" },
 			})
 		})
 
@@ -108,7 +108,7 @@ export async function POST(
 		})
 
 		return NextResponse.json({
-			message: "Invoice marked as paid",
+			message: "Fatura ödendi olarak işaretlendi",
 			invoice: updated,
 		})
 	} catch (error) {

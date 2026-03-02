@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 					email: email.trim().toLowerCase(),
 					phone: phone?.trim() || null,
 					password: hashedPassword,
-					role: "CUSTOMER",
+					role: "Müşteri",
 				},
 			})
 		}
@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 				petId: pet.id,
 				serviceId: service.id,
 				date: new Date(date),
-				status: "PENDING",
+				status: "Beklemede",
 				notes: notes?.trim() || null,
 			},
 			select: {

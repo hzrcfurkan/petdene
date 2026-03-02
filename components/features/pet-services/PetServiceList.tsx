@@ -63,10 +63,10 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 
 		try {
 			await deleteService(id)
-			toast.success("Service deleted successfully")
+			toast.success("Hizmet başarıyla silindi")
 			refetch()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to delete service")
+			toast.error(error?.info?.error || "Hizmet silinemedi")
 		}
 	}
 
@@ -79,7 +79,7 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 			toast.success(`Service ${!service.active ? "activated" : "deactivated"} successfully`)
 			refetch()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to update service")
+			toast.error(error?.info?.error || "Hizmet güncellenemedi")
 		}
 	}
 
@@ -122,7 +122,7 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 							</DialogTrigger>
 							<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
 								<DialogHeader>
-									<DialogTitle>{editingService ? "Edit Service" : "Create Service"}</DialogTitle>
+									<DialogTitle>{editingService ? "Hizmet Düzenle" : "Create Service"}</DialogTitle>
 									<DialogDescription>
 										{editingService ? "Update service information" : "Add a new service to the catalog"}
 									</DialogDescription>
@@ -158,7 +158,7 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 					<Select value={typeFilter} onValueChange={setTypeFilter} disabled={!!type}>
 						<SelectTrigger className="w-full sm:w-[180px]">
 							<Filter className="w-4 h-4 mr-2 shrink-0" />
-							<SelectValue placeholder="Type" />
+							<SelectValue placeholder="Tür" />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="ALL">All Types</SelectItem>
@@ -171,7 +171,7 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 					</Select>
 					<Select value={activeFilter} onValueChange={setActiveFilter} disabled={active !== undefined}>
 						<SelectTrigger className="w-full sm:w-[180px]">
-							<SelectValue placeholder="Status" />
+							<SelectValue placeholder="Durum" />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="ALL">All Status</SelectItem>
@@ -181,7 +181,7 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 					</Select>
 					<Select value={sortBy} onValueChange={setSortBy}>
 						<SelectTrigger className="w-full sm:w-[180px]">
-							<SelectValue placeholder="Sort by" />
+							<SelectValue placeholder="Sırala" />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="title-asc">Title (A-Z)</SelectItem>
@@ -221,8 +221,8 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 										<TableHead>Price</TableHead>
 										<TableHead>Duration</TableHead>
 										<TableHead>Appointments</TableHead>
-										<TableHead>Status</TableHead>
-										{showActions && <TableHead className="text-right">Actions</TableHead>}
+										<TableHead>Durum</TableHead>
+										{showActions && <TableHead className="text-right">İşlemler</TableHead>}
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -247,12 +247,12 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 													</div>
 												</div>
 											</TableCell>
-											<TableCell data-label="Type">
+											<TableCell data-label="Tür">
 												<Badge variant="outline">
 													{service.type.charAt(0).toUpperCase() + service.type.slice(1).replace("-", " ")}
 												</Badge>
 											</TableCell>
-											<TableCell data-label="Price">
+											<TableCell data-label="Fiyat">
 												<div className="font-medium">{formatCurrency(service.price)}</div>
 											</TableCell>
 											<TableCell data-label="Duration">
@@ -261,10 +261,10 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 											<TableCell data-label="Appointments">
 												{service._count?.appointments || 0}
 											</TableCell>
-											<TableCell data-label="Status">
+											<TableCell data-label="Durum">
 												<div className="flex items-center gap-2">
 													<Badge className={service.active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
-														{service.active ? "Active" : "Inactive"}
+														{service.active ? "Aktif" : "Pasif"}
 													</Badge>
 													{canEdit && (
 														<Switch

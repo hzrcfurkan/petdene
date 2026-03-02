@@ -56,10 +56,10 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 
 		try {
 			await deletePet(id)
-			toast.success("Pet deleted successfully")
+			toast.success("Hasta başarıyla silindi")
 			refetch()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to delete pet")
+			toast.error(error?.info?.error || "Hasta silinemedi")
 		}
 	}
 
@@ -81,7 +81,7 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 	const canEdit = currentUser && (currentUser.isAdmin || currentUser.isSuperAdmin || currentUser.isStaff || currentUser.role === "CUSTOMER")
 	const canDelete = currentUser && (currentUser.isAdmin || currentUser.isSuperAdmin || currentUser.isStaff)
 
-	const speciesOptions = ["Dog", "Cat", "Bird", "Rabbit", "Hamster", "Fish", "Other"]
+	const speciesOptions = ["Köpek", "Kedi", "Kuş", "Tavşan", "Hamster", "Balık", "Diğer"]
 
 	return (
 		<Card>
@@ -92,7 +92,7 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 							<PawPrint className="w-5 h-5" />
 							Pets
 						</CardTitle>
-						<CardDescription>Manage and view pets</CardDescription>
+						<CardDescription>Hastaları yönetin ve görüntüleyin</CardDescription>
 					</div>
 					{showActions && canEdit && (
 						<Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -104,9 +104,9 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 							</DialogTrigger>
 							<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
 								<DialogHeader>
-									<DialogTitle>{editingPet ? "Edit Pet" : "Add New Pet"}</DialogTitle>
+									<DialogTitle>{editingPet ? "Hasta Düzenle" : "Add New Pet"}</DialogTitle>
 									<DialogDescription>
-										{editingPet ? "Update pet information" : "Add a new pet to the system"}
+										{editingPet ? "Hasta bilgilerini güncelle" : "Sisteme yeni hasta ekle"}
 									</DialogDescription>
 								</DialogHeader>
 								<PetForm
@@ -140,7 +140,7 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 						<Select value={speciesFilter} onValueChange={setSpeciesFilter} disabled={!!species}>
 							<SelectTrigger className="w-full sm:w-[180px]">
 								<Filter className="w-4 h-4 mr-2 shrink-0" />
-								<SelectValue placeholder="Species" />
+								<SelectValue placeholder="Tür" />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="ALL">All Species</SelectItem>
@@ -153,7 +153,7 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 						</Select>
 						<Select value={sortBy} onValueChange={setSortBy}>
 							<SelectTrigger className="w-full sm:w-[180px]">
-								<SelectValue placeholder="Sort by" />
+								<SelectValue placeholder="Sırala" />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="name-asc">Name (A-Z)</SelectItem>
@@ -186,13 +186,13 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 								<TableHeader>
 									<TableRow>
 										<TableHead>Patient #</TableHead>
-										<TableHead>Name</TableHead>
-										<TableHead>Species</TableHead>
-										<TableHead>Breed</TableHead>
-										<TableHead>Age</TableHead>
-										<TableHead>Owner</TableHead>
-										<TableHead>Records</TableHead>
-										{showActions && <TableHead className="text-right">Actions</TableHead>}
+										<TableHead>Ad</TableHead>
+										<TableHead>Tür</TableHead>
+										<TableHead>Irk</TableHead>
+										<TableHead>Yaş</TableHead>
+										<TableHead>Sahip</TableHead>
+										<TableHead>Kayıtlar</TableHead>
+										{showActions && <TableHead className="text-right">İşlemler</TableHead>}
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -201,7 +201,7 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 											<TableCell data-label="Patient #">
 												<Badge variant="secondary">{pet.patientNumber || "—"}</Badge>
 											</TableCell>
-											<TableCell data-label="Name">
+											<TableCell data-label="Ad">
 												<div className="flex items-center gap-2">
 													{pet.image && (
 														<img

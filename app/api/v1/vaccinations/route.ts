@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 		const where: any = {}
 
 		// Role-based filtering: CUSTOMER can only see vaccinations for their pets
-		if (currentUser.role === "CUSTOMER") {
+		if (currentUser.role === "Müşteri") {
 			const pets = await prisma.pet.findMany({
 				where: { ownerId: currentUser.id },
 				select: { id: true },
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role, "STAFF")) {
+		if (!canAccessResource(currentUser.role, "Personel")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json(vaccination, { status: 201 })
 	} catch (error) {
 		console.error("[Vaccinations API] POST error:", error)
-		return NextResponse.json({ error: "Failed to create vaccination" }, { status: 500 })
+		return NextResponse.json({ error: "Aşı oluşturulamadı" }, { status: 500 })
 	}
 }
 

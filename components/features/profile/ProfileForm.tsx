@@ -55,7 +55,7 @@ export function ProfileForm() {
 					image: imageUrl,
 				}),
 			})
-			if (!res.ok) throw new Error("Failed to update profile")
+			if (!res.ok) throw new Error("Profil güncellenemedi")
 			setProfile({ ...profile, image: imageUrl })
 			toast.success("Profile picture updated successfully")
 		} catch (error) {
@@ -79,10 +79,10 @@ export function ProfileForm() {
 					phone: profile.phone,
 				}),
 			})
-			if (!res.ok) throw new Error("Failed to update profile")
-			toast.success("Profile updated successfully")
+			if (!res.ok) throw new Error("Profil güncellenemedi")
+			toast.success("Profil başarıyla güncellendi")
 		} catch (error) {
-			toast.error("Failed to update profile")
+			toast.error("Profil güncellenemedi")
 		} finally {
 			setSaving(false)
 		}
@@ -125,7 +125,7 @@ export function ProfileForm() {
 								<p className="text-xs text-muted-foreground mt-1">Email cannot be changed</p>
 							</div>
 							<div>
-								<Label htmlFor="role">Role</Label>
+								<Label htmlFor="role">Rol</Label>
 								<div className="mt-2">
 									<div className="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm items-center">
 										<span className="text-muted-foreground">{getRoleLabel(profile?.role)}</span>
@@ -160,7 +160,7 @@ export function ProfileForm() {
 						</div>
 
 						<Button type="submit" disabled={saving} className="w-full">
-							{saving ? "Saving..." : "Save Changes"}
+							{saving ? "Kaydediliyor..." : "Save Changes"}
 						</Button>
 					</form>
 				</CardContent>

@@ -9,7 +9,7 @@ import { format } from "date-fns"
 
 export function AppointmentManagement() {
 	const { data: allData } = useAppointments({ limit: 1000, sort: "date-desc" })
-	const { data: pendingData } = useAppointments({ status: "PENDING", limit: 100, sort: "date-asc" })
+	const { data: pendingData } = useAppointments({ status: "Beklemede", limit: 100, sort: "date-asc" })
 	const { data: todayData } = useAppointments({
 		dateFrom: new Date().toISOString().split("T")[0],
 		dateTo: new Date().toISOString().split("T")[0],
@@ -23,9 +23,9 @@ export function AppointmentManagement() {
 
 	const stats = {
 		total: allAppointments.length,
-		pending: allAppointments.filter((a) => a.status === "PENDING").length,
-		confirmed: allAppointments.filter((a) => a.status === "CONFIRMED").length,
-		completed: allAppointments.filter((a) => a.status === "COMPLETED").length,
+		pending: allAppointments.filter((a) => a.status === "Beklemede").length,
+		confirmed: allAppointments.filter((a) => a.status === "Onaylandı").length,
+		completed: allAppointments.filter((a) => a.status === "Tamamlandı").length,
 		today: todayAppointments.length,
 	}
 
@@ -35,7 +35,7 @@ export function AppointmentManagement() {
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total</CardTitle>
+						<CardTitle className="text-sm font-medium">Toplam</CardTitle>
 						<Calendar className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
@@ -46,7 +46,7 @@ export function AppointmentManagement() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Pending</CardTitle>
+						<CardTitle className="text-sm font-medium">Beklemede</CardTitle>
 						<Clock className="h-4 w-4 text-yellow-600" />
 					</CardHeader>
 					<CardContent>
@@ -57,7 +57,7 @@ export function AppointmentManagement() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Confirmed</CardTitle>
+						<CardTitle className="text-sm font-medium">Onaylandı</CardTitle>
 						<CheckCircle className="h-4 w-4 text-blue-600" />
 					</CardHeader>
 					<CardContent>
@@ -68,7 +68,7 @@ export function AppointmentManagement() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Completed</CardTitle>
+						<CardTitle className="text-sm font-medium">Tamamlandı</CardTitle>
 						<CheckCircle className="h-4 w-4 text-green-600" />
 					</CardHeader>
 					<CardContent>
@@ -93,7 +93,7 @@ export function AppointmentManagement() {
 			<Tabs defaultValue="all" className="space-y-4">
 				<TabsList>
 					<TabsTrigger value="all">All Appointments</TabsTrigger>
-					<TabsTrigger value="pending">Pending</TabsTrigger>
+					<TabsTrigger value="pending">Beklemede</TabsTrigger>
 					<TabsTrigger value="today">Today</TabsTrigger>
 				</TabsList>
 
@@ -102,7 +102,7 @@ export function AppointmentManagement() {
 				</TabsContent>
 
 				<TabsContent value="pending" className="space-y-4">
-					<AppointmentList status="PENDING" showActions={true} key="pending" />
+					<AppointmentList status="Beklemede" showActions={true} key="pending" />
 				</TabsContent>
 
 				<TabsContent value="today" className="space-y-4">

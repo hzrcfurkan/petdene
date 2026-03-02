@@ -38,7 +38,7 @@ export function PaymentScreen() {
 		petName: string
 		protocolNumber: number
 	} | null>(null)
-	const [paymentMethod, setPaymentMethod] = useState("cash")
+	const [paymentMethod, setPaymentMethod] = useState("nakit")
 	const [paymentAmount, setPaymentAmount] = useState("")
 	const [paymentNotes, setPaymentNotes] = useState("")
 	const [paymentType, setPaymentType] = useState<"partial" | "full" | "mark">("full")
@@ -59,7 +59,7 @@ export function PaymentScreen() {
 		setPaymentAmount("")
 		setPaymentNotes("")
 		setPaymentType("full")
-		setPaymentMethod("cash")
+		setPaymentMethod("nakit")
 	}
 
 	const handleRecordPayment = async () => {
@@ -71,7 +71,7 @@ export function PaymentScreen() {
 		} else {
 			amount = Number(paymentAmount)
 			if (!amount || amount <= 0) {
-				toast.error("Enter valid amount")
+				toast.error("Geçerli tutar girin")
 				return
 			}
 			if (amount > selectedVisit.balance) {
@@ -94,7 +94,7 @@ export function PaymentScreen() {
 			setSelectedVisit(null)
 			refetch()
 		} catch (err: any) {
-			toast.error(err?.info?.error || "Failed to record payment")
+			toast.error(err?.info?.error || "Ödeme kaydedilemedi")
 		}
 	}
 
@@ -110,7 +110,7 @@ export function PaymentScreen() {
 			setSelectedVisit(null)
 			refetch()
 		} catch (err: any) {
-			toast.error(err?.info?.error || "Failed to record payment")
+			toast.error(err?.info?.error || "Ödeme kaydedilemedi")
 		}
 	}
 
@@ -258,13 +258,13 @@ export function PaymentScreen() {
 								<TableHeader>
 									<TableRow>
 										<TableHead>Protocol</TableHead>
-										<TableHead>Patient</TableHead>
-										<TableHead>Owner</TableHead>
-										<TableHead>Date</TableHead>
-										<TableHead>Total</TableHead>
-										<TableHead>Paid</TableHead>
-										<TableHead>Balance</TableHead>
-										<TableHead className="text-right">Actions</TableHead>
+										<TableHead>Hasta</TableHead>
+										<TableHead>Sahip</TableHead>
+										<TableHead>Tarih</TableHead>
+										<TableHead>Toplam</TableHead>
+										<TableHead>Ödenen</TableHead>
+										<TableHead>Bakiye</TableHead>
+										<TableHead className="text-right">İşlemler</TableHead>
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -374,7 +374,7 @@ export function PaymentScreen() {
 
 							{paymentType === "partial" && (
 								<div>
-									<Label>Amount</Label>
+									<Label>Tutar</Label>
 									<Input
 										type="number"
 										step="0.01"
@@ -395,8 +395,8 @@ export function PaymentScreen() {
 										<SelectValue />
 									</SelectTrigger>
 									<SelectContent>
-										<SelectItem value="cash">Cash</SelectItem>
-										<SelectItem value="card">Card</SelectItem>
+										<SelectItem value="nakit">Cash</SelectItem>
+										<SelectItem value="kart">Card</SelectItem>
 										<SelectItem value="stripe">Stripe</SelectItem>
 									</SelectContent>
 								</Select>
@@ -406,7 +406,7 @@ export function PaymentScreen() {
 								<Input
 									value={paymentNotes}
 									onChange={(e) => setPaymentNotes(e.target.value)}
-									placeholder="Payment notes"
+									placeholder="Ödeme notu"
 									className="mt-2"
 								/>
 							</div>
@@ -425,7 +425,7 @@ export function PaymentScreen() {
 										disabled={addPayment.isPending}
 										className="flex-1"
 									>
-										{addPayment.isPending ? "Processing..." : "Mark as Paid"}
+										{addPayment.isPending ? "Processing..." : "Ödendi Olarak İşaretle"}
 									</Button>
 								) : (
 									<Button
@@ -436,7 +436,7 @@ export function PaymentScreen() {
 										}
 										className="flex-1"
 									>
-										{addPayment.isPending ? "Recording..." : "Record Payment"}
+										{addPayment.isPending ? "Kaydediliyor..." : "Ödeme Kaydet"}
 									</Button>
 								)}
 							</div>

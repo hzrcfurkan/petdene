@@ -31,10 +31,10 @@ export function UsingTheApp() {
 							<div className="rounded-lg border p-4">
 								<h3 className="mb-2 text-sm font-semibold">Option 1: Create a New Account</h3>
 								<ol className="ml-4 list-decimal space-y-2 text-sm">
-									<li>Click "Sign Up" or "Get Started" on the homepage</li>
+									<li>Click "Kayıt Ol" or "Get Started" on the homepage</li>
 									<li>Fill in your information:
 										<ul className="ml-4 mt-1 list-disc space-y-1 text-xs text-muted-foreground">
-											<li>Name</li>
+											<li>Ad</li>
 											<li>Email address</li>
 											<li>Password (minimum 8 characters)</li>
 										</ul>
@@ -117,7 +117,7 @@ export function UsingTheApp() {
 							</div>
 							<div className="rounded-lg border p-4">
 								<div className="mb-2 flex items-center gap-2">
-									<Badge variant="secondary">Staff</Badge>
+									<Badge variant="secondary">Personel</Badge>
 								</div>
 								<p className="text-xs text-muted-foreground">
 									Access appointments, medical records, pet management, and can create prescriptions
@@ -126,7 +126,7 @@ export function UsingTheApp() {
 							</div>
 							<div className="rounded-lg border p-4">
 								<div className="mb-2 flex items-center gap-2">
-									<Badge variant="outline">Customer</Badge>
+									<Badge variant="outline">Müşteri</Badge>
 								</div>
 								<p className="text-xs text-muted-foreground">
 									Manage your own pets, book appointments, view medical records, and manage invoices
@@ -168,7 +168,7 @@ export function UsingTheApp() {
 											<li>Upload a photo (optional)</li>
 										</ul>
 									</li>
-									<li>Click "Save" to create the pet profile</li>
+									<li>Click "Kaydet" to create the pet profile</li>
 								</ol>
 								<p className="mt-3 font-medium">What you can do:</p>
 								<ul className="ml-4 list-disc space-y-1 text-xs text-muted-foreground">
@@ -195,12 +195,12 @@ export function UsingTheApp() {
 								<p className="font-medium">How to book an appointment:</p>
 								<ol className="ml-4 list-decimal space-y-1 text-xs text-muted-foreground">
 									<li>Go to "Appointments" in the navigation</li>
-									<li>Click "Book Appointment" or "New Appointment"</li>
+									<li>Click "Randevu Al" or "Yeni Randevu"</li>
 									<li>Select a pet from your list</li>
 									<li>Choose a service (Grooming, Vet Checkup, etc.)</li>
 									<li>Select date and time</li>
 									<li>Add any notes or special instructions</li>
-									<li>Click "Book Appointment"</li>
+									<li>Click "Randevu Al"</li>
 								</ol>
 								<p className="mt-3 font-medium">Appointment statuses:</p>
 								<ul className="ml-4 list-disc space-y-1 text-xs text-muted-foreground">

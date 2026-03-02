@@ -23,7 +23,7 @@ export async function POST(
 			)
 		}
 
-		const validMethods = ["cash", "card", "stripe"]
+		const validMethods = ["nakit", "kart", "stripe"]
 		if (!validMethods.includes(method)) {
 			return NextResponse.json(
 				{ error: `Invalid method. Must be one of: ${validMethods.join(", ")}` },
@@ -64,7 +64,7 @@ export async function POST(
 					method,
 					amount: amt,
 					notes: notes || null,
-					status: "COMPLETED",
+					status: "Tamamlandı",
 				},
 				select: {
 					id: true,
@@ -89,6 +89,6 @@ export async function POST(
 		)
 	} catch (error) {
 		console.error("[Visit Payments API] POST error:", error)
-		return NextResponse.json({ error: "Failed to record payment" }, { status: 500 })
+		return NextResponse.json({ error: "Ödeme kaydedilemedi" }, { status: 500 })
 	}
 }

@@ -25,7 +25,7 @@ const ROLE_CONFIG = {
 		variant: "secondary" as const,
 	},
 	[USER_ROLES.CUSTOMER]: {
-		label: "Customer",
+		label: "Müşteri",
 		icon: User,
 		variant: "outline" as const,
 	},

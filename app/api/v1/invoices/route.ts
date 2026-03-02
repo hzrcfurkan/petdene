@@ -151,12 +151,12 @@ export async function GET(req: NextRequest) {
 
 	// Sync invoice statuses with payment statuses
 	const syncPromises = invoices.map(async (invoice) => {
-		if (invoice.payment && invoice.payment.status === "COMPLETED" && invoice.status !== "PAID") {
+		if (invoice.payment && invoice.payment.status === "Tamamlandı" && invoice.status !== "Ödendi") {
 			await prisma.invoice.update({
 				where: { id: invoice.id },
-				data: { status: "PAID" },
+				data: { status: "Ödendi" },
 			})
-			invoice.status = "PAID"
+			invoice.status = "Ödendi"
 		}
 	})
 	await Promise.all(syncPromises)
@@ -183,7 +183,7 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role as any, "STAFF")) {
+		if (!canAccessResource(currentUser.role as any, "Personel")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
@@ -214,7 +214,7 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "Amount must be positive" }, { status: 400 })
 		}
 
-		const validStatuses = ["UNPAID", "PAID", "CANCELLED"]
+		const validStatuses = ["Ödenmedi", "Ödendi", "İptal Edildi"]
 		if (status && !validStatuses.includes(status)) {
 			return NextResponse.json(
 				{ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` },
@@ -252,7 +252,7 @@ export async function POST(req: NextRequest) {
 				data: {
 					visitId,
 					amount,
-					status: status || "UNPAID",
+					status: status || "Ödenmedi",
 				},
 				select: {
 					id: true,
@@ -322,7 +322,7 @@ export async function POST(req: NextRequest) {
 			data: {
 				appointmentId,
 				amount,
-				status: status || "UNPAID",
+				status: status || "Ödenmedi",
 			},
 			select: {
 				id: true,
@@ -337,7 +337,7 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json(invoice, { status: 201 })
 	} catch (error) {
 		console.error("[Invoices API] POST error:", error)
-		return NextResponse.json({ error: "Failed to create invoice" }, { status: 500 })
+		return NextResponse.json({ error: "Fatura oluşturulamadı" }, { status: 500 })
 	}
 }
 

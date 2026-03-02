@@ -81,10 +81,10 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 
 		try {
 			await deleteInvoice(id)
-			toast.success("Invoice deleted successfully")
+			toast.success("Fatura başarıyla silindi")
 			refetch()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to delete invoice")
+			toast.error(error?.info?.error || "Fatura silinemedi")
 		}
 	}
 
@@ -149,7 +149,7 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 							<FileText className="w-5 h-5" />
 							Invoices
 						</CardTitle>
-						<CardDescription>Manage and view invoice records</CardDescription>
+						<CardDescription>Faturaları yönetin ve görüntüleyin</CardDescription>
 					</div>
 					{showActions && canEdit && (
 						<Button onClick={handleCreateNew}>
@@ -164,18 +164,18 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 				<div className="flex gap-2 flex-wrap">
 					<Select value={statusFilter} onValueChange={setStatusFilter}>
 						<SelectTrigger className="w-[180px]">
-							<SelectValue placeholder="Status" />
+							<SelectValue placeholder="Durum" />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="ALL">All Status</SelectItem>
-							<SelectItem value="UNPAID">Unpaid</SelectItem>
-							<SelectItem value="PAID">Paid</SelectItem>
-							<SelectItem value="CANCELLED">Cancelled</SelectItem>
+							<SelectItem value="Ödenmedi">Unpaid</SelectItem>
+							<SelectItem value="Ödendi">Ödenen</SelectItem>
+							<SelectItem value="İptal Edildi">İptal Edildi</SelectItem>
 						</SelectContent>
 					</Select>
 					<Select value={sortBy} onValueChange={setSortBy}>
 						<SelectTrigger className="w-[180px]">
-							<SelectValue placeholder="Sort by" />
+							<SelectValue placeholder="Sırala" />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="date-asc">Date (Oldest)</SelectItem>
@@ -223,14 +223,14 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 								<TableHeader>
 									<TableRow>
 										<TableHead>Invoice ID</TableHead>
-										<TableHead>Pet</TableHead>
-										<TableHead>Service</TableHead>
-										<TableHead>Amount</TableHead>
-										<TableHead>Status</TableHead>
-										<TableHead>Date</TableHead>
-										<TableHead>Owner</TableHead>
+										<TableHead>Hasta</TableHead>
+										<TableHead>Hizmet</TableHead>
+										<TableHead>Tutar</TableHead>
+										<TableHead>Durum</TableHead>
+										<TableHead>Tarih</TableHead>
+										<TableHead>Sahip</TableHead>
 										{showActions && canPay && <TableHead>Payment</TableHead>}
-										{showActions && <TableHead className="text-right">Actions</TableHead>}
+										{showActions && <TableHead className="text-right">İşlemler</TableHead>}
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -239,7 +239,7 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 											<TableCell data-label="Invoice ID" className="font-mono text-sm">
 												{invoice.id.slice(0, 8)}...
 											</TableCell>
-											<TableCell data-label="Pet">
+											<TableCell data-label="Hasta">
 												<div>
 													<div className="font-medium">
 														{invoice.visit?.pet?.name ?? invoice.appointment?.pet?.name}
@@ -249,30 +249,30 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 													</div>
 												</div>
 											</TableCell>
-											<TableCell data-label="Service">
+											<TableCell data-label="Hizmet">
 												{invoice.visit
 													? `PRO-${invoice.visit.protocolNumber}`
 													: invoice.appointment?.service?.title || "N/A"}
 											</TableCell>
-											<TableCell data-label="Amount">
+											<TableCell data-label="Tutar">
 												{formatCurrency(invoice.amount)}
 											</TableCell>
-											<TableCell data-label="Status">
+											<TableCell data-label="Durum">
 												<Badge className={statusColors[invoice.status]}>
 													{invoice.status}
 												</Badge>
 											</TableCell>
-											<TableCell data-label="Date">
+											<TableCell data-label="Tarih">
 												{format(new Date(invoice.createdAt), "MMM dd, yyyy")}
 											</TableCell>
-											<TableCell data-label="Owner">
+											<TableCell data-label="Sahip">
 												{(invoice.visit?.pet?.owner ?? invoice.appointment?.pet?.owner)?.name ||
 													(invoice.visit?.pet?.owner ?? invoice.appointment?.pet?.owner)?.email ||
 													"N/A"}
 											</TableCell>
 											{showActions && canPay && (
-												<TableCell data-label="Payment">
-													{invoice.status === "UNPAID" ? (
+												<TableCell data-label="Ödeme">
+													{invoice.status === "Ödenmedi" ? (
 														<InlinePaymentForm
 															invoice={invoice}
 															onSuccess={handlePaymentSuccess}
@@ -286,7 +286,7 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 												<TableCell className="text-right" data-label="">
 													<DropdownMenu>
 														<DropdownMenuTrigger asChild>
-															<Button variant="ghost" size="sm" title="Actions">
+															<Button variant="ghost" size="sm" title="İşlemler">
 																<MoreHorizontal className="w-4 h-4" />
 															</Button>
 														</DropdownMenuTrigger>

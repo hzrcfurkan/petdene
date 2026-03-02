@@ -55,7 +55,7 @@ export function InlinePaymentForm({ invoice, onSuccess }: InlinePaymentFormProps
 					})
 					.finally(() => setIsLoadingIntent(false))
 			}
-		} else if (paymentMethod === "cash" && !isCashDialogOpen) {
+		} else if (paymentMethod === "nakit" && !isCashDialogOpen) {
 			setIsCashDialogOpen(true)
 		}
 	}, [paymentMethod, stripeKey, isStripeDialogOpen, isCashDialogOpen, invoice.id, clientSecret, isLoadingIntent])
@@ -67,7 +67,7 @@ export function InlinePaymentForm({ invoice, onSuccess }: InlinePaymentFormProps
 				headers: { "Content-Type": "application/json" },
 				body: JSON.stringify({
 					invoiceId: invoice.id,
-					method: "cash",
+					method: "nakit",
 					amount: invoice.amount,
 				}),
 			})
@@ -92,7 +92,7 @@ export function InlinePaymentForm({ invoice, onSuccess }: InlinePaymentFormProps
 						<SelectValue placeholder="Pay invoice" />
 					</SelectTrigger>
 					<SelectContent>
-						<SelectItem value="cash">
+						<SelectItem value="nakit">
 							<div className="flex items-center gap-2">
 								<DollarSign className="w-4 h-4" />
 								Cash Payment

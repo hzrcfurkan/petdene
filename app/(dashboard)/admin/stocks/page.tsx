@@ -1,11 +1,10 @@
-
-
 import LayoutAdmin from "@/components/layout/admin"
 import { currentUserServer } from "@/lib/auth"
 import { redirect } from "next/navigation"
 import { StockList } from "@/components/features/stocks/StockList"
+import type { Metadata } from "next"
 
-export const metadata = {
+export const metadata: Metadata = {
 	title: "Stok Yönetimi | PetCare",
 }
 

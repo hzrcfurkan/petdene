@@ -152,7 +152,7 @@ export async function PUT(
 		if (notes !== undefined) updateData.notes = notes || null
 
 		// Only STAFF/ADMIN/SUPER_ADMIN can change owner
-		if (ownerId && canAccessResource(currentUser.role as any, "STAFF")) {
+		if (ownerId && canAccessResource(currentUser.role as any, "Personel")) {
 			const owner = await prisma.user.findUnique({
 				where: { id: ownerId },
 			})
@@ -198,7 +198,7 @@ export async function PUT(
 		return NextResponse.json(updatedPet)
 	} catch (error) {
 		console.error("[Pets API] PUT error:", error)
-		return NextResponse.json({ error: "Failed to update pet" }, { status: 500 })
+		return NextResponse.json({ error: "Hasta güncellenemedi" }, { status: 500 })
 	}
 }
 
@@ -234,7 +234,7 @@ export async function DELETE(
 			where: {
 				petId: id,
 				status: {
-					in: ["PENDING", "CONFIRMED"],
+					in: ["Beklemede", "Onaylandı"],
 				},
 			},
 		})
@@ -254,10 +254,10 @@ export async function DELETE(
 			where: { id },
 		})
 
-		return NextResponse.json({ message: "Pet deleted successfully" })
+		return NextResponse.json({ message: "Hasta başarıyla silindi" })
 	} catch (error) {
 		console.error("[Pets API] DELETE error:", error)
-		return NextResponse.json({ error: "Failed to delete pet" }, { status: 500 })
+		return NextResponse.json({ error: "Hasta silinemedi" }, { status: 500 })
 	}
 }
 

@@ -56,6 +56,6 @@ export async function PUT(req: NextRequest) {
 
 		return NextResponse.json(updatedUser)
 	} catch (error) {
-		return NextResponse.json({ error: "Failed to update profile" }, { status: 500 })
+		return NextResponse.json({ error: "Profil güncellenemedi" }, { status: 500 })
 	}
 }

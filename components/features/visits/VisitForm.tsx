@@ -80,7 +80,7 @@ export function VisitForm({
 
 	const ownerOptions: SearchSelectOption[] = owners.map((u: any) => ({
 		value: u.id,
-		label: u.name || u.email || "Unknown",
+		label: u.name || u.email || "Bilinmiyor",
 		subLabel: u.phone ? `${u.email} • ${u.phone}` : u.email,
 	}))
 
@@ -109,7 +109,7 @@ export function VisitForm({
 			toast.success("Visit created successfully. Protocol number assigned.")
 			onSuccess()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to create visit")
+			toast.error(error?.info?.error || "Ziyaret oluşturulamadı")
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -169,7 +169,7 @@ export function VisitForm({
 						) : (
 							<Input
 								disabled
-								placeholder="First select an owner above"
+								placeholder="Önce yukarıdan sahip seçin"
 								className="bg-muted"
 							/>
 						)
@@ -199,7 +199,7 @@ export function VisitForm({
 						id="visitDate"
 						value={visitDate}
 						onChange={setVisitDate}
-						placeholder="Select date and time"
+						placeholder="Tarih ve saat seçin"
 					/>
 				</div>
 
@@ -222,7 +222,7 @@ export function VisitForm({
 				)}
 
 				<div className="space-y-2 md:col-span-2">
-					<Label htmlFor="notes">Notes</Label>
+					<Label htmlFor="notes">Notlar</Label>
 					<Textarea
 						id="notes"
 						value={notes}

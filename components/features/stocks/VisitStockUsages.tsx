@@ -139,7 +139,7 @@ export function VisitStockUsages({ visitId, visitStatus }: VisitStockUsagesProps
 	const { mutate: remove }  = useRemoveVisitStockUsage(visitId)
 	const usages: VisitStockUsage[] = data?.usages || []
 	const total = usages.reduce((s, u) => s + u.total, 0)
-	const canEdit = visitStatus !== "COMPLETED" && visitStatus !== "CANCELLED"
+	const canEdit = visitStatus !== "Tamamlandı" && visitStatus !== "İptal Edildi"
 
 	const handleRemove = (usage: VisitStockUsage) => {
 		if (!confirm(`"${usage.stockItem.name}" kullanımını geri almak istediğinizden emin misiniz? Stok iade edilecek.`)) return

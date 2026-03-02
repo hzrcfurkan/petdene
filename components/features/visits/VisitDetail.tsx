@@ -64,7 +64,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 	const addPayment = useAddVisitPayment(visit.id)
 	const saveMedicalRecord = useSaveVisitMedicalRecord(visit.id)
 
-	const [paymentMethod, setPaymentMethod] = useState("cash")
+	const [paymentMethod, setPaymentMethod] = useState("nakit")
 	const [paymentAmount, setPaymentAmount] = useState("")
 	const [paymentNotes, setPaymentNotes] = useState("")
 	const [addServiceOpen, setAddServiceOpen] = useState(false)
@@ -97,9 +97,9 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 	const handleDownloadPDF = () => {
 		try {
 			generateVisitPDF(visit, currency)
-			toast.success("Visit PDF downloaded")
+			toast.success("Ziyaret PDF indirildi")
 		} catch (error: any) {
-			toast.error(error?.message || "Failed to generate PDF")
+			toast.error(error?.message || "PDF oluşturulamadı")
 		}
 	}
 
@@ -109,15 +109,15 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 		const serviceId = (form.elements.namedItem("serviceId") as HTMLSelectElement)?.value
 		const quantity = Number((form.elements.namedItem("quantity") as HTMLInputElement)?.value) || 1
 		if (!serviceId) {
-			toast.error("Select a service")
+			toast.error("Hizmet seçin")
 			return
 		}
 		try {
 			await addService.mutateAsync({ serviceId, quantity })
-			toast.success("Service added")
+			toast.success("Hizmet eklendi")
 			setAddServiceOpen(false)
 		} catch (err: any) {
-			toast.error(err?.info?.error || "Failed to add service")
+			toast.error(err?.info?.error || "Hizmet eklenemedi")
 		}
 	}
 
@@ -125,7 +125,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 		e.preventDefault()
 		const amt = Number(paymentAmount)
 		if (!amt || amt <= 0) {
-			toast.error("Enter valid amount")
+			toast.error("Geçerli tutar girin")
 			return
 		}
 		if (amt > balance) {
@@ -138,12 +138,12 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 				amount: amt,
 				notes: paymentNotes || undefined,
 			})
-			toast.success("Payment recorded")
+			toast.success("Ödeme kaydedildi")
 			setAddPaymentOpen(false)
 			setPaymentAmount("")
 			setPaymentNotes("")
 		} catch (err: any) {
-			toast.error(err?.info?.error || "Failed to record payment")
+			toast.error(err?.info?.error || "Ödeme kaydedilemedi")
 		}
 	}
 
@@ -157,9 +157,9 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 				treatmentsPerformed: treatmentsPerformed || undefined,
 				recommendations: recommendations || undefined,
 			})
-			toast.success("Medical record saved")
+			toast.success("Tıbbi kayıt kaydedildi")
 		} catch (err: any) {
-			toast.error(err?.info?.error || "Failed to save")
+			toast.error(err?.info?.error || "Kaydedilemedi")
 		}
 	}
 
@@ -203,7 +203,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 						</Badge>
 					)}
 					{isPaid && visit.totalAmount > 0 && (
-						<Badge variant="default">Paid</Badge>
+						<Badge variant="default">Ödenen</Badge>
 					)}
 				</div>
 			</div>
@@ -224,7 +224,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 									<CardTitle>Services</CardTitle>
 									<CardDescription>Services added to this visit</CardDescription>
 								</div>
-								{canEdit && visit.status !== "CANCELLED" && (
+								{canEdit && visit.status !== "İptal Edildi" && (
 									<Dialog open={addServiceOpen} onOpenChange={setAddServiceOpen}>
 										<DialogTrigger asChild>
 											<Button size="sm">
@@ -241,10 +241,10 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 											</DialogHeader>
 											<form onSubmit={handleAddService} className="space-y-4">
 												<div>
-													<Label>Service</Label>
+													<Label>Hizmet</Label>
 													<Select name="serviceId" required>
 														<SelectTrigger>
-															<SelectValue placeholder="Select service" />
+															<SelectValue placeholder="Hizmet seçin" />
 														</SelectTrigger>
 														<SelectContent>
 															{services.map((s: any) => (
@@ -265,7 +265,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 													/>
 												</div>
 												<Button type="submit" disabled={addService.isPending}>
-													{addService.isPending ? "Adding..." : "Add"}
+													{addService.isPending ? "Ekleniyor..." : "Ekle"}
 												</Button>
 											</form>
 										</DialogContent>
@@ -278,11 +278,11 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead>Service</TableHead>
+											<TableHead>Hizmet</TableHead>
 											<TableHead>Qty</TableHead>
 											<TableHead>Unit Price</TableHead>
-											<TableHead className="text-right">Total</TableHead>
-											{canEdit && visit.status !== "CANCELLED" && <TableHead />}
+											<TableHead className="text-right">Toplam</TableHead>
+											{canEdit && visit.status !== "İptal Edildi" && <TableHead />}
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -294,13 +294,13 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 												<TableCell className="text-right font-medium">
 													{formatCurrency(vs.total)}
 												</TableCell>
-												{canEdit && visit.status !== "CANCELLED" && (
+												{canEdit && visit.status !== "İptal Edildi" && (
 													<TableCell>
 														<Button
 															variant="ghost"
 															size="sm"
 															onClick={() => {
-																if (confirm("Remove this service?")) {
+																if (confirm("Bu hizmeti kaldırmak istediğinizden emin misiniz?")) {
 																	removeService.mutate(vs.id)
 																}
 															}}
@@ -347,7 +347,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 										<Textarea
 											value={complaints}
 											onChange={(e) => setComplaints(e.target.value)}
-											placeholder="Chief complaints..."
+											placeholder="Şikayetler..."
 											rows={2}
 										/>
 									</div>
@@ -356,7 +356,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 										<Textarea
 											value={examinationNotes}
 											onChange={(e) => setExaminationNotes(e.target.value)}
-											placeholder="Physical examination findings..."
+											placeholder="Fizik muayene bulguları..."
 											rows={3}
 										/>
 									</div>
@@ -365,7 +365,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 										<Textarea
 											value={diagnosis}
 											onChange={(e) => setDiagnosis(e.target.value)}
-											placeholder="Diagnosis..."
+											placeholder="Tanı..."
 											rows={2}
 										/>
 									</div>
@@ -374,7 +374,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 										<Textarea
 											value={treatmentsPerformed}
 											onChange={(e) => setTreatmentsPerformed(e.target.value)}
-											placeholder="Treatments performed during visit..."
+											placeholder="Uygulanan tedaviler..."
 											rows={2}
 										/>
 									</div>
@@ -383,12 +383,12 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 										<Textarea
 											value={recommendations}
 											onChange={(e) => setRecommendations(e.target.value)}
-											placeholder="Follow-up recommendations..."
+											placeholder="Takip önerileri..."
 											rows={2}
 										/>
 									</div>
 									<Button type="submit" disabled={saveMedicalRecord.isPending}>
-										{saveMedicalRecord.isPending ? "Saving..." : "Save Medical Record"}
+										{saveMedicalRecord.isPending ? "Kaydediliyor..." : "Tıbbi Kaydı Kaydet"}
 									</Button>
 								</form>
 							) : (
@@ -471,14 +471,14 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 															<SelectValue />
 														</SelectTrigger>
 														<SelectContent>
-															<SelectItem value="cash">Cash</SelectItem>
-															<SelectItem value="card">Card</SelectItem>
+															<SelectItem value="nakit">Cash</SelectItem>
+															<SelectItem value="kart">Card</SelectItem>
 															<SelectItem value="stripe">Stripe</SelectItem>
 														</SelectContent>
 													</Select>
 												</div>
 												<div>
-													<Label>Amount</Label>
+													<Label>Tutar</Label>
 													<Input
 														type="number"
 														step="0.01"
@@ -494,7 +494,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 													<Input
 														value={paymentNotes}
 														onChange={(e) => setPaymentNotes(e.target.value)}
-														placeholder="Payment notes"
+														placeholder="Ödeme notu"
 													/>
 												</div>
 												<div className="flex gap-2">
@@ -508,12 +508,12 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 																	amount: balance,
 																	notes: paymentNotes || undefined,
 																})
-																toast.success("Full payment recorded")
+																toast.success("Tam ödeme kaydedildi")
 																setAddPaymentOpen(false)
 																setPaymentAmount("")
 																setPaymentNotes("")
 															} catch (err: any) {
-																toast.error(err?.info?.error || "Failed")
+																toast.error(err?.info?.error || "Başarısız")
 															}
 														}}
 														disabled={addPayment.isPending}
@@ -521,7 +521,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 														Mark as Paid ({formatCurrency(balance)})
 													</Button>
 													<Button type="submit" disabled={addPayment.isPending}>
-														{addPayment.isPending ? "Recording..." : "Record Partial"}
+														{addPayment.isPending ? "Kaydediliyor..." : "Kısmi Ödeme Kaydet"}
 													</Button>
 												</div>
 											</form>
@@ -535,10 +535,10 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead>Date</TableHead>
+											<TableHead>Tarih</TableHead>
 											<TableHead>Method</TableHead>
-											<TableHead>Amount</TableHead>
-											<TableHead>Status</TableHead>
+											<TableHead>Tutar</TableHead>
+											<TableHead>Durum</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -548,7 +548,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 												<TableCell className="capitalize">{p.method}</TableCell>
 												<TableCell>{formatCurrency(p.amount)}</TableCell>
 												<TableCell>
-													<Badge variant={p.status === "COMPLETED" ? "default" : "secondary"}>
+													<Badge variant={p.status === "Tamamlandı" ? "default" : "secondary"}>
 														{p.status}
 													</Badge>
 												</TableCell>

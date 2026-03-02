@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 		// For invoice creation: only visits without invoice, exclude cancelled
 		if (forInvoice) {
 			where.invoice = null
-			where.status = { not: "CANCELLED" }
+			where.status = { not: "İptal Edildi" }
 		}
 
 		if (currentUser.isCustomer) {
@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
 			where.petId = petId
 		}
 
-		if (staffId && canAccessResource(currentUser.role as any, "STAFF")) {
+		if (staffId && canAccessResource(currentUser.role as any, "Personel")) {
 			where.staffId = staffId
 		}
 		if (status) where.status = status
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
 		if (!currentUser) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
-		if (!canAccessResource(currentUser.role as any, "STAFF")) {
+		if (!canAccessResource(currentUser.role as any, "Personel")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
@@ -196,6 +196,6 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json(visit, { status: 201 })
 	} catch (error) {
 		console.error("[Visits API] POST error:", error)
-		return NextResponse.json({ error: "Failed to create visit" }, { status: 500 })
+		return NextResponse.json({ error: "Ziyaret oluşturulamadı" }, { status: 500 })
 	}
 }

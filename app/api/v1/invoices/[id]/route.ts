@@ -103,12 +103,12 @@ export async function GET(
 		}
 
 		// Sync invoice status with payment status if payment is completed but invoice is not paid
-		if (invoice.payment && invoice.payment.status === "COMPLETED" && invoice.status !== "PAID") {
+		if (invoice.payment && invoice.payment.status === "Tamamlandı" && invoice.status !== "Ödendi") {
 			await prisma.invoice.update({
 				where: { id },
-				data: { status: "PAID" },
+				data: { status: "Ödendi" },
 			})
-			invoice.status = "PAID"
+			invoice.status = "Ödendi"
 		}
 
 		const ownerId = invoice.appointment?.pet?.ownerId ?? invoice.visit?.pet?.ownerId
@@ -134,7 +134,7 @@ export async function PUT(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role as any, "STAFF")) {
+		if (!canAccessResource(currentUser.role as any, "Personel")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
@@ -168,7 +168,7 @@ export async function PUT(
 		}
 
 		if (status !== undefined) {
-			const validStatuses = ["UNPAID", "PAID", "CANCELLED"]
+			const validStatuses = ["Ödenmedi", "Ödendi", "İptal Edildi"]
 			if (!validStatuses.includes(status)) {
 				return NextResponse.json(
 					{ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` },
@@ -177,8 +177,8 @@ export async function PUT(
 			}
 
 			if (
-				existingInvoice.status === "PAID" &&
-				status !== "PAID" &&
+				existingInvoice.status === "Ödendi" &&
+				status !== "Ödendi" &&
 				existingInvoice.payment
 			) {
 				return NextResponse.json(
@@ -227,7 +227,7 @@ export async function DELETE(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role as any, "STAFF")) {
+		if (!canAccessResource(currentUser.role as any, "Personel")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 

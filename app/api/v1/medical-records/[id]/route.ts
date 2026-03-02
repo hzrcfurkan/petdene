@@ -40,7 +40,7 @@ export async function GET(
 		}
 
 		// Role-based access: CUSTOMER can only see medical records for their pets
-		if (currentUser.role === "CUSTOMER") {
+		if (currentUser.role === "Müşteri") {
 			if (record.pet.ownerId !== currentUser.id) {
 				return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 			}
@@ -64,7 +64,7 @@ export async function PUT(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role, "STAFF")) {
+		if (!canAccessResource(currentUser.role, "Personel")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
@@ -135,7 +135,7 @@ export async function DELETE(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role, "STAFF")) {
+		if (!canAccessResource(currentUser.role, "Personel")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 

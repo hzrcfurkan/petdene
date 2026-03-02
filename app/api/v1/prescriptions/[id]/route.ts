@@ -95,7 +95,7 @@ export async function PUT(
 		}
 
 		// Only STAFF, ADMIN, and SUPER_ADMIN can update prescriptions
-		if (!canAccessResource(currentUser.role as any, "STAFF")) {
+		if (!canAccessResource(currentUser.role as any, "Personel")) {
 			return NextResponse.json(
 				{ error: "Only staff members can update prescriptions" },
 				{ status: 403 }
@@ -210,7 +210,7 @@ export async function DELETE(
 		}
 
 		// Only STAFF, ADMIN, and SUPER_ADMIN can delete prescriptions
-		if (!canAccessResource(currentUser.role as any, "STAFF")) {
+		if (!canAccessResource(currentUser.role as any, "Personel")) {
 			return NextResponse.json(
 				{ error: "Only staff members can delete prescriptions" },
 				{ status: 403 }

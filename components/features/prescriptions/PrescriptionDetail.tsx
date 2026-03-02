@@ -19,7 +19,7 @@ export function PrescriptionDetail({ prescription }: PrescriptionDetailProps) {
 			generatePrescriptionPDF(prescription)
 			toast.success("Prescription PDF downloaded")
 		} catch (error: any) {
-			toast.error(error?.message || "Failed to generate PDF")
+			toast.error(error?.message || "PDF oluşturulamadı")
 		}
 	}
 

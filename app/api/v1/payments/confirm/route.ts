@@ -64,7 +64,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if already completed
-		if (payment.status === "COMPLETED" && payment.invoice.status === "PAID") {
+		if (payment.status === "Tamamlandı" && payment.invoice.status === "Ödendi") {
 			return NextResponse.json({ message: "Payment already confirmed" })
 		}
 
@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
 			prisma.payment.update({
 				where: { id: payment.id },
 				data: {
-					status: "COMPLETED",
+					status: "Tamamlandı",
 					paidAt: new Date(),
 					transactionId: paymentIntentId,
 				},
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
 			prisma.invoice.update({
 				where: { id: invoiceId },
 				data: {
-					status: "PAID",
+					status: "Ödendi",
 				},
 			}),
 		])

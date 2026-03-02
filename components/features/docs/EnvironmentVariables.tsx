@@ -99,7 +99,7 @@ const ENV_VARIABLES = [
 		required: false,
 		description: "Resend API key for email functionality",
 		example: "re_your-api-key",
-		category: "Email",
+		category: "E-posta",
 	},
 	{
 		name: "NEXT_PUBLIC_USD_TO_TRY",

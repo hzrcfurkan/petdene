@@ -20,7 +20,7 @@ export async function DELETE(
 		if (!visitService) {
 			return NextResponse.json({ error: "Visit service not found" }, { status: 404 })
 		}
-		if (visitService.visit.status === "CANCELLED") {
+		if (visitService.visit.status === "İptal Edildi") {
 			return NextResponse.json(
 				{ error: "Cannot remove services from cancelled visit" },
 				{ status: 400 }

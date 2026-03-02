@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
 				password: hashedPassword,
 				name,
 				phone,
-				role: role || "CUSTOMER",
+				role: role || "Müşteri",
 			},
 		})
 
@@ -46,6 +46,6 @@ export async function POST(req: NextRequest) {
 			{ status: 201 },
 		)
 	} catch (error) {
-		return NextResponse.json({ error: "Failed to create user" }, { status: 500 })
+		return NextResponse.json({ error: "Kullanıcı oluşturulamadı" }, { status: 500 })
 	}
 }

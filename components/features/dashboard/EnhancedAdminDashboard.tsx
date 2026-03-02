@@ -43,15 +43,15 @@ export function EnhancedAdminDashboard() {
 	const stats = useMemo(() => {
 		const recentAppts  = appointments.filter(a => new Date(a.date) >= thirtyDaysAgo)
 		const prevAppts    = appointments.filter(a => new Date(a.date) >= prevThirtyDays && new Date(a.date) < thirtyDaysAgo)
-		const paidInvoices = invoices.filter(i => i.status === "PAID")
-		const unpaidInvs   = invoices.filter(i => i.status === "UNPAID")
-		const pending      = appointments.filter(a => a.status === "PENDING")
-		const upcoming     = appointments.filter(a => new Date(a.date) >= now && ["PENDING","CONFIRMED"].includes(a.status))
+		const paidInvoices = invoices.filter(i => i.status === "Ödendi")
+		const unpaidInvs   = invoices.filter(i => i.status === "Ödenmedi")
+		const pending      = appointments.filter(a => a.status === "Beklemede")
+		const upcoming     = appointments.filter(a => new Date(a.date) >= now && ["Beklemede","Onaylandı"].includes(a.status))
 		const overdue      = vaccinations.filter(v => v.nextDue && new Date(v.nextDue) < now)
 		const totalRev     = paidInvoices.reduce((s, i) => s + i.amount, 0)
 		const unpaidAmt    = unpaidInvs.reduce((s, i) => s + i.amount, 0)
-		const monthRev     = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
-		const prevRev      = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
+		const monthRev     = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "Ödendi").reduce((s,i)=>s+i.amount,0)
+		const prevRev      = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "Ödendi").reduce((s,i)=>s+i.amount,0)
 		const revChange    = prevRev > 0 ? ((monthRev - prevRev) / prevRev) * 100 : 0
 		const apptChange   = prevAppts.length > 0 ? ((recentAppts.length - prevAppts.length) / prevAppts.length) * 100 : 0
 		return {
@@ -69,7 +69,7 @@ export function EnhancedAdminDashboard() {
 		})
 		const revChart = Array.from({ length: 6 }, (_, i) => {
 			const d = new Date(now); d.setMonth(d.getMonth() - (5 - i))
-			return { name: format(d, "MMM yy"), value: invoices.filter(inv => format(new Date(inv.createdAt),"yyyy-MM") === format(d,"yyyy-MM") && inv.status==="PAID").reduce((s,inv)=>s+inv.amount,0) }
+			return { name: format(d, "MMM yy"), value: invoices.filter(inv => format(new Date(inv.createdAt),"yyyy-MM") === format(d,"yyyy-MM") && inv.status==="Ödendi").reduce((s,inv)=>s+inv.amount,0) }
 		})
 		const statusCounts: Record<string,number> = {}
 		appointments.forEach(a => { statusCounts[a.status] = (statusCounts[a.status]||0)+1 })

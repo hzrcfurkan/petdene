@@ -210,7 +210,7 @@ export function UserManagement() {
 										/>
 									</div>
 									<div className="space-y-2">
-										<Label htmlFor="cust-phone">Phone</Label>
+										<Label htmlFor="cust-phone">Telefon</Label>
 										<Input
 											id="cust-phone"
 											placeholder="+90 555 123 4567"
@@ -264,10 +264,10 @@ export function UserManagement() {
 							<SelectValue placeholder="Sort by..." />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="name-asc">Name (A-Z)</SelectItem>
-							<SelectItem value="name-desc">Name (Z-A)</SelectItem>
-							<SelectItem value="date-desc">Newest First</SelectItem>
-							<SelectItem value="date-asc">Oldest First</SelectItem>
+							<SelectItem value="name-asc">Ad (A-Z)</SelectItem>
+							<SelectItem value="name-desc">Ad (Z-A)</SelectItem>
+							<SelectItem value="date-desc">En Yeni</SelectItem>
+							<SelectItem value="date-asc">En Eski</SelectItem>
 						</SelectContent>
 					</Select>
 					<Select
@@ -281,11 +281,11 @@ export function UserManagement() {
 							<SelectValue placeholder="Filter by role..." />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="ALL">All Roles</SelectItem>
-							<SelectItem value="CUSTOMER">Customer</SelectItem>
-							<SelectItem value="STAFF">Staff</SelectItem>
+							<SelectItem value="ALL">Tüm Roller</SelectItem>
+							<SelectItem value="CUSTOMER">Müşteri</SelectItem>
+							<SelectItem value="STAFF">Personel</SelectItem>
 							<SelectItem value="ADMIN">Admin</SelectItem>
-							<SelectItem value="SUPER_ADMIN">Super Admin</SelectItem>
+							<SelectItem value="SUPER_ADMIN">Süper Admin</SelectItem>
 						</SelectContent>
 					</Select>
 					<Button variant="outline" onClick={handleReset}>
@@ -318,9 +318,9 @@ export function UserManagement() {
 										</SelectTrigger>
 										<SelectContent>
 											<SelectItem value="CUSTOMER">{getRoleLabel("CUSTOMER")}</SelectItem>
-											<SelectItem value="STAFF">{getRoleLabel("STAFF")}</SelectItem>
-											<SelectItem value="ADMIN">{getRoleLabel("ADMIN")}</SelectItem>
-											<SelectItem value="SUPER_ADMIN">{getRoleLabel("SUPER_ADMIN")}</SelectItem>
+											<SelectItem value="STAFF">{getRoleLabel("Personel")}</SelectItem>
+											<SelectItem value="ADMIN">{getRoleLabel("Admin")}</SelectItem>
+											<SelectItem value="SUPER_ADMIN">{getRoleLabel("Süper Admin")}</SelectItem>
 										</SelectContent>
 									</Select>
 									{user.role === "CUSTOMER" && user.id !== currentUserId && (
@@ -345,7 +345,7 @@ export function UserManagement() {
 														Are you sure you want to remove {user.name || user.email}? This will soft-delete the account. They will no longer be able to sign in.
 													</AlertDialogDescription>
 													<div className="flex gap-2 justify-end">
-														<AlertDialogCancel>Cancel</AlertDialogCancel>
+														<AlertDialogCancel>İptal</AlertDialogCancel>
 														<AlertDialogAction
 															onClick={() => handleDeleteCustomer(user.id, user.name || user.email)}
 															className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -391,7 +391,7 @@ export function UserManagement() {
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>Edit Customer</DialogTitle>
-						<DialogDescription>Update customer information</DialogDescription>
+						<DialogDescription>Müşteri bilgilerini güncelle</DialogDescription>
 					</DialogHeader>
 					{editingUser && (
 						<form onSubmit={handleUpdateCustomer} className="space-y-4">
@@ -415,7 +415,7 @@ export function UserManagement() {
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label htmlFor="edit-phone">Phone</Label>
+								<Label htmlFor="edit-phone">Telefon</Label>
 								<Input
 									id="edit-phone"
 									value={editForm.phone}

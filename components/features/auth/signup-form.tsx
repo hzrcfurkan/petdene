@@ -69,12 +69,12 @@ export default function SignupForm() {
 				<div key={field} className="space-y-2">
 					<Label htmlFor={field}>
 						{field === "name"
-							? "Full Name"
+							? "Ad Soyad"
 							: field === "email"
-								? "Email"
+								? "E-posta"
 								: field === "phone"
 									? "Phone Number"
-									: "Password"}
+									: "Şifre"}
 					</Label>
 					<Input
 						id={field}
@@ -103,7 +103,7 @@ export default function SignupForm() {
 			))}
 
 			<Button type="submit" className="w-full" disabled={loading}>
-				{loading ? "Creating account..." : "Sign Up"}
+				{loading ? "Creating account..." : "Kayıt Ol"}
 			</Button>
 		</form>
 	)

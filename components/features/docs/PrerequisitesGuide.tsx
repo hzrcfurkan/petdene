@@ -75,7 +75,7 @@ export function PrerequisitesGuide() {
 									<li>
 										Follow the installation wizard:
 										<ul className="ml-4 mt-1 list-disc space-y-1 text-xs text-muted-foreground">
-											<li>Click "Next" through all steps</li>
+											<li>Click "Sonraki" through all steps</li>
 											<li>Accept the license agreement</li>
 											<li>Use default installation location</li>
 											<li>Make sure "Add to PATH" is checked (usually checked by default)</li>
@@ -341,7 +341,7 @@ export function PrerequisitesGuide() {
 								</li>
 								<li>Download Git for your operating system</li>
 								<li>Run the installer</li>
-								<li>Use all default settings (just click "Next" through all steps)</li>
+								<li>Use all default settings (just click "Sonraki" through all steps)</li>
 								<li>Restart your computer after installation</li>
 							</ol>
 							<div className="mt-3 rounded-md bg-muted p-3">

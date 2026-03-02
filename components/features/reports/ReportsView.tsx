@@ -40,7 +40,7 @@ export function ReportsView() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Daily Revenue</CardTitle>
-						<CardDescription>Loading...</CardDescription>
+						<CardDescription>Yükleniyor...</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">—</div>
@@ -49,7 +49,7 @@ export function ReportsView() {
 				<Card>
 					<CardHeader>
 						<CardTitle>Total Outstanding Debt</CardTitle>
-						<CardDescription>Loading...</CardDescription>
+						<CardDescription>Yükleniyor...</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">—</div>
@@ -90,7 +90,7 @@ export function ReportsView() {
 				</div>
 				{dateMode === "single" ? (
 					<div className="space-y-2">
-						<Label htmlFor="report-date" className="text-xs">Date</Label>
+						<Label htmlFor="report-date" className="text-xs">Tarih</Label>
 						<Input
 							id="report-date"
 							type="date"
@@ -165,7 +165,7 @@ export function ReportsView() {
 							{formatCurrency(totalDebt)}
 						</div>
 						<p className="text-sm text-muted-foreground mt-2">
-							{totalDebt > 0 ? "Unpaid visit balances" : "All visits paid"}
+							{totalDebt > 0 ? "Ödenmemiş ziyaret bakiyeleri" : "All visits paid"}
 						</p>
 					</CardContent>
 				</Card>

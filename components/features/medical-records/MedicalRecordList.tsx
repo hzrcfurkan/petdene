@@ -154,11 +154,11 @@ export function MedicalRecordList({
 						<Table>
 							<TableHeader>
 								<TableRow>
-									<TableHead>Date</TableHead>
+									<TableHead>Tarih</TableHead>
 									<TableHead>Title</TableHead>
-									<TableHead>Pet</TableHead>
+									<TableHead>Hasta</TableHead>
 									<TableHead>Diagnosis</TableHead>
-									{showActions && <TableHead className="text-right">Actions</TableHead>}
+									{showActions && <TableHead className="text-right">İşlemler</TableHead>}
 								</TableRow>
 							</TableHeader>
 							<TableBody>
@@ -283,7 +283,7 @@ export function MedicalRecordList({
 								</CardHeader>
 								<CardContent className="space-y-4">
 									<div>
-										<p className="text-sm font-medium text-muted-foreground">Date</p>
+										<p className="text-sm font-medium text-muted-foreground">Tarih</p>
 										<p className="text-sm">{format(new Date(viewingRecord.date), "MMMM dd, yyyy 'at' h:mm a")}</p>
 									</div>
 									{viewingRecord.description && (

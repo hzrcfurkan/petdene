@@ -21,7 +21,7 @@ export function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFormProps) 
 	const { formatCurrency } = useCurrency()
 	const [visitId, setVisitId] = useState(invoice?.visitId || "")
 	const [amount, setAmount] = useState(invoice?.amount.toString() || "")
-	const [status, setStatus] = useState<"UNPAID" | "PAID" | "CANCELLED">(invoice?.status || "UNPAID")
+	const [status, setStatus] = useState<"Ödenmedi" | "Ödendi" | "İptal Edildi">(invoice?.status || "Ödenmedi")
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
 	const createInvoiceMutation = useCreateInvoice()
@@ -59,14 +59,14 @@ export function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFormProps) 
 						status,
 					},
 				})
-				toast.success("Invoice updated successfully")
+				toast.success("Fatura başarıyla güncellendi")
 			} else {
 				await createInvoiceMutation.mutateAsync({
 					visitId,
 					amount: parseFloat(amount),
 					status,
 				})
-				toast.success("Invoice created successfully")
+				toast.success("Fatura başarıyla oluşturuldu")
 			}
 			onSuccess()
 		} catch (error: any) {
@@ -106,14 +106,14 @@ export function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFormProps) 
 				</div>
 				<div className="space-y-2">
 					<Label htmlFor="status" className="text-sm font-medium">Status *</Label>
-					<Select value={status} onValueChange={(value: "UNPAID" | "PAID" | "CANCELLED") => setStatus(value)} required>
+					<Select value={status} onValueChange={(value: "Ödenmedi" | "Ödendi" | "İptal Edildi") => setStatus(value)} required>
 						<SelectTrigger id="status" className="w-full h-11">
 							<SelectValue placeholder="Select status" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="UNPAID">Unpaid</SelectItem>
-							<SelectItem value="PAID">Paid</SelectItem>
-							<SelectItem value="CANCELLED">Cancelled</SelectItem>
+							<SelectItem value="Ödenmedi">Unpaid</SelectItem>
+							<SelectItem value="Ödendi">Ödenen</SelectItem>
+							<SelectItem value="İptal Edildi">İptal Edildi</SelectItem>
 						</SelectContent>
 					</Select>
 				</div>
@@ -122,7 +122,7 @@ export function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFormProps) 
 						Cancel
 					</Button>
 					<Button type="submit" disabled={isSubmitting}>
-						{isSubmitting ? "Saving..." : "Update"} Invoice
+						{isSubmitting ? "Kaydediliyor..." : "Güncelle"} Invoice
 					</Button>
 				</div>
 			</form>
@@ -193,14 +193,14 @@ export function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFormProps) 
 					<Label htmlFor="status" className="text-sm font-medium">
 						Status *
 					</Label>
-					<Select value={status} onValueChange={(value: "UNPAID" | "PAID" | "CANCELLED") => setStatus(value)} required>
+					<Select value={status} onValueChange={(value: "Ödenmedi" | "Ödendi" | "İptal Edildi") => setStatus(value)} required>
 						<SelectTrigger id="status" className="w-full h-11">
 							<SelectValue placeholder="Select status" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="UNPAID">Unpaid</SelectItem>
-							<SelectItem value="PAID">Paid</SelectItem>
-							<SelectItem value="CANCELLED">Cancelled</SelectItem>
+							<SelectItem value="Ödenmedi">Unpaid</SelectItem>
+							<SelectItem value="Ödendi">Ödenen</SelectItem>
+							<SelectItem value="İptal Edildi">İptal Edildi</SelectItem>
 						</SelectContent>
 					</Select>
 				</div>
@@ -212,7 +212,7 @@ export function InvoiceForm({ invoice, onSuccess, onCancel }: InvoiceFormProps) 
 					Cancel
 				</Button>
 				<Button type="submit" disabled={isSubmitting || !visitId || visits.length === 0}>
-					{isSubmitting ? "Creating..." : "Create"} Invoice
+					{isSubmitting ? "Creating..." : "Oluştur"} Invoice
 				</Button>
 			</div>
 		</form>

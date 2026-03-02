@@ -179,7 +179,7 @@ export async function POST(req: NextRequest) {
 	} catch (error) {
 		console.error("[PetServices API] POST error:", error)
 		return NextResponse.json(
-			{ error: "Failed to create service" },
+			{ error: "Hizmet oluşturulamadı" },
 			{ status: 500 }
 		)
 	}

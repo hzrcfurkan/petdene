@@ -106,7 +106,7 @@ export default function SigninForm() {
 						d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
 					/>
 				</svg>
-				{isGoogleLoading ? "Signing in..." : "Sign in with Google"}
+				{isGoogleLoading ? "Giriş yapılıyor..." : "Sign in with Google"}
 			</Button>
 
 			<div className="relative mb-4">
@@ -120,13 +120,13 @@ export default function SigninForm() {
 
 			<form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
 				<div className="space-y-2">
-					<Label htmlFor="email">Email</Label>
+					<Label htmlFor="email">E-posta</Label>
 					<Input id="email" type="email" placeholder="you@example.com" {...register("email")} />
 					{errors.email && <p className="text-sm text-destructive">{errors.email?.message}</p>}
 				</div>
 				<div className="space-y-2">
 					<div className="flex items-center justify-between">
-						<Label htmlFor="password">Password</Label>
+						<Label htmlFor="password">Şifre</Label>
 						<Link href="/forgot-password" className="text-xs text-primary hover:underline">
 							Forgot password?
 						</Link>
@@ -135,7 +135,7 @@ export default function SigninForm() {
 					{errors.password && <p className="text-sm text-destructive">{errors.password?.message}</p>}
 				</div>
 				<Button type="submit" className="w-full" disabled={isSubmitting}>
-					{isSubmitting ? "Signing in..." : "Sign In"}
+					{isSubmitting ? "Giriş yapılıyor..." : "Giriş Yap"}
 				</Button>
 			</form>
 

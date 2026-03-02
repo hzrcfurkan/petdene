@@ -91,7 +91,7 @@ export async function PATCH(
 	try {
 		const { id } = await params
 		const currentUser = await currentUserServer()
-		if (!currentUser || !canAccessResource(currentUser.role as any, "STAFF")) {
+		if (!currentUser || !canAccessResource(currentUser.role as any, "Personel")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 

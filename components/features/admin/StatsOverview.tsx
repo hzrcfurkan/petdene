@@ -63,7 +63,7 @@ export function StatsOverview() {
 
       <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium">Staff</CardTitle>
+          <CardTitle className="text-sm font-medium">Personel</CardTitle>
           <UserCheck className="h-4 w-4 text-muted-foreground" />
         </CardHeader>
         <CardContent>

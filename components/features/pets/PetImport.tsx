@@ -136,11 +136,11 @@ export function PetImport() {
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead>Name</TableHead>
-											<TableHead>Species</TableHead>
-											<TableHead>Breed</TableHead>
+											<TableHead>Ad</TableHead>
+											<TableHead>Tür</TableHead>
+											<TableHead>Irk</TableHead>
 											<TableHead>Owner Email</TableHead>
-											<TableHead>Age</TableHead>
+											<TableHead>Yaş</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>

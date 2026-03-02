@@ -40,7 +40,7 @@ const FEATURES = [
 	},
 	{
 		icon: Users,
-		title: "User Management",
+		title: "Kullanıcı Yönetimi",
 		description: "Role-based access control for customers, staff, administrators, and super admins",
 		features: ["Role-based access", "User management", "Permission control", "Multi-role support"],
 	},

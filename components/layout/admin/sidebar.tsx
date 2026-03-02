@@ -29,8 +29,8 @@ export default function Sidebar() {
 	if (!currentUser) return null
 
 	const userRole = currentUser.role
-	const dashLink = userRole === "SUPER_ADMIN" ? "/super" : userRole === "ADMIN" ? "/admin" : userRole === "STAFF" ? "/staff" : "/customer"
-	const navItems = getNavItems(userRole || "CUSTOMER")
+	const dashLink = userRole === "Süper Admin" ? "/super" : userRole === "Admin" ? "/admin" : userRole === "Personel" ? "/staff" : "/customer"
+	const navItems = getNavItems(userRole || "Müşteri")
 	const initials = (currentUser.name || currentUser.email || "U").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)
 
 	const SidebarContent = () => (
@@ -48,7 +48,7 @@ export default function Sidebar() {
 					</div>
 					<div>
 						<p className="sb-logo-name">PetCare</p>
-						<p className="sb-logo-role">{getRoleLabel(userRole || "CUSTOMER")}</p>
+						<p className="sb-logo-role">{getRoleLabel(userRole || "Müşteri")}</p>
 					</div>
 				</Link>
 				{isMobile && (

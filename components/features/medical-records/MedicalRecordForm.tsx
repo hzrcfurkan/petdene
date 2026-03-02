@@ -73,7 +73,7 @@ export function MedicalRecordForm({ medicalRecord, onSuccess, onCancel }: Medica
 			} else {
 				createMedicalRecord(data, {
 					onSuccess: () => {
-						toast.success("Medical record created successfully")
+						toast.success("Tıbbi kayıt başarıyla oluşturuldu")
 						onSuccess()
 					},
 					onError: (error: any) => {
@@ -95,7 +95,7 @@ export function MedicalRecordForm({ medicalRecord, onSuccess, onCancel }: Medica
 					<Label htmlFor="petId">Pet *</Label>
 					<Select value={petId} onValueChange={setPetId} required>
 						<SelectTrigger id="petId">
-							<SelectValue placeholder="Select a pet" />
+							<SelectValue placeholder="Hasta seçin" />
 						</SelectTrigger>
 						<SelectContent>
 							{pets.map((pet) => (
@@ -119,7 +119,7 @@ export function MedicalRecordForm({ medicalRecord, onSuccess, onCancel }: Medica
 				</div>
 
 				<div className="space-y-2">
-					<Label htmlFor="date">Date</Label>
+					<Label htmlFor="date">Tarih</Label>
 					<DatePicker
 						id="date"
 						value={date}
@@ -166,7 +166,7 @@ export function MedicalRecordForm({ medicalRecord, onSuccess, onCancel }: Medica
 					Cancel
 				</Button>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? "Saving..." : medicalRecord ? "Update" : "Create"} Medical Record
+					{isSubmitting ? "Kaydediliyor..." : medicalRecord ? "Güncelle" : "Oluştur"} Medical Record
 				</Button>
 			</div>
 		</form>

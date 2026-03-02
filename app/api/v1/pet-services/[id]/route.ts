@@ -168,7 +168,7 @@ export async function PUT(
 	} catch (error) {
 		console.error("[PetServices API] PUT error:", error)
 		return NextResponse.json(
-			{ error: "Failed to update service" },
+			{ error: "Hizmet güncellenemedi" },
 			{ status: 500 }
 		)
 	}
@@ -208,7 +208,7 @@ export async function DELETE(
 			where: {
 				serviceId: id,
 				status: {
-					in: ["PENDING", "CONFIRMED"],
+					in: ["Beklemede", "Onaylandı"],
 				},
 			},
 		})
@@ -228,11 +228,11 @@ export async function DELETE(
 			where: { id },
 		})
 
-		return NextResponse.json({ message: "Service deleted successfully" })
+		return NextResponse.json({ message: "Hizmet başarıyla silindi" })
 	} catch (error) {
 		console.error("[PetServices API] DELETE error:", error)
 		return NextResponse.json(
-			{ error: "Failed to delete service" },
+			{ error: "Hizmet silinemedi" },
 			{ status: 500 }
 		)
 	}

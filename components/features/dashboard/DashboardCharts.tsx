@@ -50,13 +50,13 @@ const appointmentsChartConfig = {
 		color: "var(--chart-1)",
 	},
 	name: {
-		label: "Date",
+		label: "Tarih",
 	},
 } satisfies ChartConfig
 
 const revenueChartConfig = {
 	value: {
-		label: "Revenue",
+		label: "Gelir",
 		color: "var(--chart-2)",
 	},
 	name: {

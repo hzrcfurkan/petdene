@@ -32,7 +32,7 @@ export function PetServiceDetail({ service }: PetServiceDetailProps) {
 					</div>
 				</div>
 				<Badge className={service.active ? "bg-green-100 text-green-800" : "bg-gray-100 text-gray-800"}>
-					{service.active ? "Active" : "Inactive"}
+					{service.active ? "Aktif" : "Pasif"}
 				</Badge>
 			</div>
 

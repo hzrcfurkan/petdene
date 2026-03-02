@@ -41,23 +41,23 @@ const statusColors: Record<string, string> = {
 export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
 	const { formatCurrency, currency } = useCurrency()
 	const [markPaidOpen, setMarkPaidOpen] = useState(false)
-	const [paymentMethod, setPaymentMethod] = useState("cash")
+	const [paymentMethod, setPaymentMethod] = useState("nakit")
 
 	const currentUser = currentUserClient()
 	const canMarkPaid =
 		currentUser &&
 		(currentUser.isAdmin || currentUser.isSuperAdmin || currentUser.isStaff) &&
-		invoice.status === "UNPAID"
+		invoice.status === "Ödenmedi"
 
 	const markPaid = useMarkInvoicePaid(invoice.id)
 
 	const handleMarkAsPaid = async () => {
 		try {
 			await markPaid.mutateAsync({ method: paymentMethod })
-			toast.success("Invoice marked as paid")
+			toast.success("Fatura ödendi olarak işaretlendi")
 			setMarkPaidOpen(false)
 		} catch (err: any) {
-			toast.error(err?.info?.error || "Failed to mark as paid")
+			toast.error(err?.info?.error || "İşaretlenemedi")
 		}
 	}
 
@@ -97,8 +97,8 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
 												<SelectValue />
 											</SelectTrigger>
 											<SelectContent>
-												<SelectItem value="cash">Cash</SelectItem>
-												<SelectItem value="card">Card</SelectItem>
+												<SelectItem value="nakit">Cash</SelectItem>
+												<SelectItem value="kart">Card</SelectItem>
 												<SelectItem value="stripe">Stripe</SelectItem>
 											</SelectContent>
 										</Select>
@@ -108,7 +108,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
 											Cancel
 										</Button>
 										<Button onClick={handleMarkAsPaid} disabled={markPaid.isPending}>
-											{markPaid.isPending ? "Processing..." : "Mark as Paid"}
+											{markPaid.isPending ? "Processing..." : "Ödendi Olarak İşaretle"}
 										</Button>
 									</div>
 								</div>
@@ -200,7 +200,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
 				) : invoice.appointment?.service ? (
 					<Card>
 						<CardHeader className="pb-3">
-							<CardTitle className="text-sm font-medium">Service</CardTitle>
+							<CardTitle className="text-sm font-medium">Hizmet</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="text-lg font-semibold">{invoice.appointment.service.title}</div>
@@ -237,7 +237,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
 					<Card>
 						<CardHeader className="pb-3">
 							<CardTitle className="text-sm font-medium">
-								{invoice.visit ? "Visit Date" : "Appointment Date"}
+								{invoice.visit ? "Ziyaret Tarihi" : "Randevu Tarihi"}
 							</CardTitle>
 						</CardHeader>
 						<CardContent>

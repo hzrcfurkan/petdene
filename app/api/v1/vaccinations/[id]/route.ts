@@ -39,7 +39,7 @@ export async function GET(
 		}
 
 		// Role-based access: CUSTOMER can only see vaccinations for their pets
-		if (currentUser.role === "CUSTOMER") {
+		if (currentUser.role === "Müşteri") {
 			if (vaccination.pet.ownerId !== currentUser.id) {
 				return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 			}
@@ -63,7 +63,7 @@ export async function PUT(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role, "STAFF")) {
+		if (!canAccessResource(currentUser.role, "Personel")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
@@ -133,7 +133,7 @@ export async function PUT(
 		return NextResponse.json(updated)
 	} catch (error) {
 		console.error("[Vaccinations API] PUT error:", error)
-		return NextResponse.json({ error: "Failed to update vaccination" }, { status: 500 })
+		return NextResponse.json({ error: "Aşı güncellenemedi" }, { status: 500 })
 	}
 }
 
@@ -148,7 +148,7 @@ export async function DELETE(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role, "STAFF")) {
+		if (!canAccessResource(currentUser.role, "Personel")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
@@ -163,10 +163,10 @@ export async function DELETE(
 
 		await prisma.vaccination.delete({ where: { id } })
 
-		return NextResponse.json({ message: "Vaccination deleted successfully" })
+		return NextResponse.json({ message: "Aşı başarıyla silindi" })
 	} catch (error) {
 		console.error("[Vaccinations API] DELETE error:", error)
-		return NextResponse.json({ error: "Failed to delete vaccination" }, { status: 500 })
+		return NextResponse.json({ error: "Aşı silinemedi" }, { status: 500 })
 	}
 }
 

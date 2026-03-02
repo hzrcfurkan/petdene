@@ -40,7 +40,7 @@ const TEST_USERS = [
 	},
 	{
 		role: "CUSTOMER",
-		label: "Customer",
+		label: "Müşteri",
 		email: "john.doe@example.com",
 		password: "password123",
 		description: "Manage your pets, book appointments, and view medical records",
@@ -58,7 +58,7 @@ export function UserTestLoginInfo() {
 		navigator.clipboard.writeText(text)
 		setCopiedIndex(index)
 		toast({
-			title: "Copied!",
+			title: "Kopyalandı!",
 			description: "Credentials copied to clipboard",
 		})
 		setTimeout(() => setCopiedIndex(null), 2000)

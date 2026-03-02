@@ -47,7 +47,7 @@ export default function Header() {
 		<header className="hd-bar">
 			<div className="hd-inner">
 				<div className="hd-left">
-					<div className="hd-breadcrumb">{breadcrumb || "Dashboard"}</div>
+					<div className="hd-breadcrumb">{breadcrumb || "Panel"}</div>
 				</div>
 
 				<div className="hd-search-wrap">
@@ -80,7 +80,7 @@ export default function Header() {
 							<DropdownMenuLabel>
 								<p className="hd-dd-name">{currentUser.name || "Kullanıcı"}</p>
 								<p className="hd-dd-email">{currentUser.email}</p>
-								<p className="hd-dd-role">{getRoleLabel(currentUser.role || "CUSTOMER")}</p>
+								<p className="hd-dd-role">{getRoleLabel(currentUser.role || "Müşteri")}</p>
 							</DropdownMenuLabel>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem asChild>

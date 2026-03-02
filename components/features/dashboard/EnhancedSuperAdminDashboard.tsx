@@ -60,10 +60,10 @@ export function EnhancedSuperAdminDashboard() {
 	}, [users, thirtyDaysAgo, prevThirtyDays])
 
 	const bizStats = useMemo(() => {
-		const paid       = invoices.filter(i => i.status === "PAID")
-		const unpaid     = invoices.filter(i => i.status === "UNPAID")
-		const monthRev   = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount, 0)
-		const prevRev    = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount, 0)
+		const paid       = invoices.filter(i => i.status === "Ödendi")
+		const unpaid     = invoices.filter(i => i.status === "Ödenmedi")
+		const monthRev   = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "Ödendi").reduce((s,i)=>s+i.amount, 0)
+		const prevRev    = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "Ödendi").reduce((s,i)=>s+i.amount, 0)
 		const recentAppts = appointments.filter(a => new Date(a.date) >= thirtyDaysAgo).length
 		return {
 			totalRev:    paid.reduce((s,i)=>s+i.amount, 0),
@@ -85,7 +85,7 @@ export function EnhancedSuperAdminDashboard() {
 		})
 		const revChart = Array.from({ length: 6 }, (_, i) => {
 			const d = new Date(now); d.setMonth(d.getMonth() - (5 - i))
-			return { name: format(d, "MMM yy"), value: invoices.filter(inv => format(new Date(inv.createdAt),"yyyy-MM")===format(d,"yyyy-MM") && inv.status==="PAID").reduce((s,inv)=>s+inv.amount,0) }
+			return { name: format(d, "MMM yy"), value: invoices.filter(inv => format(new Date(inv.createdAt),"yyyy-MM")===format(d,"yyyy-MM") && inv.status==="Ödendi").reduce((s,inv)=>s+inv.amount,0) }
 		})
 		const roleChart = [
 			{ name: "Müşteri", value: userStats.customers },

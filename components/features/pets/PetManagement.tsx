@@ -13,9 +13,9 @@ export function PetManagement() {
 	// Calculate stats
 	const stats = {
 		total: allPets.length,
-		dogs: allPets.filter((p) => p.species === "Dog").length,
-		cats: allPets.filter((p) => p.species === "Cat").length,
-		others: allPets.filter((p) => !["Dog", "Cat"].includes(p.species)).length,
+		dogs: allPets.filter((p) => p.species === "Köpek").length,
+		cats: allPets.filter((p) => p.species === "Kedi").length,
+		others: allPets.filter((p) => !["Köpek", "Kedi"].includes(p.species)).length,
 		withAppointments: allPets.filter((p) => (p._count?.appointments || 0) > 0).length,
 	}
 

@@ -25,7 +25,7 @@ export default function BookPage() {
 		email: "",
 		phone: "",
 		petName: "",
-		species: "Dog",
+		species: "Köpek",
 		serviceId: "",
 		date: "",
 		notes: "",
@@ -180,10 +180,10 @@ export default function BookPage() {
 													<SelectValue />
 												</SelectTrigger>
 												<SelectContent>
-													<SelectItem value="Dog">Dog</SelectItem>
-													<SelectItem value="Cat">Cat</SelectItem>
-													<SelectItem value="Bird">Bird</SelectItem>
-													<SelectItem value="Other">Other</SelectItem>
+													<SelectItem value="Köpek">Dog</SelectItem>
+													<SelectItem value="Kedi">Cat</SelectItem>
+													<SelectItem value="Kuş">Bird</SelectItem>
+													<SelectItem value="Diğer">Other</SelectItem>
 												</SelectContent>
 											</Select>
 										</div>
@@ -197,7 +197,7 @@ export default function BookPage() {
 										required
 									>
 										<SelectTrigger id="serviceId">
-											<SelectValue placeholder="Select a service" />
+											<SelectValue placeholder="Hizmet seçin" />
 										</SelectTrigger>
 										<SelectContent>
 											{services.map((s) => (
@@ -230,7 +230,7 @@ export default function BookPage() {
 									/>
 								</div>
 								<Button type="submit" className="w-full" size="lg" disabled={isSubmitting}>
-									{isSubmitting ? "Booking..." : "Book Appointment"}
+									{isSubmitting ? "Booking..." : "Randevu Al"}
 								</Button>
 								<p className="text-center text-sm text-muted-foreground">
 									Already have an account?{" "}

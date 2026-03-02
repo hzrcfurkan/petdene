@@ -59,14 +59,14 @@ export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDe
 	}
 
 	const handleQuickApprove = () => {
-		if (appointment.status === "PENDING") {
-			handleStatusChange("CONFIRMED")
+		if (appointment.status === "Beklemede") {
+			handleStatusChange("Onaylandı")
 		}
 	}
 
 	const handleQuickComplete = () => {
-		if (appointment.status === "CONFIRMED") {
-			handleStatusChange("COMPLETED")
+		if (appointment.status === "Onaylandı") {
+			handleStatusChange("Tamamlandı")
 		}
 	}
 
@@ -78,7 +78,7 @@ export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDe
 					<Badge className={statusColors[appointment.status] || ""}>
 						{appointment.status}
 					</Badge>
-					{canChangeStatus && appointment.status === "PENDING" && (
+					{canChangeStatus && appointment.status === "Beklemede" && (
 						<Button
 							size="sm"
 							onClick={handleQuickApprove}
@@ -89,7 +89,7 @@ export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDe
 							Approve
 						</Button>
 					)}
-					{canChangeStatus && appointment.status === "CONFIRMED" && (
+					{canChangeStatus && appointment.status === "Onaylandı" && (
 						<Button
 							size="sm"
 							variant="outline"
@@ -123,10 +123,10 @@ export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDe
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="PENDING">PENDING</SelectItem>
-									<SelectItem value="CONFIRMED">CONFIRMED</SelectItem>
-									<SelectItem value="COMPLETED">COMPLETED</SelectItem>
-									<SelectItem value="CANCELLED">CANCELLED</SelectItem>
+									<SelectItem value="Beklemede">PENDING</SelectItem>
+									<SelectItem value="Onaylandı">CONFIRMED</SelectItem>
+									<SelectItem value="Tamamlandı">COMPLETED</SelectItem>
+									<SelectItem value="İptal Edildi">CANCELLED</SelectItem>
 								</SelectContent>
 							</Select>
 							{isPending && <span className="text-sm text-muted-foreground">Updating...</span>}
@@ -160,7 +160,7 @@ export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDe
 				{/* Service */}
 				<Card>
 					<CardHeader className="pb-3">
-						<CardTitle className="text-sm font-medium">Service</CardTitle>
+						<CardTitle className="text-sm font-medium">Hizmet</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="text-lg font-semibold">{appointment.service?.title}</div>
@@ -198,7 +198,7 @@ export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDe
 				{appointment.pet?.owner && (
 					<Card>
 						<CardHeader className="pb-3">
-							<CardTitle className="text-sm font-medium">Owner</CardTitle>
+							<CardTitle className="text-sm font-medium">Sahip</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="text-lg font-semibold">{appointment.pet.owner.name || "N/A"}</div>
@@ -239,7 +239,7 @@ export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDe
 							<div className="text-lg font-semibold">
 								{formatCurrency(appointment.invoice.amount)}
 							</div>
-							<Badge className="mt-2" variant={appointment.invoice.status === "PAID" ? "default" : "secondary"}>
+							<Badge className="mt-2" variant={appointment.invoice.status === "Ödendi" ? "default" : "secondary"}>
 								{appointment.invoice.status}
 							</Badge>
 						</CardContent>

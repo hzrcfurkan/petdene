@@ -60,10 +60,10 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 
 		try {
 			await deleteVaccination(id)
-			toast.success("Vaccination deleted successfully")
+			toast.success("Aşı başarıyla silindi")
 			refetch()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to delete vaccination")
+			toast.error(error?.info?.error || "Aşı silinemedi")
 		}
 	}
 
@@ -140,7 +140,7 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 					</div>
 					<Select value={sortBy} onValueChange={setSortBy}>
 						<SelectTrigger className="w-[180px]">
-							<SelectValue placeholder="Sort by" />
+							<SelectValue placeholder="Sırala" />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="date-asc">Date (Oldest)</SelectItem>
@@ -188,11 +188,11 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 								<TableHeader>
 									<TableRow>
 										<TableHead>Vaccine Name</TableHead>
-										<TableHead>Pet</TableHead>
+										<TableHead>Hasta</TableHead>
 										<TableHead>Date Given</TableHead>
 										<TableHead>Next Due</TableHead>
-										<TableHead>Owner</TableHead>
-										{showActions && <TableHead className="text-right">Actions</TableHead>}
+										<TableHead>Sahip</TableHead>
+										{showActions && <TableHead className="text-right">İşlemler</TableHead>}
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -207,7 +207,7 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 
 										return (
 											<TableRow key={vaccination.id}>
-												<TableCell data-label="Vaccine Name">
+												<TableCell data-label="Aşı Adı">
 													<div className="font-medium">{vaccination.vaccineName}</div>
 													{vaccination.notes && (
 														<div className="text-sm text-muted-foreground line-clamp-1">
@@ -215,7 +215,7 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 														</div>
 													)}
 												</TableCell>
-												<TableCell data-label="Pet">
+												<TableCell data-label="Hasta">
 													<div>
 														<div className="font-medium">{vaccination.pet?.name}</div>
 														<div className="text-sm text-muted-foreground">{vaccination.pet?.species}</div>
@@ -239,7 +239,7 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 														<span className="text-muted-foreground">N/A</span>
 													)}
 												</TableCell>
-												<TableCell data-label="Owner">
+												<TableCell data-label="Sahip">
 													{vaccination.pet?.owner?.name || vaccination.pet?.owner?.email || "N/A"}
 												</TableCell>
 												{showActions && (

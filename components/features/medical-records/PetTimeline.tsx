@@ -117,7 +117,7 @@ export function PetTimeline({ petId }: PetTimelineProps) {
 	const getTypeLabel = (type: string) => {
 		switch (type) {
 			case "medical":
-				return "Medical Record"
+				return "Tıbbi Kayıt"
 			case "vaccination":
 				return "Vaccination"
 			case "prescription":

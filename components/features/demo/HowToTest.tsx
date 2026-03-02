@@ -19,7 +19,7 @@ const TESTING_STEPS = [
 	},
 	{
 		step: 2,
-		title: "Sign In",
+		title: "Giriş Yap",
 		description: "Navigate to the sign-in page and use the test credentials provided above",
 		icon: UserPlus,
 		details: [

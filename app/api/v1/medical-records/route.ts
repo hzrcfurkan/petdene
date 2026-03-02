@@ -24,7 +24,7 @@ export async function GET(req: NextRequest) {
 		const where: any = {}
 
 		// Role-based filtering: CUSTOMER can only see medical records for their pets
-		if (currentUser.role === "CUSTOMER") {
+		if (currentUser.role === "Müşteri") {
 			const pets = await prisma.pet.findMany({
 				where: { ownerId: currentUser.id },
 				select: { id: true },
@@ -122,7 +122,7 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role, "STAFF")) {
+		if (!canAccessResource(currentUser.role, "Personel")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 

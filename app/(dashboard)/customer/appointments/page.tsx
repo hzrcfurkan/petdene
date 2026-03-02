@@ -20,7 +20,7 @@ export default async function ClientAppointmentsPage() {
 				<header className="space-y-1">
 					<h1 className="text-3xl font-bold tracking-tight">My Appointments</h1>
 					<p className="text-muted-foreground">
-						View and manage your pet appointments. Click "New Appointment" to book a visit.
+						View and manage your pet appointments. Click "Yeni Randevu" to book a visit.
 					</p>
 				</header>
 

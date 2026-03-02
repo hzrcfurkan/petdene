@@ -131,7 +131,7 @@ export function VaccinationImport() {
 								<Table>
 									<TableHeader>
 										<TableRow>
-											<TableHead>Pet</TableHead>
+											<TableHead>Hasta</TableHead>
 											<TableHead>Vaccine Name</TableHead>
 											<TableHead>Date Given</TableHead>
 											<TableHead>Next Due</TableHead>

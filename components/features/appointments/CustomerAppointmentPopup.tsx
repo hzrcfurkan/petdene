@@ -96,7 +96,7 @@ export function CustomerAppointmentPopup({ onSuccess, trigger }: CustomerAppoint
 				}
 			)
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to create appointment")
+			toast.error(error?.info?.error || "Randevu oluşturulamadı")
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -151,7 +151,7 @@ export function CustomerAppointmentPopup({ onSuccess, trigger }: CustomerAppoint
 								disabled={petsLoading || pets.length === 0}
 							>
 								<SelectTrigger id="petId">
-									<SelectValue placeholder={petsLoading ? "Loading..." : pets.length === 0 ? "No pets available" : "Select your pet"} />
+									<SelectValue placeholder={petsLoading ? "Yükleniyor..." : pets.length === 0 ? "No pets available" : "Select your pet"} />
 								</SelectTrigger>
 								<SelectContent>
 									{pets.map((pet) => (
@@ -180,7 +180,7 @@ export function CustomerAppointmentPopup({ onSuccess, trigger }: CustomerAppoint
 								disabled={servicesLoading || services.length === 0}
 							>
 								<SelectTrigger id="serviceId">
-									<SelectValue placeholder={servicesLoading ? "Loading..." : services.length === 0 ? "No services available" : "Select a service"} />
+									<SelectValue placeholder={servicesLoading ? "Yükleniyor..." : services.length === 0 ? "No services available" : "Hizmet seçin"} />
 								</SelectTrigger>
 								<SelectContent>
 									{services.map((service) => (
@@ -246,7 +246,7 @@ export function CustomerAppointmentPopup({ onSuccess, trigger }: CustomerAppoint
 							type="submit"
 							disabled={isSubmitting || pets.length === 0 || services.length === 0}
 						>
-							{isSubmitting ? "Booking..." : "Book Appointment"}
+							{isSubmitting ? "Booking..." : "Randevu Al"}
 						</Button>
 					</div>
 				</form>

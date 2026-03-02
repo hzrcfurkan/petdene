@@ -11,7 +11,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role, "ADMIN")) {
+		if (!canAccessResource(currentUser.role, "Admin")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
@@ -67,7 +67,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 		return NextResponse.json(updatedUser)
 	} catch (error) {
 		console.error("[v0] Update user error:", error)
-		return NextResponse.json({ error: "Failed to update user" }, { status: 500 })
+		return NextResponse.json({ error: "Kullanıcı güncellenemedi" }, { status: 500 })
 	}
 }
 
@@ -79,7 +79,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (currentUser.role !== "SUPER_ADMIN") {
+		if (currentUser.role !== "Süper Admin") {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
@@ -91,6 +91,6 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 
 		return NextResponse.json({ success: true })
 	} catch (error) {
-		return NextResponse.json({ error: "Failed to delete user" }, { status: 500 })
+		return NextResponse.json({ error: "Kullanıcı silinemedi" }, { status: 500 })
 	}
 }

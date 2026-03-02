@@ -48,7 +48,7 @@ export function EnhancedCustomerDashboard() {
 	// Calculate statistics
 	const stats = useMemo(() => {
 		const upcomingAppointments = myAppointments.filter(
-			(a) => new Date(a.date) >= now && (a.status === "PENDING" || a.status === "CONFIRMED")
+			(a) => new Date(a.date) >= now && (a.status === "Beklemede" || a.status === "Onaylandı")
 		)
 		const upcomingVaccinations = myVaccinations.filter(
 			(v) => v.nextDue && new Date(v.nextDue) >= now
@@ -56,9 +56,9 @@ export function EnhancedCustomerDashboard() {
 		const overdueVaccinations = myVaccinations.filter(
 			(v) => v.nextDue && new Date(v.nextDue) < now
 		)
-		const unpaidInvoices = myInvoices.filter((i) => i.status === "UNPAID")
+		const unpaidInvoices = myInvoices.filter((i) => i.status === "Ödenmedi")
 		const totalSpent = myInvoices
-			.filter((i) => i.status === "PAID")
+			.filter((i) => i.status === "Ödendi")
 			.reduce((sum, inv) => sum + inv.amount, 0)
 
 		return {
@@ -98,7 +98,7 @@ export function EnhancedCustomerDashboard() {
 	// Recent data
 	const upcomingAppointments = useMemo(() => {
 		return myAppointments
-			.filter((a) => new Date(a.date) >= now && (a.status === "PENDING" || a.status === "CONFIRMED"))
+			.filter((a) => new Date(a.date) >= now && (a.status === "Beklemede" || a.status === "Onaylandı"))
 			.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 			.slice(0, 5)
 	}, [myAppointments, now])
@@ -183,7 +183,7 @@ export function EnhancedCustomerDashboard() {
 					columns={[
 						{
 							key: "date",
-							label: "Date",
+							label: "Tarih",
 							render: (item) => format(new Date(item.date), "MMM dd, yyyy"),
 						},
 						{
@@ -198,7 +198,7 @@ export function EnhancedCustomerDashboard() {
 						},
 						{
 							key: "status",
-							label: "Status",
+							label: "Durum",
 							render: (item) => (
 								<Badge className={statusColors[item.status] || ""}>{item.status}</Badge>
 							),
@@ -218,18 +218,18 @@ export function EnhancedCustomerDashboard() {
 						},
 						{
 							key: "amount",
-							label: "Amount",
+							label: "Tutar",
 							render: (item) => formatCurrency(item.amount),
 						},
 						{
 							key: "status",
-							label: "Status",
+							label: "Durum",
 							render: (item) => (
 								<Badge
 									className={
-										item.status === "PAID"
+										item.status === "Ödendi"
 											? "bg-green-100 text-green-800"
-											: item.status === "UNPAID"
+											: item.status === "Ödenmedi"
 												? "bg-yellow-100 text-yellow-800"
 												: "bg-red-100 text-red-800"
 									}
@@ -240,7 +240,7 @@ export function EnhancedCustomerDashboard() {
 						},
 						{
 							key: "createdAt",
-							label: "Date",
+							label: "Tarih",
 							render: (item) => format(new Date(item.createdAt), "MMM dd, yyyy"),
 						},
 					]}
@@ -290,7 +290,7 @@ export function EnhancedCustomerDashboard() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
-							{myAppointments.filter((a) => a.status === "COMPLETED").length}
+							{myAppointments.filter((a) => a.status === "Tamamlandı").length}
 						</div>
 						<p className="text-xs text-muted-foreground">Total completed</p>
 					</CardContent>

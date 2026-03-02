@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 		const dateFrom = searchParams.get("dateFrom")
 		const dateTo = searchParams.get("dateTo")
 
-		const visitWhere: any = { status: { not: "CANCELLED" } }
+		const visitWhere: any = { status: { not: "İptal Edildi" } }
 		if (dateFrom || dateTo) {
 			visitWhere.visitDate = {}
 			if (dateFrom) visitWhere.visitDate.gte = new Date(dateFrom + "T00:00:00.000Z")
@@ -74,7 +74,7 @@ export async function GET(req: NextRequest) {
 			if (!customerBalances[ownerId]) {
 				customerBalances[ownerId] = {
 					ownerId,
-					ownerName: v.pet.owner.name || "Unknown",
+					ownerName: v.pet.owner.name || "Bilinmiyor",
 					ownerEmail: v.pet.owner.email,
 					totalDebt: 0,
 					visitCount: 0,

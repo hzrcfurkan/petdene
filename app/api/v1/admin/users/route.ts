@@ -14,9 +14,9 @@ export async function GET(req: NextRequest) {
 		// STAFF can only read CUSTOMER list (for visit owner selection); ADMIN+ for full access
 		const { searchParams } = new URL(req.url)
 		const roleFilter = searchParams.get("role")
-		if (!canAccessResource(currentUser.role, "ADMIN")) {
+		if (!canAccessResource(currentUser.role, "Admin")) {
 			// STAFF can only read CUSTOMER list (for visit owner selection)
-			if (currentUser.role !== "STAFF" || roleFilter !== "CUSTOMER") {
+			if (currentUser.role !== "Personel" || roleFilter !== "Müşteri") {
 				return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 			}
 		}
@@ -95,7 +95,7 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role, "ADMIN")) {
+		if (!canAccessResource(currentUser.role, "Admin")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
@@ -110,14 +110,14 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "User already exists" }, { status: 400 })
 		}
 
-		const userRole = role === "CUSTOMER" ? "CUSTOMER" : "STAFF"
+		const userRole = role === "Müşteri" ? "Müşteri" : "Personel"
 		// STAFF requires password; CUSTOMER can have auto-generated temp password
 		let hashedPassword: string | null = null
 		if (password && password.trim()) {
 			hashedPassword = await bcrypt.hash(password, 10)
-		} else if (userRole === "STAFF") {
+		} else if (userRole === "Personel") {
 			return NextResponse.json({ error: "Password is required for staff" }, { status: 400 })
-		} else if (userRole === "CUSTOMER") {
+		} else if (userRole === "Müşteri") {
 			const tempPassword = Math.random().toString(36).slice(-12)
 			hashedPassword = await bcrypt.hash(tempPassword, 10)
 		}
@@ -154,7 +154,7 @@ export async function PUT(req: NextRequest) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (currentUser.role !== "SUPER_ADMIN") {
+		if (currentUser.role !== "Süper Admin") {
 			return NextResponse.json({ error: "Only Super Admin can manage roles" }, { status: 403 })
 		}
 

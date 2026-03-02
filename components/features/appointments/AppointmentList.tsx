@@ -70,14 +70,14 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 	const { mutate: updateAppointment } = useUpdateAppointment()
 
 	const handleDelete = async (id: string) => {
-		if (!confirm("Are you sure you want to delete this appointment?")) return
+		if (!confirm("Bu randevuyu silmek istediğinizden emin misiniz?")) return
 
 		try {
 			await deleteAppointment(id)
-			toast.success("Appointment deleted successfully")
+			toast.success("Randevu başarıyla silindi")
 			refetch()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to delete appointment")
+			toast.error(error?.info?.error || "Randevu silinemedi")
 		}
 	}
 
@@ -109,7 +109,7 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 							<Calendar className="w-5 h-5" />
 							Appointments
 						</CardTitle>
-						<CardDescription>Manage and view appointments</CardDescription>
+						<CardDescription>Randevuları yönetin ve görüntüleyin</CardDescription>
 					</div>
 					{showActions && canCreate && (
 						<Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
@@ -121,9 +121,9 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 							</DialogTrigger>
 							<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
 								<DialogHeader>
-									<DialogTitle>{editingAppointment ? "Edit Appointment" : "Create Appointment"}</DialogTitle>
+									<DialogTitle>{editingAppointment ? "Randevu Düzenle" : "Create Appointment"}</DialogTitle>
 									<DialogDescription>
-										{editingAppointment ? "Update appointment details" : "Schedule a new appointment"}
+										{editingAppointment ? "Randevu bilgilerini güncelle" : "Yeni randevu oluştur"}
 									</DialogDescription>
 								</DialogHeader>
 								<AppointmentForm
@@ -157,19 +157,19 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 						<Select value={statusFilter} onValueChange={setStatusFilter}>
 							<SelectTrigger className="w-full sm:w-[180px]">
 								<Filter className="w-4 h-4 mr-2 shrink-0" />
-								<SelectValue placeholder="Status" />
+								<SelectValue placeholder="Durum" />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="ALL">All Status</SelectItem>
-								<SelectItem value="PENDING">Pending</SelectItem>
-								<SelectItem value="CONFIRMED">Confirmed</SelectItem>
-								<SelectItem value="COMPLETED">Completed</SelectItem>
-								<SelectItem value="CANCELLED">Cancelled</SelectItem>
+								<SelectItem value="Beklemede">Beklemede</SelectItem>
+								<SelectItem value="Onaylandı">Onaylandı</SelectItem>
+								<SelectItem value="Tamamlandı">Tamamlandı</SelectItem>
+								<SelectItem value="İptal Edildi">İptal Edildi</SelectItem>
 							</SelectContent>
 						</Select>
 						<Select value={sortBy} onValueChange={setSortBy}>
 							<SelectTrigger className="w-full sm:w-[180px]">
-								<SelectValue placeholder="Sort by" />
+								<SelectValue placeholder="Sırala" />
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="date-desc">Date (Newest)</SelectItem>
@@ -221,12 +221,12 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 								<TableHeader>
 									<TableRow>
 										<TableHead>Date & Time</TableHead>
-										<TableHead>Pet</TableHead>
-										<TableHead>Service</TableHead>
-										<TableHead>Owner</TableHead>
-										<TableHead>Staff</TableHead>
-										<TableHead>Status</TableHead>
-										{showActions && <TableHead className="text-right">Actions</TableHead>}
+										<TableHead>Hasta</TableHead>
+										<TableHead>Hizmet</TableHead>
+										<TableHead>Sahip</TableHead>
+										<TableHead>Personel</TableHead>
+										<TableHead>Durum</TableHead>
+										{showActions && <TableHead className="text-right">İşlemler</TableHead>}
 									</TableRow>
 								</TableHeader>
 								<TableBody>
@@ -235,30 +235,30 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 											<TableCell data-label="Date & Time">
 												{format(new Date(appointment.date), "MMM dd, yyyy HH:mm")}
 											</TableCell>
-											<TableCell data-label="Pet">
+											<TableCell data-label="Hasta">
 												<div>
 													<div className="font-medium">{appointment.pet?.name}</div>
 													<div className="text-sm text-muted-foreground">{appointment.pet?.species}</div>
 												</div>
 											</TableCell>
-											<TableCell data-label="Service">
+											<TableCell data-label="Hizmet">
 												<div>
 													<div className="font-medium">{appointment.service?.title}</div>
 													<div className="text-sm text-muted-foreground">{appointment.service?.type}</div>
 												</div>
 											</TableCell>
-											<TableCell data-label="Owner">
+											<TableCell data-label="Sahip">
 												{appointment.pet?.owner?.name || appointment.pet?.owner?.email || "N/A"}
 											</TableCell>
-											<TableCell data-label="Staff">
-												{appointment.staff?.name || appointment.staff?.email || "Unassigned"}
+											<TableCell data-label="Personel">
+												{appointment.staff?.name || appointment.staff?.email || "Atanmamış"}
 											</TableCell>
-											<TableCell data-label="Status">
+											<TableCell data-label="Durum">
 												<div className="flex items-center gap-2">
 													<Badge className={statusColors[appointment.status] || ""}>
 														{appointment.status}
 													</Badge>
-													{canEdit && appointment.status === "PENDING" && (
+													{canEdit && appointment.status === "Beklemede" && (
 														<Button
 															variant="outline"
 															size="sm"
@@ -266,7 +266,7 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 																updateAppointment(
 																	{
 																		id: appointment.id,
-																		data: { status: "CONFIRMED" },
+																		data: { status: "Onaylandı" },
 																	},
 																	{
 																		onSuccess: () => {
@@ -284,7 +284,7 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 															Approve
 														</Button>
 													)}
-													{canEdit && appointment.status === "CONFIRMED" && (
+													{canEdit && appointment.status === "Onaylandı" && (
 														<Button
 															variant="outline"
 															size="sm"
@@ -292,7 +292,7 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 																updateAppointment(
 																	{
 																		id: appointment.id,
-																		data: { status: "COMPLETED" },
+																		data: { status: "Tamamlandı" },
 																	},
 																	{
 																		onSuccess: () => {
@@ -300,7 +300,7 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 																			refetch()
 																		},
 																		onError: (error: any) => {
-																			toast.error(error?.info?.error || "Failed to update appointment")
+																			toast.error(error?.info?.error || "Randevu güncellenemedi")
 																		},
 																	}
 																)

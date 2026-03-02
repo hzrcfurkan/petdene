@@ -40,12 +40,12 @@ export function EnhancedStaffDashboard() {
 
 	// Calculate statistics
 	const stats = useMemo(() => {
-		const pendingAppointments = myAppointments.filter((a) => a.status === "PENDING")
+		const pendingAppointments = myAppointments.filter((a) => a.status === "Beklemede")
 		const todayAppointments = myAppointments.filter(
 			(a) => format(new Date(a.date), "yyyy-MM-dd") === format(now, "yyyy-MM-dd")
 		)
 		const upcomingAppointments = myAppointments.filter(
-			(a) => new Date(a.date) >= now && (a.status === "PENDING" || a.status === "CONFIRMED")
+			(a) => new Date(a.date) >= now && (a.status === "Beklemede" || a.status === "Onaylandı")
 		)
 		const overdueVaccinations = vaccinations.filter(
 			(v) => v.nextDue && new Date(v.nextDue) < now
@@ -98,7 +98,7 @@ export function EnhancedStaffDashboard() {
 
 	const upcomingAppointments = useMemo(() => {
 		return myAppointments
-			.filter((a) => new Date(a.date) >= now && (a.status === "PENDING" || a.status === "CONFIRMED"))
+			.filter((a) => new Date(a.date) >= now && (a.status === "Beklemede" || a.status === "Onaylandı"))
 			.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 			.slice(0, 5)
 	}, [myAppointments, now])
@@ -181,7 +181,7 @@ export function EnhancedStaffDashboard() {
 						},
 						{
 							key: "status",
-							label: "Status",
+							label: "Durum",
 							render: (item) => (
 								<Badge className={statusColors[item.status] || ""}>{item.status}</Badge>
 							),
@@ -196,7 +196,7 @@ export function EnhancedStaffDashboard() {
 					columns={[
 						{
 							key: "date",
-							label: "Date",
+							label: "Tarih",
 							render: (item) => format(new Date(item.date), "MMM dd, yyyy"),
 						},
 						{
@@ -211,7 +211,7 @@ export function EnhancedStaffDashboard() {
 						},
 						{
 							key: "status",
-							label: "Status",
+							label: "Durum",
 							render: (item) => (
 								<Badge className={statusColors[item.status] || ""}>{item.status}</Badge>
 							),
@@ -266,7 +266,7 @@ export function EnhancedStaffDashboard() {
 							{myAppointments.filter(
 								(a) =>
 									format(new Date(a.date), "yyyy-MM-dd") === format(now, "yyyy-MM-dd") &&
-									a.status === "COMPLETED"
+									a.status === "Tamamlandı"
 							).length}
 						</div>
 						<p className="text-xs text-muted-foreground">Appointments</p>

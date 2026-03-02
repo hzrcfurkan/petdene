@@ -49,10 +49,10 @@ export function PetServiceForm({ service, onSuccess, onCancel }: PetServiceFormP
 
 			if (service) {
 				await updateService({ id: service.id, data })
-				toast.success("Service updated successfully")
+				toast.success("Hizmet başarıyla güncellendi")
 			} else {
 				await createService(data)
-				toast.success("Service created successfully")
+				toast.success("Hizmet başarıyla oluşturuldu")
 			}
 			onSuccess()
 		} catch (error: any) {
@@ -157,7 +157,7 @@ export function PetServiceForm({ service, onSuccess, onCancel }: PetServiceFormP
 					Cancel
 				</Button>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? "Saving..." : service ? "Update" : "Create"} Service
+					{isSubmitting ? "Kaydediliyor..." : service ? "Güncelle" : "Oluştur"} Service
 				</Button>
 			</div>
 		</form>

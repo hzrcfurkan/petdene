@@ -53,10 +53,10 @@ export function VisitList({ petId, showCreate = true }: VisitListProps) {
 
 	const getStatusBadge = (status: string) => {
 		switch (status) {
-			case "COMPLETED":
-				return <Badge variant="default">Completed</Badge>
-			case "CANCELLED":
-				return <Badge variant="destructive">Cancelled</Badge>
+			case "Tamamlandı":
+				return <Badge variant="default">Tamamlandı</Badge>
+			case "İptal Edildi":
+				return <Badge variant="destructive">İptal Edildi</Badge>
 			default:
 				return <Badge variant="secondary">In Progress</Badge>
 		}
@@ -160,13 +160,13 @@ export function VisitList({ petId, showCreate = true }: VisitListProps) {
 								<TableHeader>
 									<TableRow>
 										<TableHead>Protocol #</TableHead>
-										<TableHead>Patient</TableHead>
-										<TableHead>Date</TableHead>
-										<TableHead>Total</TableHead>
-										<TableHead>Paid</TableHead>
-										<TableHead>Balance</TableHead>
-										<TableHead>Status</TableHead>
-										{detailBasePath && <TableHead className="text-right">Actions</TableHead>}
+										<TableHead>Hasta</TableHead>
+										<TableHead>Tarih</TableHead>
+										<TableHead>Toplam</TableHead>
+										<TableHead>Ödenen</TableHead>
+										<TableHead>Bakiye</TableHead>
+										<TableHead>Durum</TableHead>
+										{detailBasePath && <TableHead className="text-right">İşlemler</TableHead>}
 									</TableRow>
 								</TableHeader>
 								<TableBody>

@@ -65,10 +65,10 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 
 			if (vaccination) {
 				await updateVaccinationMutation.mutateAsync({ id: vaccination.id, data })
-				toast.success("Vaccination updated successfully")
+				toast.success("Aşı başarıyla güncellendi")
 			} else {
 				await createVaccinationMutation.mutateAsync(data)
-				toast.success("Vaccination created successfully")
+				toast.success("Aşı başarıyla oluşturuldu")
 			}
 			onSuccess()
 		} catch (error: any) {
@@ -89,7 +89,7 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 						onValueChange={setPetId}
 						placeholder="Search by patient or owner name..."
 						searchPlaceholder="Search by patient name, owner name, or email..."
-						emptyText={isLoadingPets ? "Loading..." : "No patients found. Try a different search."}
+						emptyText={isLoadingPets ? "Yükleniyor..." : "No patients found. Try a different search."}
 						onSearchChange={setPetSearch}
 						loading={isLoadingPets}
 						renderOption={(opt) => {
@@ -142,7 +142,7 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 			</div>
 
 			<div className="space-y-2">
-				<Label htmlFor="notes">Notes</Label>
+				<Label htmlFor="notes">Notlar</Label>
 				<Textarea
 					id="notes"
 					value={notes}
@@ -157,7 +157,7 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 					Cancel
 				</Button>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? "Saving..." : vaccination ? "Update" : "Create"} Vaccination
+					{isSubmitting ? "Kaydediliyor..." : vaccination ? "Güncelle" : "Oluştur"} Vaccination
 				</Button>
 			</div>
 		</form>

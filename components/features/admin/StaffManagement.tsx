@@ -173,7 +173,7 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 									/>
 								</div>
 								<div className="space-y-2">
-									<Label htmlFor="email">Email</Label>
+									<Label htmlFor="email">E-posta</Label>
 									<Input
 										id="email"
 										type="email"
@@ -205,7 +205,7 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 									/>
 								</div>
 								<Button type="submit" className="w-full" disabled={isSubmitting}>
-									{isSubmitting ? "Adding..." : "Add Staff Member"}
+									{isSubmitting ? "Ekleniyor..." : "Add Staff Member"}
 								</Button>
 							</form>
 						</DialogContent>
@@ -249,7 +249,7 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 													Are you sure you want to delete {member.name}? This action cannot be undone.
 												</AlertDialogDescription>
 												<div className="flex gap-2 justify-end">
-													<AlertDialogCancel>Cancel</AlertDialogCancel>
+													<AlertDialogCancel>İptal</AlertDialogCancel>
 													<AlertDialogAction
 														onClick={() => handleRemoveStaff(member.id)}
 														className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
@@ -318,7 +318,7 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="edit-email">Email</Label>
+							<Label htmlFor="edit-email">E-posta</Label>
 							<Input
 								id="edit-email"
 								type="email"

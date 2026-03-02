@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
 		}
 
 		// Additional filters
-		if (issuedById && canAccessResource(currentUser.role as any, "STAFF")) {
+		if (issuedById && canAccessResource(currentUser.role as any, "Personel")) {
 			where.issuedById = issuedById
 		}
 		if (medicineName) {
@@ -160,7 +160,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Only STAFF, ADMIN, and SUPER_ADMIN can create prescriptions
-		if (!canAccessResource(currentUser.role as any, "STAFF")) {
+		if (!canAccessResource(currentUser.role as any, "Personel")) {
 			return NextResponse.json(
 				{ error: "Only staff members can create prescriptions" },
 				{ status: 403 }
@@ -235,7 +235,7 @@ export async function POST(req: NextRequest) {
 	} catch (error) {
 		console.error("[Prescriptions API] POST error:", error)
 		return NextResponse.json(
-			{ error: "Failed to create prescription" },
+			{ error: "Reçete oluşturulamadı" },
 			{ status: 500 }
 		)
 	}

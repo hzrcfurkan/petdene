@@ -43,7 +43,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
 		const visit = await prisma.visit.findUnique({ where: { id: visitId }, select: { id: true, status: true } })
 		if (!visit) return NextResponse.json({ error: "Ziyaret bulunamadı" }, { status: 404 })
-		if (visit.status === "CANCELLED")
+		if (visit.status === "İptal Edildi")
 			return NextResponse.json({ error: "İptal edilmiş ziyarete stok eklenemez" }, { status: 400 })
 
 		const price = unitPrice !== undefined ? Number(unitPrice) : stockItem.price

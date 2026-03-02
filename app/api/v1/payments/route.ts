@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Validate payment method
-		const validMethods = ["cash", "stripe"]
+		const validMethods = ["nakit", "stripe"]
 		if (!validMethods.includes(method)) {
 			return NextResponse.json(
 				{ error: `Invalid payment method. Must be one of: ${validMethods.join(", ")}` },
@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if invoice is already paid
-		if (invoice.status === "PAID") {
+		if (invoice.status === "Ödendi") {
 			return NextResponse.json(
 				{ error: "Invoice is already marked as paid" },
 				{ status: 400 }
@@ -191,7 +191,7 @@ export async function POST(req: NextRequest) {
 		// Check if payment already exists
 		if (invoice.payment) {
 			// If payment is already completed, reject
-			if (invoice.payment.status === "COMPLETED") {
+			if (invoice.payment.status === "Tamamlandı") {
 				return NextResponse.json(
 					{ error: "Payment already completed for this invoice" },
 					{ status: 400 }
@@ -199,14 +199,14 @@ export async function POST(req: NextRequest) {
 			}
 			
 			// If payment is PENDING, FAILED, or CANCELLED, allow updating to cash
-			if (method === "cash" && (invoice.payment.status === "PENDING" || invoice.payment.status === "FAILED" || invoice.payment.status === "CANCELLED")) {
+			if (method === "nakit" && (invoice.payment.status === "Beklemede" || invoice.payment.status === "FAILED" || invoice.payment.status === "İptal Edildi")) {
 				// Update existing payment to cash (keep as PENDING - staff will confirm)
 				const updatedPayment = await prisma.payment.update({
 					where: { id: invoice.payment.id },
 					data: {
-						method: "cash",
+						method: "nakit",
 						amount: invoice.amount,
-						status: "PENDING", // Keep as PENDING until staff confirms
+						status: "Beklemede", // Keep as PENDING until staff confirms
 						paidAt: null,
 						transactionId: null,
 						stripePaymentIntentId: null,
@@ -242,12 +242,12 @@ export async function POST(req: NextRequest) {
 				return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 			}
 			// Customers can only use cash or stripe (not manual entry)
-			if (method !== "cash" && method !== "stripe") {
+			if (method !== "nakit" && method !== "stripe") {
 				return NextResponse.json({ error: "Invalid payment method for customer" }, { status: 403 })
 			}
 		} else {
 			// Staff/Admin can create payments with any method
-			if (!canAccessResource(currentUser.role as any, "STAFF")) {
+			if (!canAccessResource(currentUser.role as any, "Personel")) {
 				return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 			}
 		}
@@ -267,7 +267,7 @@ export async function POST(req: NextRequest) {
 		// For cash payments, mark as PENDING (staff/admin will confirm later)
 		// For stripe, status should be PENDING (handled by webhook)
 		// Invoice status will only be updated to PAID when staff/admin confirms the payment
-		const paymentStatus = "PENDING"
+		const paymentStatus = "Beklemede"
 		const paidAtDate = null // Will be set when payment is confirmed
 
 		const payment = await prisma.payment.create({
@@ -295,7 +295,7 @@ export async function POST(req: NextRequest) {
 		return NextResponse.json(payment, { status: 201 })
 	} catch (error) {
 		console.error("[Payments API] POST error:", error)
-		return NextResponse.json({ error: "Failed to record payment" }, { status: 500 })
+		return NextResponse.json({ error: "Ödeme kaydedilemedi" }, { status: 500 })
 	}
 }
 

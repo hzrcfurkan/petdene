@@ -67,7 +67,7 @@ export function PrescriptionForm({ prescription, onSuccess, onCancel }: Prescrip
 				toast.success("Prescription updated successfully")
 			} else {
 				await createPrescription(data)
-				toast.success("Prescription created successfully")
+				toast.success("Reçete başarıyla oluşturuldu")
 			}
 			onSuccess()
 		} catch (error: any) {
@@ -88,7 +88,7 @@ export function PrescriptionForm({ prescription, onSuccess, onCancel }: Prescrip
 						onValueChange={setPetId}
 						placeholder="Search by patient or owner name..."
 						searchPlaceholder="Search by patient name, owner name, or email..."
-						emptyText={isLoadingPets ? "Loading..." : "No patients found. Try a different search."}
+						emptyText={isLoadingPets ? "Yükleniyor..." : "No patients found. Try a different search."}
 						onSearchChange={setPetSearch}
 						loading={isLoadingPets}
 						renderOption={(opt) => {
@@ -155,7 +155,7 @@ export function PrescriptionForm({ prescription, onSuccess, onCancel }: Prescrip
 					Cancel
 				</Button>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? "Saving..." : prescription ? "Update" : "Create"} Prescription
+					{isSubmitting ? "Kaydediliyor..." : prescription ? "Güncelle" : "Oluştur"} Prescription
 				</Button>
 			</div>
 		</form>
