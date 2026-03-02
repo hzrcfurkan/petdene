@@ -27,7 +27,7 @@ export async function GET(req: NextRequest) {
 		// For invoice creation: only visits without invoice, exclude cancelled
 		if (forInvoice) {
 			where.invoice = null
-			where.status = { not: "İptal Edildi" }
+			where.status = { not: "CANCELLED" }
 		}
 
 		if (currentUser.isCustomer) {

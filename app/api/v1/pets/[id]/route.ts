@@ -234,7 +234,7 @@ export async function DELETE(
 			where: {
 				petId: id,
 				status: {
-					in: ["Beklemede", "Onaylandı"],
+					in: ["PENDING", "CONFIRMED"],
 				},
 			},
 		})

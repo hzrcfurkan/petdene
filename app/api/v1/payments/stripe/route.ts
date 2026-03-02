@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if invoice is already paid
-		if (invoice.status === "Ödendi") {
+		if (invoice.status === "PAID") {
 			return NextResponse.json({ error: "Invoice is already paid" }, { status: 400 })
 		}
 
@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
 
 		// Check if payment already exists and is completed
 		if (invoice.payment) {
-			if (invoice.payment.status === "Tamamlandı") {
+			if (invoice.payment.status === "COMPLETED") {
 				return NextResponse.json({ error: "Payment already completed for this invoice" }, { status: 400 })
 			}
 			// If payment exists but is PENDING or FAILED, we can reuse it
@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
 						invoiceId: invoice.id,
 						method: "stripe",
 						amount: invoice.amount,
-						status: "Beklemede",
+						status: "PENDING",
 					},
 				})
 			} catch (error: any) {
@@ -126,7 +126,7 @@ export async function POST(req: NextRequest) {
 						throw new Error("Failed to create or retrieve payment record")
 					}
 					// If payment is completed, return error
-					if (payment.status === "Tamamlandı") {
+					if (payment.status === "COMPLETED") {
 						return NextResponse.json({ error: "Payment already completed for this invoice" }, { status: 400 })
 					}
 				} else {
@@ -135,13 +135,13 @@ export async function POST(req: NextRequest) {
 					throw error
 				}
 			}
-		} else if (payment.status === "FAILED" || payment.status === "İptal Edildi") {
+		} else if (payment.status === "FAILED" || payment.status === "CANCELLED") {
 			// Reset failed/cancelled payment to PENDING
 			try {
 				payment = await prisma.payment.update({
 					where: { id: payment.id },
 					data: {
-						status: "Beklemede",
+						status: "PENDING",
 						stripePaymentIntentId: null,
 						stripeClientSecret: null,
 					},
@@ -169,14 +169,14 @@ export async function POST(req: NextRequest) {
 						prisma.payment.update({
 							where: { id: payment.id },
 							data: {
-								status: "Tamamlandı",
+								status: "COMPLETED",
 								paidAt: new Date(),
 								transactionId: existingIntent.id,
 							},
 						}),
 						prisma.invoice.update({
 							where: { id: invoice.id },
-							data: { status: "Ödendi" },
+							data: { status: "PAID" },
 						}),
 					])
 					return NextResponse.json(
@@ -272,7 +272,7 @@ export async function PUT(req: NextRequest) {
 						stripePaymentIntentId: paymentIntent.id,
 					},
 					data: {
-						status: "Tamamlandı",
+						status: "COMPLETED",
 						paidAt: new Date(),
 						transactionId: paymentIntent.id,
 					},
@@ -281,7 +281,7 @@ export async function PUT(req: NextRequest) {
 				// Update invoice status
 				await prisma.invoice.update({
 					where: { id: invoiceId },
-					data: { status: "Ödendi" },
+					data: { status: "PAID" },
 				})
 			}
 		} else if (event.type === "payment_intent.payment_failed") {
@@ -303,7 +303,7 @@ export async function PUT(req: NextRequest) {
 					stripePaymentIntentId: paymentIntent.id,
 				},
 				data: {
-					status: "İptal Edildi",
+					status: "CANCELLED",
 				},
 			})
 		}

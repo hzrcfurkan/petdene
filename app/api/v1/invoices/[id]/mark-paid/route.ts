@@ -46,14 +46,14 @@ export async function POST(
 			return NextResponse.json({ error: "Invoice not found" }, { status: 404 })
 		}
 
-		if (invoice.status === "Ödendi") {
+		if (invoice.status === "PAID") {
 			return NextResponse.json(
 				{ error: "Invoice is already paid" },
 				{ status: 400 }
 			)
 		}
 
-		if (invoice.payment?.status === "Tamamlandı") {
+		if (invoice.payment?.status === "COMPLETED") {
 			return NextResponse.json(
 				{ error: "Payment already completed for this invoice" },
 				{ status: 400 }
@@ -68,7 +68,7 @@ export async function POST(
 					data: {
 						method,
 						amount: invoice.amount,
-						status: "Tamamlandı",
+						status: "COMPLETED",
 						paidAt: new Date(),
 					},
 				})
@@ -78,14 +78,14 @@ export async function POST(
 						invoiceId,
 						method,
 						amount: invoice.amount,
-						status: "Tamamlandı",
+						status: "COMPLETED",
 						paidAt: new Date(),
 					},
 				})
 			}
 			await tx.invoice.update({
 				where: { id: invoiceId },
-				data: { status: "Ödendi" },
+				data: { status: "PAID" },
 			})
 		})
 

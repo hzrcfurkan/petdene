@@ -170,7 +170,7 @@ export async function DELETE(
 			prisma.payment.delete({ where: { id } }),
 			prisma.invoice.update({
 				where: { id: existingPayment.invoiceId },
-				data: { status: "Ödenmedi" },
+				data: { status: "UNPAID" },
 			}),
 		])
 

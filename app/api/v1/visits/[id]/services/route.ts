@@ -30,7 +30,7 @@ export async function POST(
 		if (!visit) {
 			return NextResponse.json({ error: "Visit not found" }, { status: 404 })
 		}
-		if (visit.status === "İptal Edildi") {
+		if (visit.status === "CANCELLED") {
 			return NextResponse.json(
 				{ error: "Cannot add services to cancelled visit" },
 				{ status: 400 }

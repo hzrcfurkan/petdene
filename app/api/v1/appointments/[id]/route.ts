@@ -149,7 +149,7 @@ export async function PUT(
 			}
 
 			// CUSTOMER can only cancel (status change to CANCELLED) or update notes
-			if (status && status !== "İptal Edildi" && status !== existingAppointment.status) {
+			if (status && status !== "CANCELLED" && status !== existingAppointment.status) {
 				return NextResponse.json(
 					{
 						error:
@@ -230,7 +230,7 @@ export async function PUT(
 				const appointmentDate = new Date(date)
 				// Allow past dates if status is COMPLETED (for backdating completed appointments)
 				const newStatus = status !== undefined ? status : existingAppointment.status
-				if (appointmentDate < new Date() && newStatus !== "Tamamlandı") {
+				if (appointmentDate < new Date() && newStatus !== "COMPLETED") {
 					return NextResponse.json(
 						{ error: "Appointment date must be in the future" },
 						{ status: 400 }
@@ -242,7 +242,7 @@ export async function PUT(
 
 		// Status updates: STAFF/ADMIN can update status, CUSTOMER can only cancel
 		if (status !== undefined) {
-			const validStatuses = ["Beklemede", "Onaylandı", "Tamamlandı", "İptal Edildi"]
+			const validStatuses = ["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"]
 			if (!validStatuses.includes(status)) {
 				return NextResponse.json(
 					{
@@ -255,7 +255,7 @@ export async function PUT(
 			// Only STAFF/ADMIN/SUPER_ADMIN can change status (except CUSTOMER can cancel)
 			if (
 				currentUser.isCustomer &&
-				status !== "İptal Edildi" &&
+				status !== "CANCELLED" &&
 				status !== existingAppointment.status
 			) {
 				return NextResponse.json(
@@ -267,7 +267,7 @@ export async function PUT(
 			updateData.status = status
 
 			// Auto-generate invoice when status changes to CONFIRMED
-			if (status === "Onaylandı" && existingAppointment.status !== "Onaylandı") {
+			if (status === "CONFIRMED" && existingAppointment.status !== "CONFIRMED") {
 				// Check if invoice already exists
 				const existingInvoice = await prisma.invoice.findUnique({
 					where: { appointmentId: id },
@@ -285,7 +285,7 @@ export async function PUT(
 							data: {
 								appointmentId: id,
 								amount: service.price,
-								status: "Ödenmedi",
+								status: "UNPAID",
 							},
 						})
 					}
@@ -407,7 +407,7 @@ export async function DELETE(
 			}
 
 			// CUSTOMER cannot delete if appointment is COMPLETED or has paid invoice
-			if (existingAppointment.status === "Tamamlandı") {
+			if (existingAppointment.status === "COMPLETED") {
 				return NextResponse.json(
 					{
 						error: "Cannot delete completed appointments",
@@ -418,7 +418,7 @@ export async function DELETE(
 
 			if (
 				existingAppointment.invoice &&
-				existingAppointment.invoice.status === "Ödendi"
+				existingAppointment.invoice.status === "PAID"
 			) {
 				return NextResponse.json(
 					{
@@ -434,7 +434,7 @@ export async function DELETE(
 		if (
 			canAccessResource(currentUser.role as any, "STAFF") &&
 			existingAppointment.invoice &&
-			existingAppointment.invoice.status === "Ödendi"
+			existingAppointment.invoice.status === "PAID"
 		) {
 			return NextResponse.json(
 				{

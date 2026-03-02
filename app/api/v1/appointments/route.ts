@@ -217,7 +217,7 @@ export async function POST(req: NextRequest) {
 
 		// Validate date is in the future (unless admin/staff setting status to COMPLETED)
 		const appointmentDate = new Date(date)
-		if (appointmentDate < new Date() && status !== "Tamamlandı") {
+		if (appointmentDate < new Date() && status !== "COMPLETED") {
 			return NextResponse.json(
 				{ error: "Appointment date must be in the future" },
 				{ status: 400 }
@@ -225,7 +225,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Validate status if provided (only STAFF/ADMIN/SUPER_ADMIN can set status)
-		let appointmentStatus = "Beklemede"
+		let appointmentStatus = "PENDING"
 		if (status !== undefined) {
 			if (currentUser.isCustomer) {
 				return NextResponse.json(
@@ -234,7 +234,7 @@ export async function POST(req: NextRequest) {
 				)
 			}
 
-			const validStatuses = ["Beklemede", "Onaylandı", "Tamamlandı", "İptal Edildi"]
+			const validStatuses = ["PENDING", "CONFIRMED", "COMPLETED", "CANCELLED"]
 			if (!validStatuses.includes(status)) {
 				return NextResponse.json(
 					{
@@ -291,7 +291,7 @@ export async function POST(req: NextRequest) {
 					lt: appointmentEnd,
 				},
 				status: {
-					in: ["Beklemede", "Onaylandı"],
+					in: ["PENDING", "CONFIRMED"],
 				},
 			},
 		})
@@ -363,7 +363,7 @@ export async function POST(req: NextRequest) {
 		})
 
 		// Auto-generate invoice when status is CONFIRMED
-		if (appointmentStatus === "Onaylandı") {
+		if (appointmentStatus === "CONFIRMED") {
 			// Get service price
 			const service = await prisma.petService.findUnique({
 				where: { id: serviceId },
@@ -375,7 +375,7 @@ export async function POST(req: NextRequest) {
 					data: {
 						appointmentId: newAppointment.id,
 						amount: service.price,
-						status: "Ödenmedi",
+						status: "UNPAID",
 					},
 				})
 			}

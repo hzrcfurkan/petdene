@@ -32,7 +32,7 @@ export async function GET(req: NextRequest) {
 		const dailyPayments = await prisma.visitPayment.aggregate({
 			where: {
 				paidAt: { gte: rangeStart, lte: rangeEnd },
-				status: "Tamamlandı",
+				status: "COMPLETED",
 			},
 			_sum: { amount: true },
 			_count: true,
@@ -42,7 +42,7 @@ export async function GET(req: NextRequest) {
 
 		// Total outstanding debt and per-customer balances
 		const visitsWithDebt = await prisma.visit.findMany({
-			where: { status: { not: "İptal Edildi" } },
+			where: { status: { not: "CANCELLED" } },
 			select: {
 				totalAmount: true,
 				paidAmount: true,

@@ -103,12 +103,12 @@ export async function GET(
 		}
 
 		// Sync invoice status with payment status if payment is completed but invoice is not paid
-		if (invoice.payment && invoice.payment.status === "Tamamlandı" && invoice.status !== "Ödendi") {
+		if (invoice.payment && invoice.payment.status === "COMPLETED" && invoice.status !== "PAID") {
 			await prisma.invoice.update({
 				where: { id },
-				data: { status: "Ödendi" },
+				data: { status: "PAID" },
 			})
-			invoice.status = "Ödendi"
+			invoice.status = "PAID"
 		}
 
 		const ownerId = invoice.appointment?.pet?.ownerId ?? invoice.visit?.pet?.ownerId
@@ -168,7 +168,7 @@ export async function PUT(
 		}
 
 		if (status !== undefined) {
-			const validStatuses = ["Ödenmedi", "Ödendi", "İptal Edildi"]
+			const validStatuses = ["UNPAID", "PAID", "CANCELLED"]
 			if (!validStatuses.includes(status)) {
 				return NextResponse.json(
 					{ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` },
@@ -177,8 +177,8 @@ export async function PUT(
 			}
 
 			if (
-				existingInvoice.status === "Ödendi" &&
-				status !== "Ödendi" &&
+				existingInvoice.status === "PAID" &&
+				status !== "PAID" &&
 				existingInvoice.payment
 			) {
 				return NextResponse.json(

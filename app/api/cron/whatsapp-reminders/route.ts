@@ -50,7 +50,7 @@ async function runReminders(req: NextRequest) {
 	const appointments = await prisma.appointment.findMany({
 		where: {
 			date: { gte: tomorrowStart, lt: tomorrowEnd },
-			status: { in: ["Beklemede", "Onaylandı"] },
+			status: { in: ["PENDING", "CONFIRMED"] },
 		},
 		select: {
 			id: true,

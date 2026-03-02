@@ -208,7 +208,7 @@ export async function DELETE(
 			where: {
 				serviceId: id,
 				status: {
-					in: ["Beklemede", "Onaylandı"],
+					in: ["PENDING", "CONFIRMED"],
 				},
 			},
 		})

@@ -181,7 +181,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Check if invoice is already paid
-		if (invoice.status === "Ödendi") {
+		if (invoice.status === "PAID") {
 			return NextResponse.json(
 				{ error: "Invoice is already marked as paid" },
 				{ status: 400 }
@@ -191,7 +191,7 @@ export async function POST(req: NextRequest) {
 		// Check if payment already exists
 		if (invoice.payment) {
 			// If payment is already completed, reject
-			if (invoice.payment.status === "Tamamlandı") {
+			if (invoice.payment.status === "COMPLETED") {
 				return NextResponse.json(
 					{ error: "Payment already completed for this invoice" },
 					{ status: 400 }
@@ -199,14 +199,14 @@ export async function POST(req: NextRequest) {
 			}
 			
 			// If payment is PENDING, FAILED, or CANCELLED, allow updating to cash
-			if (method === "nakit" && (invoice.payment.status === "Beklemede" || invoice.payment.status === "FAILED" || invoice.payment.status === "İptal Edildi")) {
+			if (method === "nakit" && (invoice.payment.status === "PENDING" || invoice.payment.status === "FAILED" || invoice.payment.status === "CANCELLED")) {
 				// Update existing payment to cash (keep as PENDING - staff will confirm)
 				const updatedPayment = await prisma.payment.update({
 					where: { id: invoice.payment.id },
 					data: {
 						method: "nakit",
 						amount: invoice.amount,
-						status: "Beklemede", // Keep as PENDING until staff confirms
+						status: "PENDING", // Keep as PENDING until staff confirms
 						paidAt: null,
 						transactionId: null,
 						stripePaymentIntentId: null,
@@ -267,7 +267,7 @@ export async function POST(req: NextRequest) {
 		// For cash payments, mark as PENDING (staff/admin will confirm later)
 		// For stripe, status should be PENDING (handled by webhook)
 		// Invoice status will only be updated to PAID when staff/admin confirms the payment
-		const paymentStatus = "Beklemede"
+		const paymentStatus = "PENDING"
 		const paidAtDate = null // Will be set when payment is confirmed
 
 		const payment = await prisma.payment.create({

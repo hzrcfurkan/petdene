@@ -17,7 +17,7 @@ export async function GET(req: NextRequest) {
 		const dateFrom = searchParams.get("dateFrom")
 		const dateTo = searchParams.get("dateTo")
 
-		const visitWhere: any = { status: { not: "İptal Edildi" } }
+		const visitWhere: any = { status: { not: "CANCELLED" } }
 		if (dateFrom || dateTo) {
 			visitWhere.visitDate = {}
 			if (dateFrom) visitWhere.visitDate.gte = new Date(dateFrom + "T00:00:00.000Z")

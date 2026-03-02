@@ -64,7 +64,7 @@ export async function POST(
 					method,
 					amount: amt,
 					notes: notes || null,
-					status: "Tamamlandı",
+					status: "COMPLETED",
 				},
 				select: {
 					id: true,

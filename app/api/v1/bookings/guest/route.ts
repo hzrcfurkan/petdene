@@ -63,7 +63,7 @@ export async function POST(req: NextRequest) {
 				petId: pet.id,
 				serviceId: service.id,
 				date: new Date(date),
-				status: "Beklemede",
+				status: "PENDING",
 				notes: notes?.trim() || null,
 			},
 			select: {

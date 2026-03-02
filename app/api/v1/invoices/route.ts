@@ -151,12 +151,12 @@ export async function GET(req: NextRequest) {
 
 	// Sync invoice statuses with payment statuses
 	const syncPromises = invoices.map(async (invoice) => {
-		if (invoice.payment && invoice.payment.status === "Tamamlandı" && invoice.status !== "Ödendi") {
+		if (invoice.payment && invoice.payment.status === "COMPLETED" && invoice.status !== "PAID") {
 			await prisma.invoice.update({
 				where: { id: invoice.id },
-				data: { status: "Ödendi" },
+				data: { status: "PAID" },
 			})
-			invoice.status = "Ödendi"
+			invoice.status = "PAID"
 		}
 	})
 	await Promise.all(syncPromises)
@@ -214,7 +214,7 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "Amount must be positive" }, { status: 400 })
 		}
 
-		const validStatuses = ["Ödenmedi", "Ödendi", "İptal Edildi"]
+		const validStatuses = ["UNPAID", "PAID", "CANCELLED"]
 		if (status && !validStatuses.includes(status)) {
 			return NextResponse.json(
 				{ error: `Invalid status. Must be one of: ${validStatuses.join(", ")}` },
@@ -252,7 +252,7 @@ export async function POST(req: NextRequest) {
 				data: {
 					visitId,
 					amount,
-					status: status || "Ödenmedi",
+					status: status || "UNPAID",
 				},
 				select: {
 					id: true,
@@ -322,7 +322,7 @@ export async function POST(req: NextRequest) {
 			data: {
 				appointmentId,
 				amount,
-				status: status || "Ödenmedi",
+				status: status || "UNPAID",
 			},
 			select: {
 				id: true,
