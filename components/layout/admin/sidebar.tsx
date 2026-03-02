@@ -1,128 +1,123 @@
 "use client"
 
 import { Logo } from "@/components/shared/Logo"
-import { Button } from "@/components/ui/button"
 import { currentUserClient, getRoleLabel } from "@/lib/auth/client"
 import { cn } from "@/lib/utils"
-import { LogOut, Menu, X } from "lucide-react"
+import { LogOut, Menu, X, ChevronRight } from "lucide-react"
 import { signOut } from "next-auth/react"
 import { useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
 import { getNavItems } from "./sidebar-items"
-import { SidebarNavigation } from "./sidebar-navigation"
+import Link from "next/link"
 
 export default function Sidebar() {
 	const currentUser = currentUserClient()
 	const [isOpen, setIsOpen] = useState(false)
 	const [isMobile, setIsMobile] = useState(false)
+	const pathname = usePathname()
 
 	useEffect(() => {
-		const checkMobile = () => {
+		const check = () => {
 			setIsMobile(window.innerWidth < 1024)
-			if (window.innerWidth >= 1024) {
-				setIsOpen(false)
-			}
+			if (window.innerWidth >= 1024) setIsOpen(false)
 		}
-
-		checkMobile()
-		window.addEventListener("resize", checkMobile)
-		return () => window.removeEventListener("resize", checkMobile)
+		check()
+		window.addEventListener("resize", check)
+		return () => window.removeEventListener("resize", check)
 	}, [])
 
 	if (!currentUser) return null
 
 	const userRole = currentUser.role
-	const getDashboardLink = () => {
-		switch (userRole) {
-			case "SUPER_ADMIN":
-				return "/super"
-			case "ADMIN":
-				return "/admin"
-			case "STAFF":
-				return "/staff"
-			case "CUSTOMER":
-				return "/customer"
-			default:
-				return "/customer"
-		}
-	}
-
-	// Get nav items based on role
-	const filteredNavItems = getNavItems(userRole || "CUSTOMER")
+	const dashLink = userRole === "SUPER_ADMIN" ? "/super" : userRole === "ADMIN" ? "/admin" : userRole === "STAFF" ? "/staff" : "/customer"
+	const navItems = getNavItems(userRole || "CUSTOMER")
+	const initials = (currentUser.name || currentUser.email || "U").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)
 
 	const SidebarContent = () => (
-		<div className="flex flex-col h-full">
-			{/* Logo */}
-			<div className="flex items-center justify-between h-16 px-6 border-b border-border bg-card">
-				<Logo href={getDashboardLink()} />
+		<div className="sb-inner">
+			{/* Logo area */}
+			<div className="sb-logo-area">
+				<Link href={dashLink} className="sb-logo-link">
+					<div className="sb-logo-icon">
+						<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">
+							<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+							<path d="M8 14s1.5 2 4 2 4-2 4-2"/>
+							<line x1="9" y1="9" x2="9.01" y2="9"/>
+							<line x1="15" y1="9" x2="15.01" y2="9"/>
+						</svg>
+					</div>
+					<div>
+						<p className="sb-logo-name">PetCare</p>
+						<p className="sb-logo-role">{getRoleLabel(userRole || "CUSTOMER")}</p>
+					</div>
+				</Link>
 				{isMobile && (
-					<Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
-						<X className="h-5 w-5" />
-					</Button>
+					<button className="sb-close-btn" onClick={() => setIsOpen(false)}>
+						<X className="w-4 h-4" />
+					</button>
 				)}
 			</div>
 
-			{/* Navigation */}
-			<SidebarNavigation
-				items={filteredNavItems}
-				onItemClick={() => isMobile && setIsOpen(false)}
-			/>
+			{/* Nav */}
+			<nav className="sb-nav">
+				<p className="sb-nav-label">Menü</p>
+				{navItems.map((item) => {
+					const Icon = item.icon
+					const active = pathname === item.href || pathname.startsWith(item.href + "/")
+					return (
+						<Link
+							key={item.href}
+							href={item.href}
+							onClick={() => isMobile && setIsOpen(false)}
+							className={cn("sb-nav-item", active && "sb-nav-active")}
+						>
+							<Icon className="sb-nav-icon" />
+							<span className="sb-nav-label-text">{item.label}</span>
+							{active && <ChevronRight className="sb-nav-chevron" />}
+						</Link>
+					)
+				})}
+			</nav>
 
-			{/* User Info & Logout */}
-			<div className="border-t border-border p-4 space-y-3">
-				<div className="px-3 py-2.5 rounded-md border border-border bg-muted/30">
-					<p className="text-sm font-medium text-foreground">{currentUser.name || "User"}</p>
-					<p className="text-xs text-muted-foreground mt-0.5">{getRoleLabel(userRole || "CUSTOMER")}</p>
+			{/* User footer */}
+			<div className="sb-footer">
+				<div className="sb-user">
+					<div className="sb-user-avatar">{initials}</div>
+					<div className="sb-user-info">
+						<p className="sb-user-name">{currentUser.name || "Kullanıcı"}</p>
+						<p className="sb-user-email">{currentUser.email}</p>
+					</div>
 				</div>
-				<Button
-					variant="ghost"
-					className="w-full justify-start gap-3 text-destructive"
-					onClick={async () => {
-						await signOut({
-							callbackUrl: "/",
-							redirect: true,
-						})
-					}}
+				<button
+					className="sb-logout"
+					onClick={async () => { await signOut({ callbackUrl: "/", redirect: true }) }}
 				>
-					<LogOut className="h-5 w-5" />
-					<span>Sign out</span>
-				</Button>
+					<LogOut className="w-4 h-4" />
+					<span>Çıkış Yap</span>
+				</button>
 			</div>
 		</div>
 	)
 
 	return (
 		<>
-			{/* Mobile Toggle Button */}
 			{isMobile && (
-				<Button
-					variant="ghost"
-					size="icon"
-					className="fixed top-4 left-4 z-50 lg:hidden size-11 min-w-11"
+				<button
+					className="sb-mobile-toggle"
 					onClick={() => setIsOpen(!isOpen)}
-					aria-label="Open menu"
+					aria-label="Menüyü Aç"
 				>
-					<Menu className="h-6 w-6" />
-				</Button>
+					<Menu className="h-5 w-5" />
+				</button>
 			)}
 
-			{/* Sidebar */}
-			<aside
-				className={cn(
-					"fixed left-0 top-0 z-40 h-screen w-64 border-r border-border bg-card lg:translate-x-0",
-					isMobile && (isOpen ? "translate-x-0" : "-translate-x-full")
-				)}
-			>
+			<aside className={cn("sb-aside", isMobile && (isOpen ? "sb-open" : "sb-closed"))}>
 				<SidebarContent />
 			</aside>
 
-			{/* Overlay for mobile */}
 			{isMobile && isOpen && (
-				<div
-					className="fixed inset-0 z-30 bg-background/80 lg:hidden"
-					onClick={() => setIsOpen(false)}
-				/>
+				<div className="sb-overlay" onClick={() => setIsOpen(false)} />
 			)}
 		</>
 	)
 }
-

@@ -129,6 +129,7 @@ model Visit {
     medicalRecord MedicalRecord?
     payments    VisitPayment[]
     invoice     Invoice?
+    stockUsages VisitStockUsage[]
 }
 
 // Services added to a Visit (with quantity and unit price)
@@ -253,4 +254,38 @@ model Payment {
     updatedAt             DateTime  @updatedAt
 
     invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+}
+
+// ============ STOK YÖNETİMİ ============
+
+model StockItem {
+    id           String   @id @default(uuid())
+    name         String                          // İlaç/malzeme adı
+    category     String   @default("İlaç")      // İlaç, Malzeme, Ürün, Diğer
+    unit         String   @default("Adet")       // Adet, ml, mg, kutu, şişe...
+    quantity     Float    @default(0)            // Mevcut stok miktarı
+    minQuantity  Float    @default(5)            // Min. stok uyarı eşiği
+    price        Float    @default(0)            // Birim satış fiyatı (TRY)
+    costPrice    Float    @default(0)            // Maliyet fiyatı
+    description  String?
+    barcode      String?
+    isActive     Boolean  @default(true)
+    createdAt    DateTime @default(now())
+    updatedAt    DateTime @updatedAt
+
+    usages VisitStockUsage[]
+}
+
+model VisitStockUsage {
+    id          String   @id @default(uuid())
+    visitId     String
+    stockItemId String
+    quantity    Float                           // Kullanılan miktar
+    unitPrice   Float                           // Uygulanan birim fiyat
+    total       Float                           // quantity * unitPrice
+    notes       String?
+    createdAt   DateTime @default(now())
+
+    visit     Visit     @relation(fields: [visitId], references: [id], onDelete: Cascade)
+    stockItem StockItem @relation(fields: [stockItemId], references: [id])
 }

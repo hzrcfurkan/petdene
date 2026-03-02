@@ -1,91 +1,100 @@
 "use client"
 
-import { ThemeToggle } from "@/components/shared/ThemeToggle"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Button } from "@/components/ui/button"
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuLabel,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { currentUserClient, getRoleLabel } from "@/lib/auth/client"
-import { Bell, Home, LogOut, Settings, User } from "lucide-react"
+import { Bell, Home, LogOut, Settings, User, Search } from "lucide-react"
 import { signOut } from "next-auth/react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
+import { ThemeToggle } from "@/components/shared/ThemeToggle"
+
+function getBreadcrumb(pathname: string): string {
+	const segments: Record<string, string> = {
+		"admin": "Yönetim",
+		"customer": "Müşteri",
+		"staff": "Personel",
+		"super": "Süper Admin",
+		"dashboard": "Panel",
+		"visits": "Ziyaretler",
+		"appointments": "Randevular",
+		"pets": "Hastalar",
+		"vaccinations": "Aşılar",
+		"prescriptions": "Reçeteler",
+		"medical-records": "Tıbbi Kayıtlar",
+		"invoices": "Faturalar",
+		"payments": "Ödemeler",
+		"reports": "Raporlar",
+		"pet-services": "Hizmetler",
+		"profile": "Profil",
+		"settings": "Ayarlar",
+		"imports": "İçe Aktar",
+	}
+	const parts = pathname.split("/").filter(Boolean)
+	return parts.map(p => segments[p] || p).join(" / ")
+}
 
 export default function Header() {
 	const currentUser = currentUserClient()
+	const pathname = usePathname()
 
 	if (!currentUser) return null
 
-	const userImage = currentUser.image
+	const initials = (currentUser.name || currentUser.email || "U").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)
+	const breadcrumb = getBreadcrumb(pathname)
 
 	return (
-		<header className="sticky top-0 z-30 h-16 bg-card">
-			<div className="flex h-full items-center justify-between pl-14 sm:pl-16 lg:pl-6 pr-4 sm:pr-6 lg:pr-8 min-w-0">
-				<div className="flex items-center">
-					<h1 className="text-base font-semibold text-foreground hidden lg:block">Dashboard</h1>
+		<header className="hd-bar">
+			<div className="hd-inner">
+				<div className="hd-left">
+					<div className="hd-breadcrumb">{breadcrumb || "Dashboard"}</div>
 				</div>
 
-				<div className="flex items-center gap-2 sm:gap-3">
-					<Button variant="ghost" size="icon" asChild className="hidden sm:flex">
-						<Link href="/" title="Go to landing page">
-							<Home className="h-5 w-5" />
-						</Link>
-					</Button>
+				<div className="hd-search-wrap">
+					<Search className="hd-search-icon" />
+					<input className="hd-search" placeholder="Ara — hasta, randevu, fatura..." />
+				</div>
+
+				<div className="hd-right">
+					<Link href="/" className="hd-icon-btn" title="Ana Sayfa">
+						<Home className="w-4 h-4" />
+					</Link>
+
 					<ThemeToggle variant="switch" />
-					<Button variant="ghost" size="icon" className="relative hidden sm:flex">
-						<Bell className="h-5 w-5" />
-						<span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-destructive"></span>
-					</Button>
+
+					<button className="hd-icon-btn hd-bell">
+						<Bell className="w-4 h-4" />
+						<span className="hd-bell-dot" />
+					</button>
 
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Button variant="ghost" className="relative h-10 w-10 rounded-full">
-								<Avatar>
-									<AvatarImage src={userImage || "/placeholder.svg"} alt={currentUser.name || "User"} />
-									<AvatarFallback>
-										{(currentUser.name?.charAt(0) || currentUser.email?.charAt(0) || "U").toUpperCase()}
-									</AvatarFallback>
+							<button className="hd-avatar-btn">
+								<Avatar className="w-8 h-8">
+									<AvatarImage src={currentUser.image || ""} alt={currentUser.name || "User"} />
+									<AvatarFallback className="hd-avatar-fallback">{initials}</AvatarFallback>
 								</Avatar>
-							</Button>
+							</button>
 						</DropdownMenuTrigger>
-						<DropdownMenuContent align="end" className="w-56">
+						<DropdownMenuContent align="end" className="hd-dropdown">
 							<DropdownMenuLabel>
-								<div className="flex flex-col space-y-1">
-									<p className="text-sm font-medium">{currentUser.name || "User"}</p>
-									<p className="text-xs text-muted-foreground">{currentUser.email || ""}</p>
-									<p className="text-xs text-primary font-medium mt-1">{getRoleLabel(currentUser.role || "CUSTOMER")}</p>
-								</div>
+								<p className="hd-dd-name">{currentUser.name || "Kullanıcı"}</p>
+								<p className="hd-dd-email">{currentUser.email}</p>
+								<p className="hd-dd-role">{getRoleLabel(currentUser.role || "CUSTOMER")}</p>
 							</DropdownMenuLabel>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem asChild>
-								<Link href="/profile" className="flex items-center cursor-pointer">
-									<User className="mr-2 h-4 w-4" />
-									My Profile
-								</Link>
+								<Link href="/profile" className="hd-dd-item"><User className="w-4 h-4" />Profilim</Link>
 							</DropdownMenuItem>
 							<DropdownMenuItem asChild>
-								<Link href="/settings" className="flex items-center cursor-pointer">
-									<Settings className="mr-2 h-4 w-4" />
-									Settings
-								</Link>
+								<Link href="/settings" className="hd-dd-item"><Settings className="w-4 h-4" />Ayarlar</Link>
 							</DropdownMenuItem>
 							<DropdownMenuSeparator />
 							<DropdownMenuItem
-								onClick={async () => {
-									await signOut({
-										callbackUrl: "/",
-										redirect: true,
-									})
-								}}
-								className="text-destructive focus:text-destructive cursor-pointer"
+								onClick={async () => { await signOut({ callbackUrl: "/", redirect: true }) }}
+								className="hd-dd-logout"
 							>
-								<LogOut className="mr-2 h-4 w-4" />
-								Sign out
+								<LogOut className="w-4 h-4" />Çıkış Yap
 							</DropdownMenuItem>
 						</DropdownMenuContent>
 					</DropdownMenu>

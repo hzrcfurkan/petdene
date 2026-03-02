@@ -1,31 +1,23 @@
 "use client"
 
 import { useMemo } from "react"
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useAppointments, usePets, useInvoices, usePetServices, useVaccinations } from "@/lib/react-query"
 import { DashboardCharts } from "./DashboardCharts"
-import { AnalyticsCard, RecentTable, AlertCard } from "./DashboardAnalytics"
 import { format } from "date-fns"
 import {
-	Calendar,
-	PawPrint,
-	DollarSign,
-	Sparkles,
-	Syringe,
-	TrendingUp,
-	Users,
-	AlertCircle,
-	Clock,
+	Calendar, PawPrint, TrendingUp, Clock,
+	AlertCircle, Syringe, FileText, Sparkles,
+	DollarSign, ArrowUpRight, ArrowDownRight, Activity,
 } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
 import { useCurrency } from "@/components/providers/CurrencyProvider"
-import { AppointmentList } from "@/components/features/appointments/AppointmentList"
+import { useVisits } from "@/lib/react-query/hooks/visits"
 
-const statusColors: Record<string, string> = {
-	PENDING: "bg-yellow-100 text-yellow-800",
-	CONFIRMED: "bg-blue-100 text-blue-800",
-	COMPLETED: "bg-green-100 text-green-800",
-	CANCELLED: "bg-red-100 text-red-800",
+const statusConfig: Record<string, { label: string; cls: string }> = {
+	PENDING:    { label: "Bekliyor",      cls: "s-pending" },
+	CONFIRMED:  { label: "Onaylandı",     cls: "s-confirmed" },
+	COMPLETED:  { label: "Tamamlandı",    cls: "s-completed" },
+	CANCELLED:  { label: "İptal",         cls: "s-cancelled" },
+	IN_PROGRESS:{ label: "Devam Ediyor",  cls: "s-inprogress" },
 }
 
 export function EnhancedAdminDashboard() {
@@ -35,298 +27,206 @@ export function EnhancedAdminDashboard() {
 	const { data: invoicesData } = useInvoices({ limit: 1000 })
 	const { data: servicesData } = usePetServices({ limit: 1000 })
 	const { data: vaccinationsData } = useVaccinations({ limit: 1000 })
+	const { data: visitsData } = useVisits({ limit: 8 })
 
 	const appointments = appointmentsData?.appointments || []
-	const pets = petsData?.pets || []
-	const invoices = invoicesData?.invoices || []
-	const services = servicesData?.services || []
+	const pets         = petsData?.pets || []
+	const invoices     = invoicesData?.invoices || []
+	const services     = servicesData?.services || []
 	const vaccinations = vaccinationsData?.vaccinations || []
+	const visits       = visitsData?.visits || []
 
-	const now = new Date()
+	const now           = new Date()
 	const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-	const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+	const prevThirtyDays= new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000)
 
-	// Calculate statistics
 	const stats = useMemo(() => {
-		const recentAppointments = appointments.filter((a) => new Date(a.date) >= thirtyDaysAgo)
-		const recentInvoices = invoices.filter((i) => new Date(i.createdAt) >= thirtyDaysAgo)
-		const paidInvoices = invoices.filter((i) => i.status === "PAID")
-		const unpaidInvoices = invoices.filter((i) => i.status === "UNPAID")
-		const pendingAppointments = appointments.filter((a) => a.status === "PENDING")
-		const upcomingAppointments = appointments.filter(
-			(a) => new Date(a.date) >= now && (a.status === "PENDING" || a.status === "CONFIRMED")
-		)
-		const overdueVaccinations = vaccinations.filter(
-			(v) => v.nextDue && new Date(v.nextDue) < now
-		)
-
-		const totalRevenue = paidInvoices.reduce((sum, inv) => sum + inv.amount, 0)
-		const unpaidAmount = unpaidInvoices.reduce((sum, inv) => sum + inv.amount, 0)
-		const monthlyRevenue = recentInvoices
-			.filter((i) => i.status === "PAID")
-			.reduce((sum, inv) => sum + inv.amount, 0)
-
+		const recentAppts  = appointments.filter(a => new Date(a.date) >= thirtyDaysAgo)
+		const prevAppts    = appointments.filter(a => new Date(a.date) >= prevThirtyDays && new Date(a.date) < thirtyDaysAgo)
+		const paidInvoices = invoices.filter(i => i.status === "PAID")
+		const unpaidInvs   = invoices.filter(i => i.status === "UNPAID")
+		const pending      = appointments.filter(a => a.status === "PENDING")
+		const upcoming     = appointments.filter(a => new Date(a.date) >= now && ["PENDING","CONFIRMED"].includes(a.status))
+		const overdue      = vaccinations.filter(v => v.nextDue && new Date(v.nextDue) < now)
+		const totalRev     = paidInvoices.reduce((s, i) => s + i.amount, 0)
+		const unpaidAmt    = unpaidInvs.reduce((s, i) => s + i.amount, 0)
+		const monthRev     = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
+		const prevRev      = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
+		const revChange    = prevRev > 0 ? ((monthRev - prevRev) / prevRev) * 100 : 0
+		const apptChange   = prevAppts.length > 0 ? ((recentAppts.length - prevAppts.length) / prevAppts.length) * 100 : 0
 		return {
-			totalAppointments: appointments.length,
-			recentAppointments: recentAppointments.length,
-			pendingAppointments: pendingAppointments.length,
-			upcomingAppointments: upcomingAppointments.length,
-			totalPets: pets.length,
-			totalRevenue,
-			monthlyRevenue,
-			unpaidAmount,
-			totalInvoices: invoices.length,
-			paidInvoices: paidInvoices.length,
-			unpaidInvoices: unpaidInvoices.length,
-			overdueVaccinations: overdueVaccinations.length,
+			recentAppts: recentAppts.length, totalPets: pets.length, totalRev, monthRev,
+			unpaidAmt, unpaidCount: unpaidInvs.length, pending: pending.length,
+			upcoming: upcoming.length, overdue: overdue.length,
+			activeServices: services.filter(s => s.active).length, revChange, apptChange,
 		}
-	}, [appointments, pets, invoices, vaccinations, now, thirtyDaysAgo])
+	}, [appointments, pets, invoices, vaccinations, services])
 
-	// Prepare chart data
-	const appointmentsChartData = useMemo(() => {
-		const last7Days = Array.from({ length: 7 }, (_, i) => {
-			const date = new Date(now)
-			date.setDate(date.getDate() - (6 - i))
-			return {
-				name: format(date, "MMM dd"),
-				value: appointments.filter(
-					(a) => format(new Date(a.date), "yyyy-MM-dd") === format(date, "yyyy-MM-dd")
-				).length,
-			}
+	const chartData = useMemo(() => {
+		const apptChart = Array.from({ length: 7 }, (_, i) => {
+			const d = new Date(now); d.setDate(d.getDate() - (6 - i))
+			return { name: format(d, "dd MMM"), value: appointments.filter(a => format(new Date(a.date),"yyyy-MM-dd") === format(d,"yyyy-MM-dd")).length }
 		})
-		return last7Days
-	}, [appointments, now])
-
-	const revenueChartData = useMemo(() => {
-		const last6Months = Array.from({ length: 6 }, (_, i) => {
-			const date = new Date(now)
-			date.setMonth(date.getMonth() - (5 - i))
-			const monthInvoices = invoices.filter(
-				(i) =>
-					format(new Date(i.createdAt), "yyyy-MM") === format(date, "yyyy-MM") &&
-					i.status === "PAID"
-			)
-			return {
-				name: format(date, "MMM yyyy"),
-				value: monthInvoices.reduce((sum, inv) => sum + inv.amount, 0),
-			}
+		const revChart = Array.from({ length: 6 }, (_, i) => {
+			const d = new Date(now); d.setMonth(d.getMonth() - (5 - i))
+			return { name: format(d, "MMM yy"), value: invoices.filter(inv => format(new Date(inv.createdAt),"yyyy-MM") === format(d,"yyyy-MM") && inv.status==="PAID").reduce((s,inv)=>s+inv.amount,0) }
 		})
-		return last6Months
-	}, [invoices, now])
-
-	const statusChartData = useMemo(() => {
-		const statusCounts: Record<string, number> = {}
-		appointments.forEach((a) => {
-			statusCounts[a.status] = (statusCounts[a.status] || 0) + 1
-		})
-		return Object.entries(statusCounts).map(([name, value]) => ({ name, value }))
-	}, [appointments])
-
-	const serviceChartData = useMemo(() => {
-		const serviceCounts: Record<string, number> = {}
-		appointments.forEach((a) => {
-			const serviceName = a.service?.title || "Unknown"
-			serviceCounts[serviceName] = (serviceCounts[serviceName] || 0) + 1
-		})
-		return Object.entries(serviceCounts)
-			.map(([name, value]) => ({ name, value }))
-			.sort((a, b) => b.value - a.value)
-			.slice(0, 5)
-	}, [appointments])
-
-	// Recent data
-	const recentAppointments = useMemo(() => {
-		return appointments
-			.filter((a) => new Date(a.date) >= sevenDaysAgo)
-			.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-			.slice(0, 5)
-	}, [appointments, sevenDaysAgo])
-
-	const recentInvoices = useMemo(() => {
-		return invoices
-			.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-			.slice(0, 5)
-	}, [invoices])
+		const statusCounts: Record<string,number> = {}
+		appointments.forEach(a => { statusCounts[a.status] = (statusCounts[a.status]||0)+1 })
+		const statusChart = Object.entries(statusCounts).map(([name,value])=>({name,value}))
+		const serviceCounts: Record<string,number> = {}
+		appointments.forEach(a => { const n=a.service?.title||"Diğer"; serviceCounts[n]=(serviceCounts[n]||0)+1 })
+		const serviceChart = Object.entries(serviceCounts).map(([name,value])=>({name,value})).sort((a,b)=>b.value-a.value).slice(0,5)
+		return { appt: apptChart, rev: revChart, status: statusChart, service: serviceChart }
+	}, [appointments, invoices])
 
 	const alerts = useMemo(() => {
-		const alertItems: string[] = []
-		if (stats.pendingAppointments > 0) {
-			alertItems.push(`${stats.pendingAppointments} appointments pending approval`)
-		}
-		if (stats.overdueVaccinations > 0) {
-			alertItems.push(`${stats.overdueVaccinations} vaccinations are overdue`)
-		}
-		if (stats.unpaidInvoices > 0) {
-			alertItems.push(`${formatCurrency(stats.unpaidAmount)} in unpaid invoices`)
-		}
-		return alertItems
+		const r = []
+		if (stats.pending > 0)    r.push({ text: `${stats.pending} randevu onay bekliyor`, t: "warn" })
+		if (stats.overdue > 0)    r.push({ text: `${stats.overdue} aşı tarihi geçmiş`, t: "danger" })
+		if (stats.unpaidCount > 0) r.push({ text: `${stats.unpaidCount} ödenmemiş fatura · ${formatCurrency(stats.unpaidAmt)}`, t: "warn" })
+		return r
 	}, [stats])
 
 	return (
-		<div className="space-y-6">
-			{/* Analytics Cards */}
-			<div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-				<AnalyticsCard
-					title="Total Appointments"
-					value={stats.totalAppointments}
-					icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
-					description={`${stats.recentAppointments} in last 30 days`}
-				/>
-				<AnalyticsCard
-					title="Total Revenue"
-					value={formatCurrency(stats.totalRevenue)}
-					icon={<DollarSign className="h-4 w-4 text-muted-foreground" />}
-					description={`${formatCurrency(stats.monthlyRevenue)} this month`}
-				/>
-				<AnalyticsCard
-					title="Total Pets"
-					value={stats.totalPets}
-					icon={<PawPrint className="h-4 w-4 text-muted-foreground" />}
-					description="Registered pets"
-				/>
-				<AnalyticsCard
-					title="Upcoming Appointments"
-					value={stats.upcomingAppointments}
-					icon={<Clock className="h-4 w-4 text-muted-foreground" />}
-					description="Scheduled visits"
-				/>
+		<div className="ad-wrap">
+			{/* Header */}
+			<div className="ad-hd">
+				<div>
+					<h1 className="ad-hd-title">Genel Bakış</h1>
+					<p className="ad-hd-sub">{format(now, "d MMMM yyyy")} — Veteriner Yönetim Paneli</p>
+				</div>
+				<span className="ad-live"><span className="ad-live-dot" />Canlı</span>
 			</div>
 
 			{/* Alerts */}
 			{alerts.length > 0 && (
-				<AlertCard type="warning" title="Action Required" items={alerts} />
+				<div className="ad-alerts">
+					{alerts.map((a, i) => (
+						<div key={i} className={`ad-alert ad-alert-${a.t}`}>
+							<AlertCircle className="w-4 h-4 shrink-0" />{a.text}
+						</div>
+					))}
+				</div>
 			)}
+
+			{/* KPI Cards */}
+			<div className="ad-kpi-grid">
+				{[
+					{
+						icon: <DollarSign className="w-5 h-5" />, color: "blue",
+						label: "Aylık Gelir", value: formatCurrency(stats.monthRev),
+						change: stats.revChange, desc: `Toplam: ${formatCurrency(stats.totalRev)}`,
+					},
+					{
+						icon: <Calendar className="w-5 h-5" />, color: "teal",
+						label: "Bu Ay Randevu", value: stats.recentAppts,
+						change: stats.apptChange, desc: `${stats.upcoming} yaklaşan`,
+					},
+					{
+						icon: <PawPrint className="w-5 h-5" />, color: "violet",
+						label: "Kayıtlı Hasta", value: stats.totalPets,
+						change: null, desc: `${stats.activeServices} aktif hizmet`,
+					},
+					{
+						icon: <Clock className="w-5 h-5" />, color: "amber",
+						label: "Onay Bekleyen", value: stats.pending,
+						change: null, desc: `${stats.upcoming} yaklaşan randevu`,
+					},
+				].map((card, i) => (
+					<div key={i} className={`ad-kpi ad-kpi-${card.color}`}>
+						<div className={`ad-kpi-icon ad-ki-${card.color}`}>{card.icon}</div>
+						<div className="ad-kpi-body">
+							<p className="ad-kpi-lbl">{card.label}</p>
+							<p className="ad-kpi-val">{card.value}</p>
+							{card.change !== null ? (
+								<div className={`ad-kpi-chg ${card.change! >= 0 ? "ad-up" : "ad-dn"}`}>
+									{card.change! >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
+									<span>%{Math.abs(card.change!).toFixed(1)}</span>
+								</div>
+							) : (
+								<p className="ad-kpi-desc">{card.desc}</p>
+							)}
+						</div>
+					</div>
+				))}
+			</div>
 
 			{/* Charts */}
 			<DashboardCharts
-				appointmentsData={appointmentsChartData}
-				revenueData={revenueChartData}
-				statusData={statusChartData}
-				serviceData={serviceChartData}
+				appointmentsData={chartData.appt}
+				revenueData={chartData.rev}
+				statusData={chartData.status}
+				serviceData={chartData.service}
 			/>
 
-			{/* Recent Data Tables */}
-			<div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
-				<RecentTable
-					title="Recent Appointments"
-					data={recentAppointments}
-					columns={[
-						{
-							key: "pet",
-							label: "Pet",
-							render: (item) => item.pet?.name || "N/A",
-						},
-						{
-							key: "service",
-							label: "Service",
-							render: (item) => item.service?.title || "N/A",
-						},
-						{
-							key: "date",
-							label: "Date",
-							render: (item) => format(new Date(item.date), "MMM dd, yyyy"),
-						},
-						{
-							key: "status",
-							label: "Status",
-							render: (item) => (
-								<Badge className={statusColors[item.status] || ""}>{item.status}</Badge>
-							),
-						},
-					]}
-					emptyMessage="No recent appointments"
-				/>
+			{/* Bottom */}
+			<div className="ad-bottom">
+				{/* Recent Visits */}
+				<div className="ad-panel">
+					<div className="ad-panel-hd">
+						<h3 className="ad-panel-title"><Activity className="w-4 h-4" />Son Ziyaretler</h3>
+						<a href="/admin/visits" className="ad-link">Tümünü Gör →</a>
+					</div>
+					<div className="ad-visits">
+						{visits.length === 0 ? (
+							<div className="ad-empty">Henüz ziyaret kaydı yok</div>
+						) : visits.map((v: any) => (
+							<div key={v.id} className="ad-visit-row">
+								<div className="ad-visit-avatar"><PawPrint className="w-4 h-4" /></div>
+								<div className="ad-visit-info">
+									<p className="ad-visit-pet">{v.pet?.name || "—"}</p>
+									<p className="ad-visit-meta">PRO-{v.protocolNumber} · {v.pet?.owner?.name || "—"}</p>
+								</div>
+								<div className="ad-visit-right">
+									<p className="ad-visit-amt">{formatCurrency(v.totalAmount)}</p>
+									<span className={`ad-badge ${statusConfig[v.status]?.cls || "s-pending"}`}>
+										{statusConfig[v.status]?.label || v.status}
+									</span>
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
 
-				<RecentTable
-					title="Recent Invoices"
-					data={recentInvoices}
-					columns={[
-						{
-							key: "pet",
-							label: "Pet",
-							render: (item) => item.appointment?.pet?.name || "N/A",
-						},
-						{
-							key: "amount",
-							label: "Amount",
-							render: (item) => formatCurrency(item.amount),
-						},
-						{
-							key: "status",
-							label: "Status",
-							render: (item) => (
-								<Badge
-									className={
-										item.status === "PAID"
-											? "bg-green-100 text-green-800"
-											: item.status === "UNPAID"
-												? "bg-yellow-100 text-yellow-800"
-												: "bg-red-100 text-red-800"
-									}
-								>
-									{item.status}
-								</Badge>
-							),
-						},
-						{
-							key: "createdAt",
-							label: "Date",
-							render: (item) => format(new Date(item.createdAt), "MMM dd, yyyy"),
-						},
-					]}
-					emptyMessage="No recent invoices"
-				/>
-			</div>
-
-			{/* Quick Stats Grid */}
-			<div className="grid gap-4 md:grid-cols-4">
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Pending Approvals</CardTitle>
-						<AlertCircle className="h-4 w-4 text-yellow-600" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{stats.pendingAppointments}</div>
-						<p className="text-xs text-muted-foreground">Requires attention</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Unpaid Invoices</CardTitle>
-						<DollarSign className="h-4 w-4 text-yellow-600" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{stats.unpaidInvoices}</div>
-						<p className="text-xs text-muted-foreground">{formatCurrency(stats.unpaidAmount)}</p>
-					</CardContent>
-				</Card>
-
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Active Services</CardTitle>
-						<Sparkles className="h-4 w-4 text-blue-600" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">
-							{services.filter((s) => s.active).length}
+				{/* Sidebar panels */}
+				<div className="ad-side">
+					<div className="ad-panel">
+						<div className="ad-panel-hd">
+							<h3 className="ad-panel-title"><TrendingUp className="w-4 h-4" />Özet</h3>
 						</div>
-						<p className="text-xs text-muted-foreground">Out of {services.length} total</p>
-					</CardContent>
-				</Card>
+						<div className="ad-summary">
+							{[
+								{ dot: "dot-green", label: "Tahsil Edilen", val: formatCurrency(stats.totalRev), cls: "" },
+								{ dot: "dot-amber", label: "Bekleyen Tahsilat", val: formatCurrency(stats.unpaidAmt), cls: "text-amber-600" },
+								{ dot: "dot-red",   label: "Geçmiş Aşılar", val: `${stats.overdue} hasta`, cls: "text-red-500" },
+								{ dot: "dot-blue",  label: "Aktif Hizmetler", val: `${stats.activeServices}`, cls: "" },
+							].map((row, i) => (
+								<div key={i} className="ad-sum-row">
+									<div className="ad-sum-left"><span className={`ad-dot ${row.dot}`} />{row.label}</div>
+									<span className={`ad-sum-val ${row.cls}`}>{row.val}</span>
+								</div>
+							))}
+						</div>
+					</div>
 
-				<Card>
-					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Overdue Vaccinations</CardTitle>
-						<Syringe className="h-4 w-4 text-red-600" />
-					</CardHeader>
-					<CardContent>
-						<div className="text-2xl font-bold">{stats.overdueVaccinations}</div>
-						<p className="text-xs text-muted-foreground">Need attention</p>
-					</CardContent>
-				</Card>
+					<div className="ad-panel">
+						<div className="ad-panel-hd">
+							<h3 className="ad-panel-title"><Sparkles className="w-4 h-4" />Hızlı Erişim</h3>
+						</div>
+						<div className="ad-qactions">
+							{[
+								{ href: "/admin/visits",       icon: <FileText className="w-4 h-4" />, label: "Yeni Ziyaret" },
+								{ href: "/admin/appointments", icon: <Calendar className="w-4 h-4" />, label: "Randevu" },
+								{ href: "/admin/pets",         icon: <PawPrint className="w-4 h-4" />, label: "Hasta Ekle" },
+								{ href: "/admin/vaccinations", icon: <Syringe  className="w-4 h-4" />, label: "Aşı Kaydı" },
+							].map((btn, i) => (
+								<a key={i} href={btn.href} className="ad-qbtn">{btn.icon}{btn.label}</a>
+							))}
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	)
 }
-

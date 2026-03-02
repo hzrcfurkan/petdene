@@ -41,6 +41,7 @@ import {
 import { usePetServices } from "@/lib/react-query/hooks/pet-services"
 import { toast } from "sonner"
 import { currentUserClient } from "@/lib/auth/client"
+import { VisitStockUsages } from "@/components/features/stocks/VisitStockUsages"
 import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { generateVisitPDF } from "@/lib/utils/visit-pdf"
 
@@ -208,8 +209,9 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 			</div>
 
 			<Tabs defaultValue="services" className="w-full">
-				<TabsList className="grid w-full grid-cols-3">
+				<TabsList className="grid w-full grid-cols-4">
 					<TabsTrigger value="services">Services</TabsTrigger>
+					<TabsTrigger value="stocks">İlaç / Malzeme</TabsTrigger>
 					<TabsTrigger value="medical">Medical Record</TabsTrigger>
 					<TabsTrigger value="payments">Payments</TabsTrigger>
 				</TabsList>
@@ -320,6 +322,11 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 						</CardContent>
 					</Card>
 				</TabsContent>
+
+
+			<TabsContent value="stocks" className="space-y-4">
+				<VisitStockUsages visitId={visit.id} visitStatus={visit.status} />
+			</TabsContent>
 
 				<TabsContent value="medical" className="space-y-4">
 					<Card>

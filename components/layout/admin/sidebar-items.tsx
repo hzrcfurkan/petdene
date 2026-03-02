@@ -1,6 +1,6 @@
 "use client"
 
-import { LayoutDashboard, Users, Settings, User, Calendar, PawPrint, Sparkles, Syringe, Pill, FileText, Stethoscope, Upload, ClipboardList, BarChart3, CreditCard } from "lucide-react"
+import { LayoutDashboard, Users, Settings, User, Calendar, PawPrint, Sparkles, Syringe, Pill, FileText, Stethoscope, Upload, ClipboardList, BarChart3, CreditCard, Warehouse } from "lucide-react"
 
 export interface NavItem {
 	label: string
@@ -116,6 +116,11 @@ export function getNavItems(role: string): NavItem[] {
 			href: "/admin/reports",
 			icon: BarChart3,
 		})
+		items.push({
+			label: "Stoklar",
+			href: "/admin/stocks",
+			icon: Warehouse,
+		})
 	}
 
 	// Add appointments, pets, vaccinations, prescriptions, and invoices for staff
@@ -164,6 +169,11 @@ export function getNavItems(role: string): NavItem[] {
 			label: "Reports",
 			href: "/admin/reports",
 			icon: BarChart3,
+		})
+		items.push({
+			label: "Stoklar",
+			href: "/admin/stocks",
+			icon: Warehouse,
 		})
 	}
 
