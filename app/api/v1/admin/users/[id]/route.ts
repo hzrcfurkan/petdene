@@ -11,7 +11,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role, "Admin")) {
+		if (!canAccessResource(currentUser.role, "ADMIN")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
@@ -79,7 +79,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (currentUser.role !== "Süper Admin") {
+		if (currentUser.role !== "SUPER_ADMIN") {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 

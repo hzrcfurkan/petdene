@@ -23,7 +23,7 @@ export async function GET(req: NextRequest) {
 		const where: any = {}
 
 		// Role-based filtering: CUSTOMER can only see vaccinations for their pets
-		if (currentUser.role === "Müşteri") {
+		if (currentUser.role === "CUSTOMER") {
 			const pets = await prisma.pet.findMany({
 				where: { ownerId: currentUser.id },
 				select: { id: true },
@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role, "Personel")) {
+		if (!canAccessResource(currentUser.role, "STAFF")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 

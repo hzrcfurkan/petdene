@@ -47,7 +47,7 @@ export async function GET(req: NextRequest) {
 			where.petId = petId
 		}
 
-		if (staffId && canAccessResource(currentUser.role as any, "Personel")) {
+		if (staffId && canAccessResource(currentUser.role as any, "STAFF")) {
 			where.staffId = staffId
 		}
 		if (status) where.status = status
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
 		if (!currentUser) {
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
-		if (!canAccessResource(currentUser.role as any, "Personel")) {
+		if (!canAccessResource(currentUser.role as any, "STAFF")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 

@@ -247,7 +247,7 @@ export async function POST(req: NextRequest) {
 			}
 		} else {
 			// Staff/Admin can create payments with any method
-			if (!canAccessResource(currentUser.role as any, "Personel")) {
+			if (!canAccessResource(currentUser.role as any, "STAFF")) {
 				return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 			}
 		}

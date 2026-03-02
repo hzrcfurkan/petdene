@@ -33,7 +33,7 @@ export async function POST(req: NextRequest) {
 					email: email.trim().toLowerCase(),
 					phone: phone?.trim() || null,
 					password: hashedPassword,
-					role: "Müşteri",
+					role: "CUSTOMER",
 				},
 			})
 		}

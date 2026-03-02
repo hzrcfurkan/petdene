@@ -39,7 +39,7 @@ export async function GET(
 		}
 
 		// Role-based access: CUSTOMER can only see vaccinations for their pets
-		if (currentUser.role === "Müşteri") {
+		if (currentUser.role === "CUSTOMER") {
 			if (vaccination.pet.ownerId !== currentUser.id) {
 				return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 			}
@@ -63,7 +63,7 @@ export async function PUT(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role, "Personel")) {
+		if (!canAccessResource(currentUser.role, "STAFF")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 
@@ -148,7 +148,7 @@ export async function DELETE(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role, "Personel")) {
+		if (!canAccessResource(currentUser.role, "STAFF")) {
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 		}
 

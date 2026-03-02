@@ -17,7 +17,7 @@ export async function POST(
 			return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
 		}
 
-		if (!canAccessResource(currentUser.role as any, "Personel")) {
+		if (!canAccessResource(currentUser.role as any, "STAFF")) {
 			return NextResponse.json({ error: "Forbidden. Admin or Staff required." }, { status: 403 })
 		}
 

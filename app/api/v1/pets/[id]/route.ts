@@ -152,7 +152,7 @@ export async function PUT(
 		if (notes !== undefined) updateData.notes = notes || null
 
 		// Only STAFF/ADMIN/SUPER_ADMIN can change owner
-		if (ownerId && canAccessResource(currentUser.role as any, "Personel")) {
+		if (ownerId && canAccessResource(currentUser.role as any, "STAFF")) {
 			const owner = await prisma.user.findUnique({
 				where: { id: ownerId },
 			})

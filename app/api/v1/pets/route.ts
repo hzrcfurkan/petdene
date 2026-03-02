@@ -25,7 +25,7 @@ export async function GET(req: NextRequest) {
 		// Role-based filtering: CUSTOMER can only see their own pets
 		if (currentUser.isCustomer) {
 			where.ownerId = currentUser.id
-		} else if (ownerId && canAccessResource(currentUser.role as any, "Personel")) {
+		} else if (ownerId && canAccessResource(currentUser.role as any, "STAFF")) {
 			// STAFF/ADMIN/SUPER_ADMIN can filter by ownerId
 			where.ownerId = ownerId
 		}
@@ -150,7 +150,7 @@ export async function POST(req: NextRequest) {
 		let finalOwnerId = ownerId
 		if (currentUser.isCustomer) {
 			finalOwnerId = currentUser.id
-		} else if (ownerId && canAccessResource(currentUser.role as any, "Personel")) {
+		} else if (ownerId && canAccessResource(currentUser.role as any, "STAFF")) {
 			// STAFF/ADMIN/SUPER_ADMIN can create pets for any owner
 			// Verify owner exists
 			const owner = await prisma.user.findUnique({

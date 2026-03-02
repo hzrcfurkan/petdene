@@ -56,7 +56,7 @@ export async function GET(req: NextRequest) {
 		if (serviceId) {
 			where.serviceId = serviceId
 		}
-		if (staffId && canAccessResource(currentUser.role as any, "Personel")) {
+		if (staffId && canAccessResource(currentUser.role as any, "STAFF")) {
 			where.staffId = staffId
 		}
 		if (status) {
@@ -248,7 +248,7 @@ export async function POST(req: NextRequest) {
 
 		// Verify staff exists if provided (only STAFF/ADMIN/SUPER_ADMIN can assign staff)
 		if (staffId) {
-			if (!canAccessResource(currentUser.role as any, "Personel")) {
+			if (!canAccessResource(currentUser.role as any, "STAFF")) {
 				return NextResponse.json(
 					{ error: "Only staff can assign staff members" },
 					{ status: 403 }
@@ -264,7 +264,7 @@ export async function POST(req: NextRequest) {
 				return NextResponse.json({ error: "Staff member not found" }, { status: 404 })
 			}
 
-			if (!["Personel", "Admin", "Süper Admin"].includes(staff.role)) {
+			if (!["STAFF", "ADMIN", "SUPER_ADMIN"].includes(staff.role)) {
 				return NextResponse.json(
 					{ error: "Assigned user must be staff, admin, or super admin" },
 					{ status: 400 }

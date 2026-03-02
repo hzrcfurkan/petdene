@@ -53,7 +53,7 @@ export async function GET(req: NextRequest) {
 		}
 
 		// Additional filters
-		if (issuedById && canAccessResource(currentUser.role as any, "Personel")) {
+		if (issuedById && canAccessResource(currentUser.role as any, "STAFF")) {
 			where.issuedById = issuedById
 		}
 		if (medicineName) {
@@ -160,7 +160,7 @@ export async function POST(req: NextRequest) {
 		}
 
 		// Only STAFF, ADMIN, and SUPER_ADMIN can create prescriptions
-		if (!canAccessResource(currentUser.role as any, "Personel")) {
+		if (!canAccessResource(currentUser.role as any, "STAFF")) {
 			return NextResponse.json(
 				{ error: "Only staff members can create prescriptions" },
 				{ status: 403 }

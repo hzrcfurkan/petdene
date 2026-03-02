@@ -175,7 +175,7 @@ export async function PUT(
 		const updateData: any = {}
 
 		// Only STAFF/ADMIN/SUPER_ADMIN can change pet, service, staff, or date
-		if (canAccessResource(currentUser.role as any, "Personel")) {
+		if (canAccessResource(currentUser.role as any, "STAFF")) {
 			if (petId !== undefined) {
 				// Verify pet exists
 				const pet = await prisma.pet.findUnique({
@@ -216,7 +216,7 @@ export async function PUT(
 							{ status: 404 }
 						)
 					}
-					if (!["Personel", "Admin", "Süper Admin"].includes(staff.role)) {
+					if (!["STAFF", "ADMIN", "SUPER_ADMIN"].includes(staff.role)) {
 						return NextResponse.json(
 							{ error: "Assigned user must be staff, admin, or super admin" },
 							{ status: 400 }
@@ -432,7 +432,7 @@ export async function DELETE(
 
 		// STAFF/ADMIN/SUPER_ADMIN can delete any appointment (with restrictions)
 		if (
-			canAccessResource(currentUser.role as any, "Personel") &&
+			canAccessResource(currentUser.role as any, "STAFF") &&
 			existingAppointment.invoice &&
 			existingAppointment.invoice.status === "Ödendi"
 		) {
