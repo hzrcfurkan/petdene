@@ -40,7 +40,7 @@ export function PrerequisitesGuide() {
 							<div className="flex-1">
 								<div className="flex items-center gap-2">
 									<CardTitle>Node.js (Version 18 or Higher)</CardTitle>
-									<Badge variant="destructive">Required</Badge>
+									<Badge variant="destructive">Zorunlu</Badge>
 								</div>
 								<CardDescription>JavaScript runtime environment needed to run the application</CardDescription>
 							</div>
@@ -132,7 +132,7 @@ export function PrerequisitesGuide() {
 							<div className="flex-1">
 								<div className="flex items-center gap-2">
 									<CardTitle>npm (Node Package Manager)</CardTitle>
-									<Badge variant="destructive">Required</Badge>
+									<Badge variant="destructive">Zorunlu</Badge>
 								</div>
 								<CardDescription>Comes automatically with Node.js - no separate installation needed</CardDescription>
 							</div>
@@ -170,7 +170,7 @@ export function PrerequisitesGuide() {
 							<div className="flex-1">
 								<div className="flex items-center gap-2">
 									<CardTitle>PostgreSQL Database</CardTitle>
-									<Badge variant="destructive">Required</Badge>
+									<Badge variant="destructive">Zorunlu</Badge>
 								</div>
 								<CardDescription>
 									Database to store all your application data (pets, users, appointments, etc.)
@@ -313,7 +313,7 @@ export function PrerequisitesGuide() {
 							<div className="flex-1">
 								<div className="flex items-center gap-2">
 									<CardTitle>Git (Version Control)</CardTitle>
-									<Badge variant="outline">Optional</Badge>
+									<Badge variant="outline">Opsiyonel</Badge>
 								</div>
 								<CardDescription>Helps download and manage the project code</CardDescription>
 							</div>

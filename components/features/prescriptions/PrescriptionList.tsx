@@ -62,10 +62,10 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 
 		try {
 			await deletePrescription(id)
-			toast.success("Prescription deleted successfully")
+			toast.success("Reçete başarıyla silindi")
 			refetch()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to delete prescription")
+			toast.error(error?.info?.error || "Reçete silinemedi")
 		}
 	}
 
@@ -119,7 +119,7 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 							</DialogTrigger>
 							<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
 								<DialogHeader>
-									<DialogTitle>{editingPrescription ? "Edit Prescription" : "Add Prescription"}</DialogTitle>
+									<DialogTitle>{editingPrescription ? "Reçete Düzenle" : "Add Prescription"}</DialogTitle>
 									<DialogDescription>
 										{editingPrescription ? "Update prescription record" : "Create a new prescription"}
 									</DialogDescription>
@@ -193,16 +193,16 @@ export function PrescriptionList({ petId, issuedById, dateFrom, dateTo, showActi
 				{isLoading ? (
 					<div className="text-center py-8">Loading prescriptions...</div>
 				) : prescriptions.length === 0 ? (
-					<div className="text-center py-8 text-muted-foreground">No prescriptions found</div>
+					<div className="text-center py-8 text-muted-foreground">Reçete bulunamadı</div>
 				) : (
 					<>
 						<ResponsiveTableWrapper>
 							<Table>
 								<TableHeader>
 									<TableRow>
-										<TableHead>Medicine Name</TableHead>
+										<TableHead>İlaç Adı</TableHead>
 										<TableHead>Hasta</TableHead>
-										<TableHead>Dosage</TableHead>
+										<TableHead>Doz</TableHead>
 										<TableHead>Date Issued</TableHead>
 										<TableHead>Issued By</TableHead>
 										<TableHead>Sahip</TableHead>

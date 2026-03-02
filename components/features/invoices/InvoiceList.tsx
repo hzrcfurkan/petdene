@@ -168,9 +168,9 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="ALL">All Status</SelectItem>
-							<SelectItem value="Ödenmedi">Unpaid</SelectItem>
-							<SelectItem value="Ödendi">Ödenen</SelectItem>
-							<SelectItem value="İptal Edildi">İptal Edildi</SelectItem>
+							<SelectItem value="UNPAID">Unpaid</SelectItem>
+							<SelectItem value="PAID">Ödenen</SelectItem>
+							<SelectItem value="CANCELLED">İptal Edildi</SelectItem>
 						</SelectContent>
 					</Select>
 					<Select value={sortBy} onValueChange={setSortBy}>
@@ -215,7 +215,7 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 				{isLoading ? (
 					<div className="text-center py-8">Loading invoices...</div>
 				) : invoices.length === 0 ? (
-					<div className="text-center py-8 text-muted-foreground">No invoices found</div>
+					<div className="text-center py-8 text-muted-foreground">Fatura bulunamadı</div>
 				) : (
 					<>
 						<ResponsiveTableWrapper>
@@ -406,7 +406,7 @@ export function InvoiceList({ appointmentId, status, ownerId, dateFrom, dateTo, 
 				}}>
 					<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
 						<DialogHeader>
-							<DialogTitle>Edit Invoice</DialogTitle>
+							<DialogTitle>Fatura Düzenle</DialogTitle>
 							<DialogDescription>Update invoice record</DialogDescription>
 						</DialogHeader>
 						<InvoiceForm

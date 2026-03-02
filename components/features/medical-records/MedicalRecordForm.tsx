@@ -62,11 +62,11 @@ export function MedicalRecordForm({ medicalRecord, onSuccess, onCancel }: Medica
 					{ id: medicalRecord.id, data },
 					{
 						onSuccess: () => {
-							toast.success("Medical record updated successfully")
+							toast.success("Tıbbi kayıt başarıyla güncellendi")
 							onSuccess()
 						},
 						onError: (error: any) => {
-							toast.error(error?.info?.error || "Failed to update medical record")
+							toast.error(error?.info?.error || "Tıbbi kayıt güncellenemedi")
 						},
 					}
 				)
@@ -77,7 +77,7 @@ export function MedicalRecordForm({ medicalRecord, onSuccess, onCancel }: Medica
 						onSuccess()
 					},
 					onError: (error: any) => {
-						toast.error(error?.info?.error || "Failed to create medical record")
+						toast.error(error?.info?.error || "Tıbbi kayıt oluşturulamadı")
 					},
 				})
 			}
@@ -130,7 +130,7 @@ export function MedicalRecordForm({ medicalRecord, onSuccess, onCancel }: Medica
 			</div>
 
 			<div className="space-y-2">
-				<Label htmlFor="description">Description</Label>
+				<Label htmlFor="description">Açıklama</Label>
 				<Textarea
 					id="description"
 					value={description}

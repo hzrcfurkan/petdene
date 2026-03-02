@@ -13,7 +13,7 @@ export function StaffDashboard() {
 			<EnhancedStaffDashboard />
 			
 			<div className="mt-8 space-y-8">
-				<DashboardManagementSection title="Recent Appointments">
+				<DashboardManagementSection title="Son Randevular">
 					<AppointmentManagement />
 				</DashboardManagementSection>
 

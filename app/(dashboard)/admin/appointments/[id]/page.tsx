@@ -14,7 +14,7 @@ export default async function AdminAppointmentDetailPage({
 
 	return (
 		<LayoutAdmin>
-			<AppointmentDetailPage listHref="/admin/appointments" listLabel="Appointments" />
+			<AppointmentDetailPage listHref="/admin/appointments" listLabel="Randevular" />
 		</LayoutAdmin>
 	)
 }

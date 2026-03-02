@@ -119,9 +119,9 @@ export function PetTimeline({ petId }: PetTimelineProps) {
 			case "medical":
 				return "Tıbbi Kayıt"
 			case "vaccination":
-				return "Vaccination"
+				return "Aşı"
 			case "prescription":
-				return "Prescription"
+				return "Reçete"
 			default:
 				return "Record"
 		}
@@ -132,7 +132,7 @@ export function PetTimeline({ petId }: PetTimelineProps) {
 			<div className="py-8">
 				<div className="flex flex-col items-center gap-2 text-center">
 					<Calendar className="h-8 w-8 text-muted-foreground" />
-					<p className="text-sm text-muted-foreground">No records found</p>
+					<p className="text-sm text-muted-foreground">Kayıt bulunamadı</p>
 					<p className="text-xs text-muted-foreground">
 						{petId ? "This pet has no medical history yet" : "No medical records, vaccinations, or prescriptions found"}
 					</p>

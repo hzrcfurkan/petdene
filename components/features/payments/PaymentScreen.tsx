@@ -136,7 +136,7 @@ export function PaymentScreen() {
 				</div>
 				<div className="flex flex-wrap items-end gap-4">
 					<div className="space-y-2">
-						<Label htmlFor="pay-dateFrom" className="text-xs">Start Date</Label>
+						<Label htmlFor="pay-dateFrom" className="text-xs">Başlangıç Tarihi</Label>
 						<Input
 							id="pay-dateFrom"
 							type="date"
@@ -145,7 +145,7 @@ export function PaymentScreen() {
 						/>
 					</div>
 					<div className="space-y-2">
-						<Label htmlFor="pay-dateTo" className="text-xs">End Date</Label>
+						<Label htmlFor="pay-dateTo" className="text-xs">Bitiş Tarihi</Label>
 						<Input
 							id="pay-dateTo"
 							type="date"
@@ -198,7 +198,7 @@ export function PaymentScreen() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Quick Actions</CardTitle>
+						<CardTitle className="text-sm font-medium">Hızlı İşlemler</CardTitle>
 						<CreditCard className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
@@ -301,7 +301,7 @@ export function PaymentScreen() {
 														size="sm"
 														asChild
 													>
-														<Link href={`/admin/visits/${visit.id}`}>View</Link>
+														<Link href={`/admin/visits/${visit.id}`}>Görüntüle</Link>
 													</Button>
 													<Button
 														size="sm"
@@ -425,7 +425,7 @@ export function PaymentScreen() {
 										disabled={addPayment.isPending}
 										className="flex-1"
 									>
-										{addPayment.isPending ? "Processing..." : "Ödendi Olarak İşaretle"}
+										{addPayment.isPending ? "İşleniyor..." : "Ödendi Olarak İşaretle"}
 									</Button>
 								) : (
 									<Button

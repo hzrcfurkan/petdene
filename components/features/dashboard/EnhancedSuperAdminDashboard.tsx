@@ -60,10 +60,10 @@ export function EnhancedSuperAdminDashboard() {
 	}, [users, thirtyDaysAgo, prevThirtyDays])
 
 	const bizStats = useMemo(() => {
-		const paid       = invoices.filter(i => i.status === "Ödendi")
-		const unpaid     = invoices.filter(i => i.status === "Ödenmedi")
-		const monthRev   = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "Ödendi").reduce((s,i)=>s+i.amount, 0)
-		const prevRev    = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "Ödendi").reduce((s,i)=>s+i.amount, 0)
+		const paid       = invoices.filter(i => i.status === "PAID")
+		const unpaid     = invoices.filter(i => i.status === "UNPAID")
+		const monthRev   = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount, 0)
+		const prevRev    = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount, 0)
 		const recentAppts = appointments.filter(a => new Date(a.date) >= thirtyDaysAgo).length
 		return {
 			totalRev:    paid.reduce((s,i)=>s+i.amount, 0),

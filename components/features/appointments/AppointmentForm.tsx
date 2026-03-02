@@ -28,7 +28,7 @@ export function AppointmentForm({ appointment, onSuccess, onCancel }: Appointmen
 	const [date, setDate] = useState(
 		appointment?.date ? new Date(appointment.date).toISOString().slice(0, 16) : ""
 	)
-	const [status, setStatus] = useState(appointment?.status || "Beklemede")
+	const [status, setStatus] = useState(appointment?.status || "PENDING")
 	const [notes, setNotes] = useState(appointment?.notes || "")
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -173,10 +173,10 @@ export function AppointmentForm({ appointment, onSuccess, onCancel }: Appointmen
 								<SelectValue placeholder="Durum seçin" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="Beklemede">PENDING</SelectItem>
-								<SelectItem value="Onaylandı">CONFIRMED (Approved)</SelectItem>
-								<SelectItem value="Tamamlandı">COMPLETED</SelectItem>
-								<SelectItem value="İptal Edildi">CANCELLED</SelectItem>
+								<SelectItem value="PENDING">Beklemede</SelectItem>
+								<SelectItem value="CONFIRMED">CONFIRMED (Approved)</SelectItem>
+								<SelectItem value="COMPLETED">Tamamlandı</SelectItem>
+								<SelectItem value="CANCELLED">İptal Edildi</SelectItem>
 							</SelectContent>
 						</Select>
 						<p className="text-xs text-muted-foreground">

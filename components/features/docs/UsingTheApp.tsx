@@ -35,7 +35,7 @@ export function UsingTheApp() {
 									<li>Fill in your information:
 										<ul className="ml-4 mt-1 list-disc space-y-1 text-xs text-muted-foreground">
 											<li>Ad</li>
-											<li>Email address</li>
+											<li>E-posta adresi</li>
 											<li>Password (minimum 8 characters)</li>
 										</ul>
 									</li>
@@ -100,7 +100,7 @@ export function UsingTheApp() {
 						<div className="grid gap-4 sm:grid-cols-2">
 							<div className="rounded-lg border p-4">
 								<div className="mb-2 flex items-center gap-2">
-									<Badge variant="destructive">Super Admin</Badge>
+									<Badge variant="destructive">Süper Admin</Badge>
 								</div>
 								<p className="text-xs text-muted-foreground">
 									Full system access including user management, all admin features, and system
@@ -194,11 +194,11 @@ export function UsingTheApp() {
 							<div className="ml-13 space-y-2 text-sm">
 								<p className="font-medium">How to book an appointment:</p>
 								<ol className="ml-4 list-decimal space-y-1 text-xs text-muted-foreground">
-									<li>Go to "Appointments" in the navigation</li>
+									<li>Go to "Randevular" in the navigation</li>
 									<li>Click "Randevu Al" or "Yeni Randevu"</li>
 									<li>Select a pet from your list</li>
 									<li>Choose a service (Grooming, Vet Checkup, etc.)</li>
-									<li>Select date and time</li>
+									<li>Tarih ve saat seçin</li>
 									<li>Add any notes or special instructions</li>
 									<li>Click "Randevu Al"</li>
 								</ol>

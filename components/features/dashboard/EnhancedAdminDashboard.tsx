@@ -43,15 +43,15 @@ export function EnhancedAdminDashboard() {
 	const stats = useMemo(() => {
 		const recentAppts  = appointments.filter(a => new Date(a.date) >= thirtyDaysAgo)
 		const prevAppts    = appointments.filter(a => new Date(a.date) >= prevThirtyDays && new Date(a.date) < thirtyDaysAgo)
-		const paidInvoices = invoices.filter(i => i.status === "Ödendi")
-		const unpaidInvs   = invoices.filter(i => i.status === "Ödenmedi")
-		const pending      = appointments.filter(a => a.status === "Beklemede")
+		const paidInvoices = invoices.filter(i => i.status === "PAID")
+		const unpaidInvs   = invoices.filter(i => i.status === "UNPAID")
+		const pending      = appointments.filter(a => a.status === "PENDING")
 		const upcoming     = appointments.filter(a => new Date(a.date) >= now && ["Beklemede","Onaylandı"].includes(a.status))
 		const overdue      = vaccinations.filter(v => v.nextDue && new Date(v.nextDue) < now)
 		const totalRev     = paidInvoices.reduce((s, i) => s + i.amount, 0)
 		const unpaidAmt    = unpaidInvs.reduce((s, i) => s + i.amount, 0)
-		const monthRev     = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "Ödendi").reduce((s,i)=>s+i.amount,0)
-		const prevRev      = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "Ödendi").reduce((s,i)=>s+i.amount,0)
+		const monthRev     = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
+		const prevRev      = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
 		const revChange    = prevRev > 0 ? ((monthRev - prevRev) / prevRev) * 100 : 0
 		const apptChange   = prevAppts.length > 0 ? ((recentAppts.length - prevAppts.length) / prevAppts.length) * 100 : 0
 		return {

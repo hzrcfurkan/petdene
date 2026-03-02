@@ -40,12 +40,12 @@ export function EnhancedStaffDashboard() {
 
 	// Calculate statistics
 	const stats = useMemo(() => {
-		const pendingAppointments = myAppointments.filter((a) => a.status === "Beklemede")
+		const pendingAppointments = myAppointments.filter((a) => a.status === "PENDING")
 		const todayAppointments = myAppointments.filter(
 			(a) => format(new Date(a.date), "yyyy-MM-dd") === format(now, "yyyy-MM-dd")
 		)
 		const upcomingAppointments = myAppointments.filter(
-			(a) => new Date(a.date) >= now && (a.status === "Beklemede" || a.status === "Onaylandı")
+			(a) => new Date(a.date) >= now && (a.status === "PENDING" || a.status === "Onaylandı")
 		)
 		const overdueVaccinations = vaccinations.filter(
 			(v) => v.nextDue && new Date(v.nextDue) < now
@@ -98,7 +98,7 @@ export function EnhancedStaffDashboard() {
 
 	const upcomingAppointments = useMemo(() => {
 		return myAppointments
-			.filter((a) => new Date(a.date) >= now && (a.status === "Beklemede" || a.status === "Onaylandı"))
+			.filter((a) => new Date(a.date) >= now && (a.status === "PENDING" || a.status === "Onaylandı"))
 			.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 			.slice(0, 5)
 	}, [myAppointments, now])
@@ -122,7 +122,7 @@ export function EnhancedStaffDashboard() {
 			{/* Analytics Cards */}
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<AnalyticsCard
-					title="My Appointments"
+					title="Randevularım"
 					value={stats.myAppointments}
 					icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
 					description={`${stats.todayAppointments} today`}
@@ -134,7 +134,7 @@ export function EnhancedStaffDashboard() {
 					description="Requires action"
 				/>
 				<AnalyticsCard
-					title="Upcoming Appointments"
+					title="Yaklaşan Randevular"
 					value={stats.upcomingAppointments}
 					icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
 					description="Scheduled visits"
@@ -191,7 +191,7 @@ export function EnhancedStaffDashboard() {
 				/>
 
 				<RecentTable
-					title="Upcoming Appointments"
+					title="Yaklaşan Randevular"
 					data={upcomingAppointments}
 					columns={[
 						{
@@ -266,10 +266,10 @@ export function EnhancedStaffDashboard() {
 							{myAppointments.filter(
 								(a) =>
 									format(new Date(a.date), "yyyy-MM-dd") === format(now, "yyyy-MM-dd") &&
-									a.status === "Tamamlandı"
+									a.status === "COMPLETED"
 							).length}
 						</div>
-						<p className="text-xs text-muted-foreground">Appointments</p>
+						<p className="text-xs text-muted-foreground">Randevular</p>
 					</CardContent>
 				</Card>
 			</div>

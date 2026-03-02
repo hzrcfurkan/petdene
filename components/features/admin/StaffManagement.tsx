@@ -73,13 +73,13 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 
 		try {
 			await createStaff(formData)
-			toast.success("Staff member added successfully")
+			toast.success("Personel başarıyla eklendi")
 			setIsOpen(false)
 			setFormData({ name: "", email: "", phone: "", password: "" })
 			refetch()
 			onStaffAdded?.()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to add staff member")
+			toast.error(error?.info?.error || "Personel eklenemedi")
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -115,14 +115,14 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 			}
 
 			await updateUser(editingStaff.id, updateData)
-			toast.success("Staff member updated successfully")
+			toast.success("Personel başarıyla güncellendi")
 			setIsEditOpen(false)
 			setEditingStaff(null)
 			setEditFormData({ name: "", email: "", phone: "", password: "" })
 			refetch()
 		} catch (error: any) {
 			console.error("Update staff error:", error)
-			toast.error(error?.info?.error || error?.message || "Failed to update staff member")
+			toast.error(error?.info?.error || error?.message || "Personel güncellenemedi")
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -131,10 +131,10 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 	async function handleRemoveStaff(userId: string) {
 		try {
 			await deleteUser(userId)
-			toast.success("Staff member removed successfully")
+			toast.success("Personel başarıyla kaldırıldı")
 			refetch()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to remove staff member")
+			toast.error(error?.info?.error || "Personel kaldırılamadı")
 		}
 	}
 
@@ -147,7 +147,7 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 							<Users className="w-5 h-5" />
 							Staff Management
 						</CardTitle>
-						<CardDescription>Manage your spa staff members</CardDescription>
+						<CardDescription>Personel üyelerinizi yönetin</CardDescription>
 					</div>
 					<Dialog open={isOpen} onOpenChange={setIsOpen}>
 						<DialogTrigger asChild>
@@ -158,15 +158,15 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 						</DialogTrigger>
 						<DialogContent>
 							<DialogHeader>
-								<DialogTitle>Add New Staff Member</DialogTitle>
+								<DialogTitle>Yeni Personel Ekle</DialogTitle>
 								<DialogDescription>Create a new staff account for your spa</DialogDescription>
 							</DialogHeader>
 							<form onSubmit={handleAddStaff} className="space-y-4">
 								<div className="space-y-2">
-									<Label htmlFor="name">Full Name</Label>
+									<Label htmlFor="name">Ad Soyad</Label>
 									<Input
 										id="name"
-										placeholder="John Doe"
+										placeholder="Ad Soyad"
 										value={formData.name}
 										onChange={(e) => setFormData({ ...formData, name: e.target.value })}
 										required
@@ -177,14 +177,14 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 									<Input
 										id="email"
 										type="email"
-										placeholder="john@example.com"
+										placeholder="ornek@eposta.com"
 										value={formData.email}
 										onChange={(e) => setFormData({ ...formData, email: e.target.value })}
 										required
 									/>
 								</div>
 								<div className="space-y-2">
-									<Label htmlFor="phone">Phone Number</Label>
+									<Label htmlFor="phone">Telefon Numarası</Label>
 									<Input
 										id="phone"
 										placeholder="+1 (555) 000-0000"
@@ -205,7 +205,7 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 									/>
 								</div>
 								<Button type="submit" className="w-full" disabled={isSubmitting}>
-									{isSubmitting ? "Ekleniyor..." : "Add Staff Member"}
+									{isSubmitting ? "Ekleniyor..." : "Personel Ekle"}
 								</Button>
 							</form>
 						</DialogContent>
@@ -303,15 +303,15 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 			>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Edit Staff Member</DialogTitle>
+						<DialogTitle>Personel Düzenle</DialogTitle>
 						<DialogDescription>Update staff member information</DialogDescription>
 					</DialogHeader>
 					<form onSubmit={handleUpdateStaff} className="space-y-4">
 						<div className="space-y-2">
-							<Label htmlFor="edit-name">Full Name</Label>
+							<Label htmlFor="edit-name">Ad Soyad</Label>
 							<Input
 								id="edit-name"
-								placeholder="John Doe"
+								placeholder="Ad Soyad"
 								value={editFormData.name}
 								onChange={(e) => setEditFormData({ ...editFormData, name: e.target.value })}
 								required
@@ -322,14 +322,14 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 							<Input
 								id="edit-email"
 								type="email"
-								placeholder="john@example.com"
+								placeholder="ornek@eposta.com"
 								value={editFormData.email}
 								onChange={(e) => setEditFormData({ ...editFormData, email: e.target.value })}
 								required
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="edit-phone">Phone Number</Label>
+							<Label htmlFor="edit-phone">Telefon Numarası</Label>
 							<Input
 								id="edit-phone"
 								placeholder="+1 (555) 000-0000"
@@ -349,7 +349,7 @@ export function StaffManagement({ onStaffAdded }: StaffManagementProps) {
 							/>
 						</div>
 						<Button type="submit" className="w-full" disabled={isSubmitting}>
-							{isSubmitting ? "Updating..." : "Update Staff Member"}
+							{isSubmitting ? "Güncelleniyor..." : "Personel Güncelle"}
 						</Button>
 					</form>
 				</DialogContent>

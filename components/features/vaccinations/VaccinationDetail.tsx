@@ -62,7 +62,7 @@ export function VaccinationDetail({ vaccination }: VaccinationDetailProps) {
 				{vaccination.nextDue ? (
 					<Card>
 						<CardHeader className="pb-3">
-							<CardTitle className="text-sm font-medium">Next Due Date</CardTitle>
+							<CardTitle className="text-sm font-medium">Sonraki Aşı Tarihi</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="text-lg font-semibold">
@@ -79,7 +79,7 @@ export function VaccinationDetail({ vaccination }: VaccinationDetailProps) {
 				) : (
 					<Card>
 						<CardHeader className="pb-3">
-							<CardTitle className="text-sm font-medium">Next Due Date</CardTitle>
+							<CardTitle className="text-sm font-medium">Sonraki Aşı Tarihi</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="text-lg font-semibold text-muted-foreground">Not scheduled</div>

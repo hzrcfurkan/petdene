@@ -23,7 +23,7 @@ export function InvoiceManagement() {
 		total: allInvoices.length,
 		unpaid: unpaidInvoices.length,
 		paid: paidInvoices.length,
-		cancelled: allInvoices.filter((i) => i.status === "İptal Edildi").length,
+		cancelled: allInvoices.filter((i) => i.status === "CANCELLED").length,
 		totalAmount: allInvoices.reduce((sum, invoice) => sum + invoice.amount, 0),
 		unpaidAmount: unpaidInvoices.reduce((sum, invoice) => sum + invoice.amount, 0),
 		paidAmount: paidInvoices.reduce((sum, invoice) => sum + invoice.amount, 0),
@@ -35,7 +35,7 @@ export function InvoiceManagement() {
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Invoices</CardTitle>
+						<CardTitle className="text-sm font-medium">Toplam Fatura</CardTitle>
 						<FileText className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
@@ -72,7 +72,7 @@ export function InvoiceManagement() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+						<CardTitle className="text-sm font-medium">Toplam Gelir</CardTitle>
 						<DollarSign className="h-4 w-4 text-blue-600" />
 					</CardHeader>
 					<CardContent>

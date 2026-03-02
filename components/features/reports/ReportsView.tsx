@@ -39,7 +39,7 @@ export function ReportsView() {
 			<div className="grid gap-4 md:grid-cols-2">
 				<Card>
 					<CardHeader>
-						<CardTitle>Daily Revenue</CardTitle>
+						<CardTitle>Günlük Gelir</CardTitle>
 						<CardDescription>Yükleniyor...</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -48,7 +48,7 @@ export function ReportsView() {
 				</Card>
 				<Card>
 					<CardHeader>
-						<CardTitle>Total Outstanding Debt</CardTitle>
+						<CardTitle>Toplam Açık Borç</CardTitle>
 						<CardDescription>Yükleniyor...</CardDescription>
 					</CardHeader>
 					<CardContent>
@@ -84,7 +84,7 @@ export function ReportsView() {
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="single">Single Day</SelectItem>
-							<SelectItem value="range">Date Range</SelectItem>
+							<SelectItem value="range">Tarih Aralığı</SelectItem>
 						</SelectContent>
 					</Select>
 				</div>
@@ -102,7 +102,7 @@ export function ReportsView() {
 				) : (
 					<>
 						<div className="space-y-2">
-							<Label htmlFor="report-dateFrom" className="text-xs">Start Date</Label>
+							<Label htmlFor="report-dateFrom" className="text-xs">Başlangıç Tarihi</Label>
 							<Input
 								id="report-dateFrom"
 								type="date"
@@ -112,7 +112,7 @@ export function ReportsView() {
 							/>
 						</div>
 						<div className="space-y-2">
-							<Label htmlFor="report-dateTo" className="text-xs">End Date</Label>
+							<Label htmlFor="report-dateTo" className="text-xs">Bitiş Tarihi</Label>
 							<Input
 								id="report-dateTo"
 								type="date"
@@ -156,7 +156,7 @@ export function ReportsView() {
 							<AlertCircle className="w-5 h-5" />
 							Total Outstanding Debt
 						</CardTitle>
-						<CardDescription>Accounts receivable across all visits</CardDescription>
+						<CardDescription>Tüm ziyaretlerdeki alacaklar</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<div
@@ -175,8 +175,8 @@ export function ReportsView() {
 			{data?.customerBalances && data.customerBalances.length > 0 && (
 				<Card>
 					<CardHeader>
-						<CardTitle>Customer Balances (Accounts Receivable)</CardTitle>
-						<CardDescription>Outstanding debt per customer - updates automatically when payments are recorded</CardDescription>
+						<CardTitle>Müşteri Bakiyeleri</CardTitle>
+						<CardDescription>Müşteri başına açık borç - ödemeler kaydedildiğinde güncellenir</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-3">

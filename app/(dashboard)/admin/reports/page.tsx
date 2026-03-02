@@ -20,7 +20,7 @@ export default async function ReportsPage() {
 		<LayoutAdmin>
 			<div className="space-y-8">
 				<header className="space-y-1">
-					<h1 className="text-3xl font-bold tracking-tight">Financial Reports</h1>
+					<h1 className="text-3xl font-bold tracking-tight">Finansal Raporlar</h1>
 					<p className="text-muted-foreground">
 						Daily revenue and total outstanding debt
 					</p>

@@ -28,7 +28,7 @@ export function AppointmentDetailPage({ listHref, listLabel }: AppointmentDetail
 
 	if (error || !appointment) {
 		return (
-			<DetailShell listHref={listHref} listLabel={listLabel} pageTitle="Appointment not found">
+			<DetailShell listHref={listHref} listLabel={listLabel} pageTitle="Randevu bulunamadı">
 				<div className="rounded-lg border border-destructive/30 bg-destructive/5 p-6 text-center">
 					<p className="text-destructive font-medium">This appointment could not be loaded.</p>
 					<button

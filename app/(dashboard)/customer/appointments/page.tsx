@@ -18,7 +18,7 @@ export default async function ClientAppointmentsPage() {
 		<LayoutAdmin>
 			<div className="space-y-8">
 				<header className="space-y-1">
-					<h1 className="text-3xl font-bold tracking-tight">My Appointments</h1>
+					<h1 className="text-3xl font-bold tracking-tight">Randevularım</h1>
 					<p className="text-muted-foreground">
 						View and manage your pet appointments. Click "Yeni Randevu" to book a visit.
 					</p>

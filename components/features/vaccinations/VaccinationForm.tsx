@@ -131,7 +131,7 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 				</div>
 
 				<div className="space-y-2">
-					<Label htmlFor="nextDue">Next Due Date</Label>
+					<Label htmlFor="nextDue">Sonraki Aşı Tarihi</Label>
 					<DatePicker
 						id="nextDue"
 						value={nextDue}

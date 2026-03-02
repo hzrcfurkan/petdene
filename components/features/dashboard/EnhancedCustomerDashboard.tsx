@@ -48,7 +48,7 @@ export function EnhancedCustomerDashboard() {
 	// Calculate statistics
 	const stats = useMemo(() => {
 		const upcomingAppointments = myAppointments.filter(
-			(a) => new Date(a.date) >= now && (a.status === "Beklemede" || a.status === "Onaylandı")
+			(a) => new Date(a.date) >= now && (a.status === "PENDING" || a.status === "Onaylandı")
 		)
 		const upcomingVaccinations = myVaccinations.filter(
 			(v) => v.nextDue && new Date(v.nextDue) >= now
@@ -56,9 +56,9 @@ export function EnhancedCustomerDashboard() {
 		const overdueVaccinations = myVaccinations.filter(
 			(v) => v.nextDue && new Date(v.nextDue) < now
 		)
-		const unpaidInvoices = myInvoices.filter((i) => i.status === "Ödenmedi")
+		const unpaidInvoices = myInvoices.filter((i) => i.status === "UNPAID")
 		const totalSpent = myInvoices
-			.filter((i) => i.status === "Ödendi")
+			.filter((i) => i.status === "PAID")
 			.reduce((sum, inv) => sum + inv.amount, 0)
 
 		return {
@@ -98,7 +98,7 @@ export function EnhancedCustomerDashboard() {
 	// Recent data
 	const upcomingAppointments = useMemo(() => {
 		return myAppointments
-			.filter((a) => new Date(a.date) >= now && (a.status === "Beklemede" || a.status === "Onaylandı"))
+			.filter((a) => new Date(a.date) >= now && (a.status === "PENDING" || a.status === "Onaylandı"))
 			.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
 			.slice(0, 5)
 	}, [myAppointments, now])
@@ -139,13 +139,13 @@ export function EnhancedCustomerDashboard() {
 			{/* Analytics Cards */}
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
 				<AnalyticsCard
-					title="My Pets"
+					title="Hayvanlarım"
 					value={stats.totalPets}
 					icon={<PawPrint className="h-4 w-4 text-muted-foreground" />}
 					description="Registered pets"
 				/>
 				<AnalyticsCard
-					title="Upcoming Appointments"
+					title="Yaklaşan Randevular"
 					value={stats.upcomingAppointments}
 					icon={<Calendar className="h-4 w-4 text-muted-foreground" />}
 					description="Scheduled visits"
@@ -178,7 +178,7 @@ export function EnhancedCustomerDashboard() {
 			{/* Recent Data Tables */}
 			<div className="grid gap-4 md:grid-cols-2">
 				<RecentTable
-					title="Upcoming Appointments"
+					title="Yaklaşan Randevular"
 					data={upcomingAppointments}
 					columns={[
 						{
@@ -252,7 +252,7 @@ export function EnhancedCustomerDashboard() {
 			<div className="grid gap-4 md:grid-cols-4">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Appointments</CardTitle>
+						<CardTitle className="text-sm font-medium">Toplam Randevu</CardTitle>
 						<Calendar className="h-4 w-4 text-blue-600" />
 					</CardHeader>
 					<CardContent>
@@ -290,7 +290,7 @@ export function EnhancedCustomerDashboard() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">
-							{myAppointments.filter((a) => a.status === "Tamamlandı").length}
+							{myAppointments.filter((a) => a.status === "COMPLETED").length}
 						</div>
 						<p className="text-xs text-muted-foreground">Total completed</p>
 					</CardContent>

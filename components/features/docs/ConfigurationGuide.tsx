@@ -85,7 +85,7 @@ export function ConfigurationGuide() {
 						{/* DATABASE_URL */}
 						<div className="rounded-lg border p-4">
 							<div className="mb-3 flex items-center gap-2">
-								<Badge variant="destructive">Required</Badge>
+								<Badge variant="destructive">Zorunlu</Badge>
 								<span className="font-semibold">DATABASE_URL</span>
 							</div>
 							<p className="mb-3 text-sm text-muted-foreground">
@@ -121,7 +121,7 @@ export function ConfigurationGuide() {
 						{/* DIRECT_URL */}
 						<div className="rounded-lg border p-4">
 							<div className="mb-3 flex items-center gap-2">
-								<Badge variant="destructive">Required</Badge>
+								<Badge variant="destructive">Zorunlu</Badge>
 								<span className="font-semibold">DIRECT_URL</span>
 							</div>
 							<p className="mb-3 text-sm text-muted-foreground">
@@ -138,7 +138,7 @@ export function ConfigurationGuide() {
 						{/* NEXTAUTH_SECRET */}
 						<div className="rounded-lg border p-4">
 							<div className="mb-3 flex items-center gap-2">
-								<Badge variant="destructive">Required</Badge>
+								<Badge variant="destructive">Zorunlu</Badge>
 								<span className="font-semibold">NEXTAUTH_SECRET</span>
 							</div>
 							<p className="mb-3 text-sm text-muted-foreground">
@@ -208,7 +208,7 @@ export function ConfigurationGuide() {
 						{/* Google OAuth */}
 						<div className="rounded-lg border p-4">
 							<div className="mb-3 flex items-center gap-2">
-								<Badge variant="secondary">Optional</Badge>
+								<Badge variant="secondary">Opsiyonel</Badge>
 								<span className="font-semibold">Google OAuth (Sign in with Google)</span>
 							</div>
 							<p className="mb-3 text-sm text-muted-foreground">
@@ -247,7 +247,7 @@ export function ConfigurationGuide() {
 						{/* Cloudinary */}
 						<div className="rounded-lg border p-4">
 							<div className="mb-3 flex items-center gap-2">
-								<Badge variant="secondary">Optional</Badge>
+								<Badge variant="secondary">Opsiyonel</Badge>
 								<span className="font-semibold">Cloudinary (Image Uploads)</span>
 							</div>
 							<p className="mb-3 text-sm text-muted-foreground">
@@ -289,7 +289,7 @@ export function ConfigurationGuide() {
 						{/* Stripe */}
 						<div className="rounded-lg border p-4">
 							<div className="mb-3 flex items-center gap-2">
-								<Badge variant="secondary">Optional</Badge>
+								<Badge variant="secondary">Opsiyonel</Badge>
 								<span className="font-semibold">Stripe (Payment Processing)</span>
 							</div>
 							<p className="mb-3 text-sm text-muted-foreground">
@@ -324,7 +324,7 @@ export function ConfigurationGuide() {
 						{/* Resend */}
 						<div className="rounded-lg border p-4">
 							<div className="mb-3 flex items-center gap-2">
-								<Badge variant="secondary">Optional</Badge>
+								<Badge variant="secondary">Opsiyonel</Badge>
 								<span className="font-semibold">Resend (Email Sending)</span>
 							</div>
 							<p className="mb-3 text-sm text-muted-foreground">

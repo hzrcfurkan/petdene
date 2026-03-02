@@ -238,7 +238,7 @@ export function VisitForm({
 					Cancel
 				</Button>
 				<Button type="submit" disabled={isSubmitting || !petId}>
-					{isSubmitting ? "Creating..." : "Create Visit"}
+					{isSubmitting ? "Oluşturuluyor..." : "Create Visit"}
 				</Button>
 			</div>
 		</form>

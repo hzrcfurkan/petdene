@@ -79,22 +79,22 @@ export function UserManagement() {
 
 	const handleRoleChange = async (userId: string, newRole: string) => {
 		if (currentUserRole !== "SUPER_ADMIN") {
-			toast.error("Only Super Admin can manage roles")
+			toast.error("Yalnızca Süper Admin rolleri yönetebilir")
 			return
 		}
 
 		if (userId === currentUserId) {
-			toast.error("You cannot change your own role")
+			toast.error("Kendi rolünüzü değiştiremezsiniz")
 			return
 		}
 
 		setUpdatingId(userId)
 		try {
 			await updateUserRole(userId, newRole)
-			toast.success("User role updated successfully")
+			toast.success("Kullanıcı rolü başarıyla güncellendi")
 			refetch()
 		} catch (error) {
-			toast.error(error instanceof Error ? error.message : "Failed to update user role")
+			toast.error(error instanceof Error ? error.message : "Kullanıcı rolü güncellenemedi")
 		} finally {
 			setUpdatingId(null)
 		}
@@ -116,12 +116,12 @@ export function UserManagement() {
 				phone: customerForm.phone || undefined,
 				password: customerForm.password || undefined,
 			})
-			toast.success("Customer added successfully")
+			toast.success("Müşteri başarıyla eklendi")
 			setIsAddCustomerOpen(false)
 			setCustomerForm({ name: "", email: "", phone: "", password: "" })
 			refetch()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to add customer")
+			toast.error(error?.info?.error || "Müşteri eklenemedi")
 		}
 	}
 
@@ -145,21 +145,21 @@ export function UserManagement() {
 				phone: editForm.phone || undefined,
 				password: editForm.password || undefined,
 			})
-			toast.success("Customer updated successfully")
+			toast.success("Müşteri başarıyla güncellendi")
 			setEditingUser(null)
 			refetch()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to update customer")
+			toast.error(error?.info?.error || "Müşteri güncellenemedi")
 		}
 	}
 
 	const handleDeleteCustomer = async (userId: string, userName: string) => {
 		try {
 			await deleteUser(userId)
-			toast.success("Customer removed (soft delete)")
+			toast.success("Müşteri kaldırıldı")
 			refetch()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to remove customer")
+			toast.error(error?.info?.error || "Müşteri kaldırılamadı")
 		}
 	}
 
@@ -184,15 +184,15 @@ export function UserManagement() {
 							</DialogTrigger>
 							<DialogContent>
 								<DialogHeader>
-									<DialogTitle>Add New Customer</DialogTitle>
-									<DialogDescription>Create a new customer account. Password is optional - a reset link can be sent.</DialogDescription>
+									<DialogTitle>Yeni Müşteri Ekle</DialogTitle>
+									<DialogDescription>Yeni müşteri hesabı oluşturun. Şifre opsiyoneldir - sıfırlama bağlantısı gönderilebilir.</DialogDescription>
 								</DialogHeader>
 								<form onSubmit={handleAddCustomer} className="space-y-4">
 									<div className="space-y-2">
 										<Label htmlFor="cust-name">Name *</Label>
 										<Input
 											id="cust-name"
-											placeholder="John Doe"
+											placeholder="Ad Soyad"
 											value={customerForm.name}
 											onChange={(e) => setCustomerForm({ ...customerForm, name: e.target.value })}
 											required
@@ -203,7 +203,7 @@ export function UserManagement() {
 										<Input
 											id="cust-email"
 											type="email"
-											placeholder="john@example.com"
+											placeholder="ornek@eposta.com"
 											value={customerForm.email}
 											onChange={(e) => setCustomerForm({ ...customerForm, email: e.target.value })}
 											required
@@ -219,7 +219,7 @@ export function UserManagement() {
 										/>
 									</div>
 									<div className="space-y-2">
-										<Label htmlFor="cust-password">Password (optional - leave blank to send reset link)</Label>
+										<Label htmlFor="cust-password">Şifre (opsiyonel - sıfırlama bağlantısı göndermek için boş bırakın)</Label>
 										<Input
 											id="cust-password"
 											type="password"
@@ -243,7 +243,7 @@ export function UserManagement() {
 						<div className="relative">
 							<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
-								placeholder="Search by name or email..."
+								placeholder="Ad veya e-posta ile ara..."
 								value={searchQuery}
 								onChange={(e) => {
 									setSearchQuery(e.target.value)
@@ -261,7 +261,7 @@ export function UserManagement() {
 						}}
 					>
 						<SelectTrigger className="w-[180px]">
-							<SelectValue placeholder="Sort by..." />
+							<SelectValue placeholder="Sırala..." />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="name-asc">Ad (A-Z)</SelectItem>
@@ -278,7 +278,7 @@ export function UserManagement() {
 						}}
 					>
 						<SelectTrigger className="w-[180px]">
-							<SelectValue placeholder="Filter by role..." />
+							<SelectValue placeholder="Role göre filtrele..." />
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="ALL">Tüm Roller</SelectItem>
@@ -390,7 +390,7 @@ export function UserManagement() {
 			<Dialog open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
 				<DialogContent>
 					<DialogHeader>
-						<DialogTitle>Edit Customer</DialogTitle>
+						<DialogTitle>Müşteri Düzenle</DialogTitle>
 						<DialogDescription>Müşteri bilgilerini güncelle</DialogDescription>
 					</DialogHeader>
 					{editingUser && (

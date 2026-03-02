@@ -82,15 +82,15 @@ export function MedicalRecordList({
 		try {
 			deleteMedicalRecord(id, {
 				onSuccess: () => {
-					toast.success("Medical record deleted successfully")
+					toast.success("Tıbbi kayıt başarıyla silindi")
 					refetch()
 				},
 				onError: (error: any) => {
-					toast.error(error?.info?.error || "Failed to delete medical record")
+					toast.error(error?.info?.error || "Tıbbi kayıt silinemedi")
 				},
 			})
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to delete medical record")
+			toast.error(error?.info?.error || "Tıbbi kayıt silinemedi")
 		}
 	}
 
@@ -131,7 +131,7 @@ export function MedicalRecordList({
 								</DialogTrigger>
 								<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
 									<DialogHeader>
-										<DialogTitle>{editingRecord ? "Edit Medical Record" : "Create Medical Record"}</DialogTitle>
+										<DialogTitle>{editingRecord ? "Tıbbi Kayıt Düzenle" : "Create Medical Record"}</DialogTitle>
 										<DialogDescription>
 											{editingRecord ? "Update medical record details" : "Add a new medical record for a pet"}
 										</DialogDescription>
@@ -167,7 +167,7 @@ export function MedicalRecordList({
 										<TableCell colSpan={showActions ? 5 : 4} className="text-center py-8" data-label="">
 											<div className="flex flex-col items-center gap-2">
 												<Stethoscope className="h-8 w-8 text-muted-foreground" />
-												<p className="text-sm text-muted-foreground">No medical records found</p>
+												<p className="text-sm text-muted-foreground">Tıbbi kayıt bulunamadı</p>
 											</div>
 										</TableCell>
 									</TableRow>
@@ -288,7 +288,7 @@ export function MedicalRecordList({
 									</div>
 									{viewingRecord.description && (
 										<div>
-											<p className="text-sm font-medium text-muted-foreground">Description</p>
+											<p className="text-sm font-medium text-muted-foreground">Açıklama</p>
 											<p className="text-sm whitespace-pre-wrap">{viewingRecord.description}</p>
 										</div>
 									)}

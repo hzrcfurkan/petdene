@@ -20,7 +20,7 @@ export default async function VaccinationImportPage() {
 		<LayoutAdmin>
 			<div className="space-y-8">
 				<header className="space-y-1">
-					<h1 className="text-3xl font-bold tracking-tight">Import Vaccinations</h1>
+					<h1 className="text-3xl font-bold tracking-tight">Aşıları İçe Aktar</h1>
 					<p className="text-muted-foreground">
 						Bulk import vaccination records from CSV or Excel files
 					</p>

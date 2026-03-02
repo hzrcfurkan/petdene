@@ -58,7 +58,7 @@ export function VisitList({ petId, showCreate = true }: VisitListProps) {
 			case "İptal Edildi":
 				return <Badge variant="destructive">İptal Edildi</Badge>
 			default:
-				return <Badge variant="secondary">In Progress</Badge>
+				return <Badge variant="secondary">Devam Ediyor</Badge>
 		}
 	}
 
@@ -67,7 +67,7 @@ export function VisitList({ petId, showCreate = true }: VisitListProps) {
 			<CardHeader>
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 					<div>
-						<CardTitle className="flex items-center gap-2">Visits (Protocols)</CardTitle>
+						<CardTitle className="flex items-center gap-2">Ziyaretler (Protokoller)</CardTitle>
 						<CardDescription>
 							Clinic visits - central transaction unit for medical records, services & payments
 						</CardDescription>
@@ -106,11 +106,11 @@ export function VisitList({ petId, showCreate = true }: VisitListProps) {
 					<div className="flex flex-wrap items-end gap-4 rounded-lg border p-4">
 						<div className="flex items-center gap-2">
 							<Calendar className="h-4 w-4 text-muted-foreground" />
-							<span className="text-sm font-medium">Filter by Date</span>
+							<span className="text-sm font-medium">Tarihe Göre Filtrele</span>
 						</div>
 						<div className="flex flex-wrap items-end gap-4">
 							<div className="space-y-2">
-								<Label htmlFor="dateFrom" className="text-xs">Start Date</Label>
+								<Label htmlFor="dateFrom" className="text-xs">Başlangıç Tarihi</Label>
 								<Input
 									id="dateFrom"
 									type="date"
@@ -122,7 +122,7 @@ export function VisitList({ petId, showCreate = true }: VisitListProps) {
 								/>
 							</div>
 							<div className="space-y-2">
-								<Label htmlFor="dateTo" className="text-xs">End Date</Label>
+								<Label htmlFor="dateTo" className="text-xs">Bitiş Tarihi</Label>
 								<Input
 									id="dateTo"
 									type="date"
@@ -152,14 +152,14 @@ export function VisitList({ petId, showCreate = true }: VisitListProps) {
 				{isLoading ? (
 					<div className="text-center py-8">Loading visits...</div>
 				) : visits.length === 0 ? (
-					<div className="text-center py-8 text-muted-foreground">No visits found</div>
+					<div className="text-center py-8 text-muted-foreground">Ziyaret bulunamadı</div>
 				) : (
 					<>
 						<ResponsiveTableWrapper>
 							<Table className="min-w-[640px]">
 								<TableHeader>
 									<TableRow>
-										<TableHead>Protocol #</TableHead>
+										<TableHead>Protokol #</TableHead>
 										<TableHead>Hasta</TableHead>
 										<TableHead>Tarih</TableHead>
 										<TableHead>Toplam</TableHead>

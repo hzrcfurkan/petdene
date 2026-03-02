@@ -170,7 +170,7 @@ export function EnvironmentVariables() {
 							{requiredVars.map((variable) => (
 								<div key={variable.name} className="rounded-lg border p-4">
 									<div className="mb-2 flex items-center gap-2">
-										<Badge variant="destructive">Required</Badge>
+										<Badge variant="destructive">Zorunlu</Badge>
 										<code className="text-sm font-semibold">{variable.name}</code>
 										<Badge variant="outline" className="text-xs">
 											{variable.category}
@@ -204,7 +204,7 @@ export function EnvironmentVariables() {
 							{optionalVars.map((variable) => (
 								<div key={variable.name} className="rounded-lg border p-4">
 									<div className="mb-2 flex items-center gap-2">
-										<Badge variant="secondary">Optional</Badge>
+										<Badge variant="secondary">Opsiyonel</Badge>
 										<code className="text-sm font-semibold">{variable.name}</code>
 										<Badge variant="outline" className="text-xs">
 											{variable.category}

@@ -10,7 +10,7 @@ import { toast } from "sonner"
 
 const ROLE_CONFIG = {
 	[USER_ROLES.SUPER_ADMIN]: {
-		label: "Super Admin",
+		label: "Süper Admin",
 		icon: Shield,
 		variant: "destructive" as const,
 	},
@@ -20,7 +20,7 @@ const ROLE_CONFIG = {
 		variant: "default" as const,
 	},
 	[USER_ROLES.STAFF]: {
-		label: "Staff",
+		label: "Personel",
 		icon: Users,
 		variant: "secondary" as const,
 	},
@@ -54,7 +54,7 @@ export default function QuickLogin() {
 			const { email, password } = data
 
 			if (!email || !password) {
-				throw new Error("Invalid response from server")
+				throw new Error("Sunucudan geçersiz yanıt")
 			}
 
 			// Sign in with test credentials
@@ -65,7 +65,7 @@ export default function QuickLogin() {
 			})
 
 			if (result?.error) {
-				throw new Error(result.error || "Failed to sign in with credentials")
+				throw new Error(result.error || "Kimlik bilgileriyle giriş yapılamadı")
 			}
 
 			toast.success(`Signed in as ${ROLE_CONFIG[role].label}`)
@@ -73,7 +73,7 @@ export default function QuickLogin() {
 			window.location.href = "/customer"
 		} catch (error) {
 			console.error("Quick login error:", error)
-			const errorMessage = error instanceof Error ? error.message : "Failed to quick login"
+			const errorMessage = error instanceof Error ? error.message : "Hızlı giriş başarısız"
 			toast.error(errorMessage)
 		} finally {
 			setLoading(null)

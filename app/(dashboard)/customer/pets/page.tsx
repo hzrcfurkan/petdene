@@ -18,7 +18,7 @@ export default async function ClientPetsPage() {
 		<LayoutAdmin>
 			<div className="space-y-8">
 				<header className="space-y-1">
-					<h1 className="text-3xl font-bold tracking-tight">My Pets</h1>
+					<h1 className="text-3xl font-bold tracking-tight">Hayvanlarım</h1>
 					<p className="text-muted-foreground">
 						Manage your pets and their information
 					</p>

@@ -57,7 +57,7 @@ export function PetServiceImport() {
 
 	const handleImport = async () => {
 		if (!file || preview.length === 0) {
-			toast.error("Please select a file first")
+			toast.error("Önce dosya seçin")
 			return
 		}
 
@@ -69,7 +69,7 @@ export function PetServiceImport() {
 			// 3. Send to backend import endpoint
 
 			// For now, show a message
-			toast.info("Import functionality will be implemented with backend endpoint")
+			toast.info("İçe aktarma işlemi yakında eklenecek")
 			toast.info(`Found ${preview.length} rows to import`)
 
 			// Example: Send to backend
@@ -78,7 +78,7 @@ export function PetServiceImport() {
 			//   body: { services: processedRows }
 			// })
 
-			toast.success("Import completed successfully")
+			toast.success("İçe aktarma başarıyla tamamlandı")
 		} catch (error: any) {
 			toast.error(error?.info?.error || "Failed to import services")
 		} finally {
@@ -121,7 +121,7 @@ export function PetServiceImport() {
 						<>
 							<Alert>
 								<AlertCircle className="h-4 w-4" />
-								<AlertTitle>Preview</AlertTitle>
+								<AlertTitle>Önizleme</AlertTitle>
 								<AlertDescription>
 									Showing first 10 rows. Please review before importing.
 								</AlertDescription>
@@ -132,10 +132,10 @@ export function PetServiceImport() {
 									<TableHeader>
 										<TableRow>
 											<TableHead>Title</TableHead>
-											<TableHead>Type</TableHead>
-											<TableHead>Price</TableHead>
-											<TableHead>Duration</TableHead>
-											<TableHead>Active</TableHead>
+											<TableHead>Tür</TableHead>
+											<TableHead>Fiyat</TableHead>
+											<TableHead>Süre</TableHead>
+											<TableHead>Aktif</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -153,7 +153,7 @@ export function PetServiceImport() {
 							</div>
 
 							<Button onClick={handleImport} disabled={isProcessing}>
-								{isProcessing ? "Processing..." : `Import ${preview.length} Services`}
+								{isProcessing ? "İşleniyor..." : `Import ${preview.length} Services`}
 							</Button>
 						</>
 					)}

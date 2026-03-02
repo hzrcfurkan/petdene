@@ -9,7 +9,7 @@ import { format } from "date-fns"
 
 export function AppointmentManagement() {
 	const { data: allData } = useAppointments({ limit: 1000, sort: "date-desc" })
-	const { data: pendingData } = useAppointments({ status: "Beklemede", limit: 100, sort: "date-asc" })
+	const { data: pendingData } = useAppointments({ status: "PENDING", limit: 100, sort: "date-asc" })
 	const { data: todayData } = useAppointments({
 		dateFrom: new Date().toISOString().split("T")[0],
 		dateTo: new Date().toISOString().split("T")[0],
@@ -23,9 +23,9 @@ export function AppointmentManagement() {
 
 	const stats = {
 		total: allAppointments.length,
-		pending: allAppointments.filter((a) => a.status === "Beklemede").length,
+		pending: allAppointments.filter((a) => a.status === "PENDING").length,
 		confirmed: allAppointments.filter((a) => a.status === "Onaylandı").length,
-		completed: allAppointments.filter((a) => a.status === "Tamamlandı").length,
+		completed: allAppointments.filter((a) => a.status === "COMPLETED").length,
 		today: todayAppointments.length,
 	}
 
@@ -102,7 +102,7 @@ export function AppointmentManagement() {
 				</TabsContent>
 
 				<TabsContent value="pending" className="space-y-4">
-					<AppointmentList status="Beklemede" showActions={true} key="pending" />
+					<AppointmentList status="PENDING" showActions={true} key="pending" />
 				</TabsContent>
 
 				<TabsContent value="today" className="space-y-4">

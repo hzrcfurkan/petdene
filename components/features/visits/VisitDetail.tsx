@@ -212,7 +212,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 				<TabsList className="grid w-full grid-cols-4">
 					<TabsTrigger value="services">Services</TabsTrigger>
 					<TabsTrigger value="stocks">İlaç / Malzeme</TabsTrigger>
-					<TabsTrigger value="medical">Medical Record</TabsTrigger>
+					<TabsTrigger value="medical">Tıbbi Kayıt</TabsTrigger>
 					<TabsTrigger value="payments">Payments</TabsTrigger>
 				</TabsList>
 
@@ -224,7 +224,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 									<CardTitle>Services</CardTitle>
 									<CardDescription>Services added to this visit</CardDescription>
 								</div>
-								{canEdit && visit.status !== "İptal Edildi" && (
+								{canEdit && visit.status !== "CANCELLED" && (
 									<Dialog open={addServiceOpen} onOpenChange={setAddServiceOpen}>
 										<DialogTrigger asChild>
 											<Button size="sm">
@@ -256,7 +256,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 													</Select>
 												</div>
 												<div>
-													<Label>Quantity</Label>
+													<Label>Miktar</Label>
 													<Input
 														name="quantity"
 														type="number"
@@ -282,7 +282,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 											<TableHead>Qty</TableHead>
 											<TableHead>Unit Price</TableHead>
 											<TableHead className="text-right">Toplam</TableHead>
-											{canEdit && visit.status !== "İptal Edildi" && <TableHead />}
+											{canEdit && visit.status !== "CANCELLED" && <TableHead />}
 										</TableRow>
 									</TableHeader>
 									<TableBody>
@@ -294,7 +294,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 												<TableCell className="text-right font-medium">
 													{formatCurrency(vs.total)}
 												</TableCell>
-												{canEdit && visit.status !== "İptal Edildi" && (
+												{canEdit && visit.status !== "CANCELLED" && (
 													<TableCell>
 														<Button
 															variant="ghost"

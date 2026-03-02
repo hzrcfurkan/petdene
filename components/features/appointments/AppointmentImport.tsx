@@ -59,7 +59,7 @@ export function AppointmentImport() {
 
 	const handleImport = async () => {
 		if (!file || preview.length === 0) {
-			toast.error("Please select a file first")
+			toast.error("Önce dosya seçin")
 			return
 		}
 
@@ -72,7 +72,7 @@ export function AppointmentImport() {
 			// 4. Send to backend import endpoint
 
 			// For now, show a message
-			toast.info("Import functionality will be implemented with backend endpoint")
+			toast.info("İçe aktarma işlemi yakında eklenecek")
 			toast.info(`Found ${preview.length} rows to import`)
 
 			// Example: Send to backend
@@ -81,7 +81,7 @@ export function AppointmentImport() {
 			//   body: { appointments: processedRows }
 			// })
 
-			toast.success("Import completed successfully")
+			toast.success("İçe aktarma başarıyla tamamlandı")
 		} catch (error: any) {
 			toast.error(error?.info?.error || "Failed to import appointments")
 		} finally {
@@ -124,7 +124,7 @@ export function AppointmentImport() {
 						<>
 							<Alert>
 								<AlertCircle className="h-4 w-4" />
-								<AlertTitle>Preview</AlertTitle>
+								<AlertTitle>Önizleme</AlertTitle>
 								<AlertDescription>
 									Showing first 10 rows. Please review before importing.
 								</AlertDescription>
@@ -156,7 +156,7 @@ export function AppointmentImport() {
 							</div>
 
 							<Button onClick={handleImport} disabled={isProcessing}>
-								{isProcessing ? "Processing..." : `Import ${preview.length} Appointments`}
+								{isProcessing ? "İşleniyor..." : `Import ${preview.length} Appointments`}
 							</Button>
 						</>
 					)}

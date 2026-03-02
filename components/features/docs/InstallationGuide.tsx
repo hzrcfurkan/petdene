@@ -33,7 +33,7 @@ export function InstallationGuide() {
 							<div className="space-y-4">
 								<div className="rounded-lg border p-4">
 									<div className="mb-2 flex items-center gap-2">
-										<Badge variant="default">Required</Badge>
+										<Badge variant="default">Zorunlu</Badge>
 										<span className="font-semibold">Node.js (Version 18 or higher)</span>
 									</div>
 									<p className="mb-3 text-sm text-muted-foreground">
@@ -73,7 +73,7 @@ export function InstallationGuide() {
 
 								<div className="rounded-lg border p-4">
 									<div className="mb-2 flex items-center gap-2">
-										<Badge variant="default">Required</Badge>
+										<Badge variant="default">Zorunlu</Badge>
 										<span className="font-semibold">npm (Comes with Node.js)</span>
 									</div>
 									<p className="mb-3 text-sm text-muted-foreground">
@@ -91,7 +91,7 @@ export function InstallationGuide() {
 
 								<div className="rounded-lg border p-4">
 									<div className="mb-2 flex items-center gap-2">
-										<Badge variant="secondary">Required</Badge>
+										<Badge variant="secondary">Zorunlu</Badge>
 										<span className="font-semibold">PostgreSQL Database</span>
 									</div>
 									<p className="mb-3 text-sm text-muted-foreground">
@@ -155,7 +155,7 @@ export function InstallationGuide() {
 
 								<div className="rounded-lg border p-4">
 									<div className="mb-2 flex items-center gap-2">
-										<Badge variant="outline">Optional</Badge>
+										<Badge variant="outline">Opsiyonel</Badge>
 										<span className="font-semibold">Git (Version Control)</span>
 									</div>
 									<p className="mb-3 text-sm text-muted-foreground">

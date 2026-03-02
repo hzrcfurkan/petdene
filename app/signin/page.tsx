@@ -36,7 +36,7 @@ export default function SignInPage() {
 			<LayoutAuth>
 				<Card className="w-full max-w-md">
 					<CardContent className="pt-6">
-						<div className="text-center">Loading...</div>
+						<div className="text-center">Yükleniyor...</div>
 					</CardContent>
 				</Card>
 			</LayoutAuth>

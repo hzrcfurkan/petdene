@@ -60,7 +60,7 @@ export function PrescriptionDetail({ prescription }: PrescriptionDetailProps) {
 				{/* Dosage */}
 				<Card>
 					<CardHeader className="pb-3">
-						<CardTitle className="text-sm font-medium">Dosage</CardTitle>
+						<CardTitle className="text-sm font-medium">Doz</CardTitle>
 					</CardHeader>
 					<CardContent>
 						<div className="text-lg font-semibold">

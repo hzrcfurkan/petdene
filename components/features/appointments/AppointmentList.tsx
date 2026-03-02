@@ -161,10 +161,10 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 							</SelectTrigger>
 							<SelectContent>
 								<SelectItem value="ALL">All Status</SelectItem>
-								<SelectItem value="Beklemede">Beklemede</SelectItem>
-								<SelectItem value="Onaylandı">Onaylandı</SelectItem>
-								<SelectItem value="Tamamlandı">Tamamlandı</SelectItem>
-								<SelectItem value="İptal Edildi">İptal Edildi</SelectItem>
+								<SelectItem value="PENDING">Beklemede</SelectItem>
+								<SelectItem value="CONFIRMED">Onaylandı</SelectItem>
+								<SelectItem value="COMPLETED">Tamamlandı</SelectItem>
+								<SelectItem value="CANCELLED">İptal Edildi</SelectItem>
 							</SelectContent>
 						</Select>
 						<Select value={sortBy} onValueChange={setSortBy}>
@@ -213,7 +213,7 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 				{isLoading ? (
 					<div className="text-center py-8">Loading appointments...</div>
 				) : appointments.length === 0 ? (
-					<div className="text-center py-8 text-muted-foreground">No appointments found</div>
+					<div className="text-center py-8 text-muted-foreground">Randevu bulunamadı</div>
 				) : (
 					<>
 						<ResponsiveTableWrapper>
@@ -258,7 +258,7 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 													<Badge className={statusColors[appointment.status] || ""}>
 														{appointment.status}
 													</Badge>
-													{canEdit && appointment.status === "Beklemede" && (
+													{canEdit && appointment.status === "PENDING" && (
 														<Button
 															variant="outline"
 															size="sm"
@@ -266,15 +266,15 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 																updateAppointment(
 																	{
 																		id: appointment.id,
-																		data: { status: "Onaylandı" },
+																		data: { status: "CONFIRMED" },
 																	},
 																	{
 																		onSuccess: () => {
-																			toast.success("Appointment approved")
+																			toast.success("Randevu onaylandı")
 																			refetch()
 																		},
 																		onError: (error: any) => {
-																			toast.error(error?.info?.error || "Failed to approve appointment")
+																			toast.error(error?.info?.error || "Randevu onaylanamadı")
 																		},
 																	}
 																)
@@ -284,7 +284,7 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 															Approve
 														</Button>
 													)}
-													{canEdit && appointment.status === "Onaylandı" && (
+													{canEdit && appointment.status === "CONFIRMED" && (
 														<Button
 															variant="outline"
 															size="sm"
@@ -292,11 +292,11 @@ export function AppointmentList({ petId, serviceId, staffId, status, dateFrom, d
 																updateAppointment(
 																	{
 																		id: appointment.id,
-																		data: { status: "Tamamlandı" },
+																		data: { status: "COMPLETED" },
 																	},
 																	{
 																		onSuccess: () => {
-																			toast.success("Appointment marked as completed")
+																			toast.success("Randevu tamamlandı olarak işaretlendi")
 																			refetch()
 																		},
 																		onError: (error: any) => {

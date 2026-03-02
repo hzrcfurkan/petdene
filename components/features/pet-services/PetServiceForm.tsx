@@ -136,13 +136,13 @@ export function PetServiceForm({ service, onSuccess, onCancel }: PetServiceFormP
 							checked={active}
 							onCheckedChange={setActive}
 						/>
-						<span>Active</span>
+						<span>Aktif</span>
 					</Label>
 				</div>
 			</div>
 
 			<div className="space-y-2">
-				<Label htmlFor="description">Description</Label>
+				<Label htmlFor="description">Açıklama</Label>
 				<Textarea
 					id="description"
 					value={description}

@@ -19,13 +19,13 @@ interface FormData {
 }
 
 const schema = yup.object({
-	name: yup.string().required("Full name is required"),
-	email: yup.string().email("Invalid email").required("Email is required"),
+	name: yup.string().required("Ad soyad zorunludur"),
+	email: yup.string().email("Geçersiz e-posta").required("E-posta zorunludur"),
 	phone: yup
 		.string()
-		.matches(/^\+?[0-9]{7,15}$/, "Enter a valid phone number")
-		.required("Phone number is required"),
-	password: yup.string().min(6, "Minimum 6 characters").required("Password is required"),
+		.matches(/^\+?[0-9]{7,15}$/, "Geçerli telefon numarası girin")
+		.required("Telefon numarası zorunludur"),
+	password: yup.string().min(6, "Minimum 6 karakter").required("Şifre zorunludur"),
 })
 
 export default function SignupForm() {
@@ -51,13 +51,13 @@ export default function SignupForm() {
 			})
 			const result = await res.json()
 
-			if (!res.ok) throw new Error(result.error || "Failed to create account")
+			if (!res.ok) throw new Error(result.error || "Hesap oluşturulamadı")
 
 			toast.success("Account created successfully! Redirecting...")
 			reset()
 			setTimeout(() => router.push("/signin"), 1200)
 		} catch (err: any) {
-			toast.error(err.message || "Something went wrong")
+			toast.error(err.message || "Bir hata oluştu")
 		} finally {
 			setLoading(false)
 		}
@@ -73,7 +73,7 @@ export default function SignupForm() {
 							: field === "email"
 								? "E-posta"
 								: field === "phone"
-									? "Phone Number"
+									? "Telefon Numarası"
 									: "Şifre"}
 					</Label>
 					<Input
@@ -87,9 +87,9 @@ export default function SignupForm() {
 						}
 						placeholder={
 							field === "name"
-								? "John Doe"
+								? "Ad Soyad"
 								: field === "email"
-									? "john@example.com"
+									? "ornek@eposta.com"
 									: field === "phone"
 										? "+1 (555) 000-0000"
 										: "••••••••"

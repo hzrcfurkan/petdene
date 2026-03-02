@@ -19,8 +19,8 @@ interface FormData {
 }
 
 const schema = yup.object({
-	email: yup.string().email("Invalid email").required("Email is required"),
-	password: yup.string().required("Password is required"),
+	email: yup.string().email("Geçersiz e-posta").required("E-posta zorunludur"),
+	password: yup.string().required("Şifre zorunludur"),
 })
 
 export default function SigninForm() {

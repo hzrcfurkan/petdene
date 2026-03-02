@@ -68,7 +68,7 @@ export default function RootLayout({
                 <div className="flex items-center justify-center min-h-screen">
                   <div className="text-center space-y-2">
                     <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
-                    <p className="text-sm text-muted-foreground">Loading...</p>
+                    <p className="text-sm text-muted-foreground">Yükleniyor...</p>
                   </div>
                 </div>
               }>

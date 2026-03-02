@@ -46,7 +46,7 @@ const CHART_COLORS = [
 
 const appointmentsChartConfig = {
 	value: {
-		label: "Appointments",
+		label: "Randevular",
 		color: "var(--chart-1)",
 	},
 	name: {
@@ -98,8 +98,8 @@ export function DashboardCharts({
 			{appointmentsData.length > 0 && (
 				<Card>
 					<CardHeader>
-						<CardTitle>Appointments Over Time</CardTitle>
-						<CardDescription>Appointment trends by date</CardDescription>
+						<CardTitle>Zaman İçinde Randevular</CardTitle>
+						<CardDescription>Tarihe göre randevu trendleri</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<ChartContainer
@@ -138,8 +138,8 @@ export function DashboardCharts({
 			{revenueData.length > 0 && (
 				<Card>
 					<CardHeader>
-						<CardTitle>Revenue Overview</CardTitle>
-						<CardDescription>Revenue by period</CardDescription>
+						<CardTitle>Gelir Genel Bakış</CardTitle>
+						<CardDescription>Döneme göre gelir</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<ChartContainer
@@ -197,8 +197,8 @@ export function DashboardCharts({
 			{statusData.length > 0 && (
 				<Card>
 					<CardHeader>
-						<CardTitle>Status Distribution</CardTitle>
-						<CardDescription>Distribution of appointment statuses</CardDescription>
+						<CardTitle>Durum Dağılımı</CardTitle>
+						<CardDescription>Randevu durumlarının dağılımı</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<ChartContainer

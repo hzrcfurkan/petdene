@@ -156,8 +156,8 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 								<SelectValue placeholder="Sırala" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="name-asc">Name (A-Z)</SelectItem>
-								<SelectItem value="name-desc">Name (Z-A)</SelectItem>
+								<SelectItem value="name-asc">Ad (A-Z)</SelectItem>
+								<SelectItem value="name-desc">Ad (Z-A)</SelectItem>
 								<SelectItem value="date-asc">Date (Oldest)</SelectItem>
 								<SelectItem value="date-desc">Date (Newest)</SelectItem>
 							</SelectContent>
@@ -178,7 +178,7 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 				{isLoading ? (
 					<div className="text-center py-8">Loading pets...</div>
 				) : pets.length === 0 ? (
-					<div className="text-center py-8 text-muted-foreground">No pets found</div>
+					<div className="text-center py-8 text-muted-foreground">Hasta bulunamadı</div>
 				) : (
 					<>
 						<ResponsiveTableWrapper>

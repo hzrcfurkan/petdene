@@ -64,7 +64,7 @@ export function PrescriptionForm({ prescription, onSuccess, onCancel }: Prescrip
 
 			if (prescription) {
 				await updatePrescription({ id: prescription.id, data })
-				toast.success("Prescription updated successfully")
+				toast.success("Reçete başarıyla güncellendi")
 			} else {
 				await createPrescription(data)
 				toast.success("Reçete başarıyla oluşturuldu")
@@ -119,7 +119,7 @@ export function PrescriptionForm({ prescription, onSuccess, onCancel }: Prescrip
 				</div>
 
 				<div className="space-y-2">
-					<Label htmlFor="dosage">Dosage</Label>
+					<Label htmlFor="dosage">Doz</Label>
 					<Input
 						id="dosage"
 						value={dosage}
@@ -140,7 +140,7 @@ export function PrescriptionForm({ prescription, onSuccess, onCancel }: Prescrip
 			</div>
 
 			<div className="space-y-2">
-				<Label htmlFor="instructions">Instructions</Label>
+				<Label htmlFor="instructions">Talimatlar</Label>
 				<Textarea
 					id="instructions"
 					value={instructions}

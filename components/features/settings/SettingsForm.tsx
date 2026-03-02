@@ -101,7 +101,7 @@ export function SettingsForm() {
 	return (
 		<Tabs defaultValue="password" className="w-full">
 			<TabsList className="grid w-full grid-cols-2">
-				<TabsTrigger value="password">Change Password</TabsTrigger>
+				<TabsTrigger value="password">Şifre Değiştir</TabsTrigger>
 				<TabsTrigger value="preferences">Preferences</TabsTrigger>
 			</TabsList>
 
@@ -109,7 +109,7 @@ export function SettingsForm() {
 				<Card className="p-6">
 					<form onSubmit={handlePasswordChange} className="space-y-6">
 						<div>
-							<Label htmlFor="current-password">Current Password</Label>
+							<Label htmlFor="current-password">Mevcut Şifre</Label>
 							<Input
 								id="current-password"
 								type="password"
@@ -122,7 +122,7 @@ export function SettingsForm() {
 						</div>
 
 						<div>
-							<Label htmlFor="new-password">New Password</Label>
+							<Label htmlFor="new-password">Yeni Şifre</Label>
 							<Input
 								id="new-password"
 								type="password"
@@ -135,7 +135,7 @@ export function SettingsForm() {
 						</div>
 
 						<div>
-							<Label htmlFor="confirm-password">Confirm Password</Label>
+							<Label htmlFor="confirm-password">Şifre Tekrar</Label>
 							<Input
 								id="confirm-password"
 								type="password"
@@ -148,7 +148,7 @@ export function SettingsForm() {
 						</div>
 
 						<Button type="submit" disabled={loading} className="w-full">
-							{loading ? "Updating..." : "Update Password"}
+							{loading ? "Güncelleniyor..." : "Update Password"}
 						</Button>
 					</form>
 				</Card>

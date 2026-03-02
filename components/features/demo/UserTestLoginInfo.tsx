@@ -10,7 +10,7 @@ import { useState } from "react"
 const TEST_USERS = [
 	{
 		role: "SUPER_ADMIN",
-		label: "Super Admin",
+		label: "Süper Admin",
 		email: "superadmin@petcare.com",
 		password: "password123",
 		description: "Full system access, user management, and all administrative features",
@@ -30,7 +30,7 @@ const TEST_USERS = [
 	},
 	{
 		role: "STAFF",
-		label: "Staff",
+		label: "Personel",
 		email: "sarah.johnson@petcare.com",
 		password: "password123",
 		description: "Access to appointments, medical records, and pet management",

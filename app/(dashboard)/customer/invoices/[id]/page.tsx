@@ -14,7 +14,7 @@ export default async function CustomerInvoiceDetailPage({
 
 	return (
 		<LayoutAdmin>
-			<InvoiceDetailPage listHref="/customer/invoices" listLabel="My Invoices" />
+			<InvoiceDetailPage listHref="/customer/invoices" listLabel="Faturalarım" />
 		</LayoutAdmin>
 	)
 }

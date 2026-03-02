@@ -14,7 +14,7 @@ export default async function AdminPetServiceDetailPage({
 
 	return (
 		<LayoutAdmin>
-			<PetServiceDetailPage listHref="/admin/pet-services" listLabel="Pet Services" />
+			<PetServiceDetailPage listHref="/admin/pet-services" listLabel="Veteriner Hizmetleri" />
 		</LayoutAdmin>
 	)
 }

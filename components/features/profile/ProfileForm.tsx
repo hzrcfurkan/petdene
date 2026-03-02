@@ -113,7 +113,7 @@ export function ProfileForm() {
 			{/* Personal Information */}
 			<Card>
 				<CardHeader>
-					<CardTitle>Personal Information</CardTitle>
+					<CardTitle>Kişisel Bilgiler</CardTitle>
 					<CardDescription>Update your profile details</CardDescription>
 				</CardHeader>
 				<CardContent>
@@ -136,7 +136,7 @@ export function ProfileForm() {
 						</div>
 
 						<div>
-							<Label htmlFor="name">Full Name</Label>
+							<Label htmlFor="name">Ad Soyad</Label>
 							<Input
 								id="name"
 								type="text"
@@ -148,7 +148,7 @@ export function ProfileForm() {
 						</div>
 
 						<div>
-							<Label htmlFor="phone">Phone Number</Label>
+							<Label htmlFor="phone">Telefon Numarası</Label>
 							<Input
 								id="phone"
 								type="tel"
@@ -179,7 +179,7 @@ export function ProfileForm() {
 					</div>
 					<div className="flex justify-between items-center py-2">
 						<span className="text-sm text-muted-foreground">Account Status</span>
-						<span className="font-medium text-green-600">Active</span>
+						<span className="font-medium text-green-600">Aktif</span>
 					</div>
 				</CardContent>
 			</Card>

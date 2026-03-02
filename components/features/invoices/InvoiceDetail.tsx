@@ -108,7 +108,7 @@ export function InvoiceDetail({ invoice }: InvoiceDetailProps) {
 											Cancel
 										</Button>
 										<Button onClick={handleMarkAsPaid} disabled={markPaid.isPending}>
-											{markPaid.isPending ? "Processing..." : "Ödendi Olarak İşaretle"}
+											{markPaid.isPending ? "İşleniyor..." : "Ödendi Olarak İşaretle"}
 										</Button>
 									</div>
 								</div>

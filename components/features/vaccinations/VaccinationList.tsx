@@ -106,7 +106,7 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 							</DialogTrigger>
 							<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
 								<DialogHeader>
-									<DialogTitle>{editingVaccination ? "Edit Vaccination" : "Add Vaccination"}</DialogTitle>
+									<DialogTitle>{editingVaccination ? "Aşı Düzenle" : "Add Vaccination"}</DialogTitle>
 									<DialogDescription>
 										{editingVaccination ? "Update vaccination record" : "Record a new vaccination"}
 									</DialogDescription>
@@ -180,14 +180,14 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 				{isLoading ? (
 					<div className="text-center py-8">Loading vaccinations...</div>
 				) : vaccinations.length === 0 ? (
-					<div className="text-center py-8 text-muted-foreground">No vaccinations found</div>
+					<div className="text-center py-8 text-muted-foreground">Aşı bulunamadı</div>
 				) : (
 					<>
 						<ResponsiveTableWrapper>
 							<Table>
 								<TableHeader>
 									<TableRow>
-										<TableHead>Vaccine Name</TableHead>
+										<TableHead>Aşı Adı</TableHead>
 										<TableHead>Hasta</TableHead>
 										<TableHead>Date Given</TableHead>
 										<TableHead>Next Due</TableHead>

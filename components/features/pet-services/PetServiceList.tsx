@@ -175,8 +175,8 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 						</SelectTrigger>
 						<SelectContent>
 							<SelectItem value="ALL">All Status</SelectItem>
-							<SelectItem value="true">Active</SelectItem>
-							<SelectItem value="false">Inactive</SelectItem>
+							<SelectItem value="true">Aktif</SelectItem>
+							<SelectItem value="false">Pasif</SelectItem>
 						</SelectContent>
 					</Select>
 					<Select value={sortBy} onValueChange={setSortBy}>
@@ -209,7 +209,7 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 				{isLoading ? (
 					<div className="text-center py-8">Loading services...</div>
 				) : services.length === 0 ? (
-					<div className="text-center py-8 text-muted-foreground">No services found</div>
+					<div className="text-center py-8 text-muted-foreground">Hizmet bulunamadı</div>
 				) : (
 					<>
 						<ResponsiveTableWrapper>
@@ -217,10 +217,10 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 								<TableHeader>
 									<TableRow>
 										<TableHead>Title</TableHead>
-										<TableHead>Type</TableHead>
-										<TableHead>Price</TableHead>
-										<TableHead>Duration</TableHead>
-										<TableHead>Appointments</TableHead>
+										<TableHead>Tür</TableHead>
+										<TableHead>Fiyat</TableHead>
+										<TableHead>Süre</TableHead>
+										<TableHead>Randevular</TableHead>
 										<TableHead>Durum</TableHead>
 										{showActions && <TableHead className="text-right">İşlemler</TableHead>}
 									</TableRow>
@@ -255,10 +255,10 @@ export function PetServiceList({ type, active, showActions = true }: PetServiceL
 											<TableCell data-label="Fiyat">
 												<div className="font-medium">{formatCurrency(service.price)}</div>
 											</TableCell>
-											<TableCell data-label="Duration">
+											<TableCell data-label="Süre">
 												{service.duration ? `${service.duration} min` : "N/A"}
 											</TableCell>
-											<TableCell data-label="Appointments">
+											<TableCell data-label="Randevular">
 												{service._count?.appointments || 0}
 											</TableCell>
 											<TableCell data-label="Durum">

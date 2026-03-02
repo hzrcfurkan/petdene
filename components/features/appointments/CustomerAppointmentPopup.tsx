@@ -63,7 +63,7 @@ export function CustomerAppointmentPopup({ onSuccess, trigger }: CustomerAppoint
 		e.preventDefault()
 		
 		if (!petId || !serviceId || !date) {
-			toast.error("Please fill in all required fields")
+			toast.error("Lütfen tüm zorunlu alanları doldurun")
 			return
 		}
 
@@ -203,7 +203,7 @@ export function CustomerAppointmentPopup({ onSuccess, trigger }: CustomerAppoint
 							id="date"
 							value={date}
 							onChange={setDate}
-							placeholder="Select date and time"
+							placeholder="Tarih ve saat seçin"
 							min={minDate}
 							required
 						/>
@@ -227,7 +227,7 @@ export function CustomerAppointmentPopup({ onSuccess, trigger }: CustomerAppoint
 					{/* Info Message */}
 					<div className="bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
 						<p className="text-sm text-blue-900 dark:text-blue-100">
-							<strong>Note:</strong> Your appointment will be submitted as <strong>PENDING</strong>. 
+							<strong>Note:</strong> Your appointment will be submitted as <strong>Beklemede</strong>. 
 							Our staff will review and confirm it. You'll be notified once it's confirmed.
 						</p>
 					</div>

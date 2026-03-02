@@ -132,7 +132,7 @@ export default function BookPage() {
 											id="name"
 											value={formData.name}
 											onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-											placeholder="John Doe"
+											placeholder="Ad Soyad"
 											required
 										/>
 									</div>
@@ -143,13 +143,13 @@ export default function BookPage() {
 											type="email"
 											value={formData.email}
 											onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-											placeholder="john@example.com"
+											placeholder="ornek@eposta.com"
 											required
 										/>
 									</div>
 								</div>
 								<div className="space-y-2">
-									<Label htmlFor="phone">Phone</Label>
+									<Label htmlFor="phone">Telefon</Label>
 									<Input
 										id="phone"
 										value={formData.phone}
@@ -220,7 +220,7 @@ export default function BookPage() {
 									/>
 								</div>
 								<div className="space-y-2">
-									<Label htmlFor="notes">Notes</Label>
+									<Label htmlFor="notes">Notlar</Label>
 									<Textarea
 										id="notes"
 										value={formData.notes}

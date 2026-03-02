@@ -20,7 +20,7 @@ export default async function PetImportPage() {
 		<LayoutAdmin>
 			<div className="space-y-8">
 				<header className="space-y-1">
-					<h1 className="text-3xl font-bold tracking-tight">Import Pets</h1>
+					<h1 className="text-3xl font-bold tracking-tight">Hastaları İçe Aktar</h1>
 					<p className="text-muted-foreground">
 						Bulk import pets from CSV or Excel files
 					</p>

@@ -133,11 +133,11 @@ export function MedicalRecordManagement() {
 									</div>
 								</div>
 								<div className="space-y-2">
-									<Label className="text-xs">Start Date</Label>
+									<Label className="text-xs">Başlangıç Tarihi</Label>
 									<Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
 								</div>
 								<div className="space-y-2">
-									<Label className="text-xs">End Date</Label>
+									<Label className="text-xs">Bitiş Tarihi</Label>
 									<Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
 								</div>
 								{(search || dateFrom || dateTo) && (
@@ -165,7 +165,7 @@ export function MedicalRecordManagement() {
 										/>
 									</div>
 								</div>
-								<Button variant="ghost" size="sm" onClick={() => setSearch("")}>Clear</Button>
+								<Button variant="ghost" size="sm" onClick={() => setSearch("")}>Temizle</Button>
 							</div>
 							<MedicalRecordList
 								dateFrom={thirtyDaysAgo.toISOString().split("T")[0]}
@@ -236,11 +236,11 @@ export function MedicalRecordManagement() {
 									</div>
 								</div>
 								<div className="space-y-2">
-									<Label className="text-xs">Start Date</Label>
+									<Label className="text-xs">Başlangıç Tarihi</Label>
 									<Input type="date" value={dateFrom} onChange={(e) => setDateFrom(e.target.value)} />
 								</div>
 								<div className="space-y-2">
-									<Label className="text-xs">End Date</Label>
+									<Label className="text-xs">Bitiş Tarihi</Label>
 									<Input type="date" value={dateTo} onChange={(e) => setDateTo(e.target.value)} />
 								</div>
 								{(search || dateFrom || dateTo) && (

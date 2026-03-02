@@ -52,20 +52,20 @@ export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDe
 					onStatusChange?.()
 				},
 				onError: (error: any) => {
-					toast.error(error?.info?.error || "Failed to update appointment status")
+					toast.error(error?.info?.error || "Randevu durumu güncellenemedi")
 				},
 			}
 		)
 	}
 
 	const handleQuickApprove = () => {
-		if (appointment.status === "Beklemede") {
+		if (appointment.status === "PENDING") {
 			handleStatusChange("Onaylandı")
 		}
 	}
 
 	const handleQuickComplete = () => {
-		if (appointment.status === "Onaylandı") {
+		if (appointment.status === "CONFIRMED") {
 			handleStatusChange("Tamamlandı")
 		}
 	}
@@ -73,12 +73,12 @@ export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDe
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
-				<CardTitle>Appointment Details</CardTitle>
+				<CardTitle>Randevu Detayları</CardTitle>
 				<div className="flex items-center gap-2">
 					<Badge className={statusColors[appointment.status] || ""}>
 						{appointment.status}
 					</Badge>
-					{canChangeStatus && appointment.status === "Beklemede" && (
+					{canChangeStatus && appointment.status === "PENDING" && (
 						<Button
 							size="sm"
 							onClick={handleQuickApprove}
@@ -89,7 +89,7 @@ export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDe
 							Approve
 						</Button>
 					)}
-					{canChangeStatus && appointment.status === "Onaylandı" && (
+					{canChangeStatus && appointment.status === "CONFIRMED" && (
 						<Button
 							size="sm"
 							variant="outline"
@@ -123,13 +123,13 @@ export function AppointmentDetail({ appointment, onStatusChange }: AppointmentDe
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="Beklemede">PENDING</SelectItem>
-									<SelectItem value="Onaylandı">CONFIRMED</SelectItem>
-									<SelectItem value="Tamamlandı">COMPLETED</SelectItem>
-									<SelectItem value="İptal Edildi">CANCELLED</SelectItem>
+									<SelectItem value="PENDING">Beklemede</SelectItem>
+									<SelectItem value="CONFIRMED">Onaylandı</SelectItem>
+									<SelectItem value="COMPLETED">Tamamlandı</SelectItem>
+									<SelectItem value="CANCELLED">İptal Edildi</SelectItem>
 								</SelectContent>
 							</Select>
-							{isPending && <span className="text-sm text-muted-foreground">Updating...</span>}
+							{isPending && <span className="text-sm text-muted-foreground">Güncelleniyor...</span>}
 						</div>
 					</CardContent>
 				</Card>

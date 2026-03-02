@@ -180,7 +180,7 @@ export function getNavItems(role: string): NavItem[] {
 	// Add pet care menus for customers (CUSTOMER role)
 	if (role === "CUSTOMER") {
 		items.push({
-			label: "My Pets",
+			label: "Hayvanlarım",
 			href: "/customer/pets",
 			icon: PawPrint,
 		})
