@@ -1,4 +1,4 @@
-"use server"
+
 
 import LayoutAdmin from "@/components/layout/admin"
 import { currentUserServer } from "@/lib/auth"
