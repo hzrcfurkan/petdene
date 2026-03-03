@@ -3,10 +3,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
-import { PawPrint, Calendar, User, Mail, Phone, FileText, Heart, Pill, Stethoscope } from "lucide-react"
+import { PawPrint, Calendar, User, Mail, Phone, FileText, Heart, Pill, Stethoscope, AlertCircle, TrendingUp } from "lucide-react"
 import { format } from "date-fns"
+import { tr } from "date-fns/locale"
 import { type Pet } from "@/lib/react-query/hooks/pets"
 import { usePet } from "@/lib/react-query/hooks/pets"
+import { useVisits } from "@/lib/react-query/hooks/visits"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 
 interface PetDetailProps {
 	pet: Pet
@@ -15,6 +18,15 @@ interface PetDetailProps {
 export function PetDetail({ pet: initialPet }: PetDetailProps) {
 	const { data: petData } = usePet(initialPet.id)
 	const pet = petData || initialPet
+	const { formatCurrency } = useCurrency()
+
+	// Avans: tüm visit'lerdeki fazla ödemelerin toplamı
+	const { data: visitsData } = useVisits({ petId: pet.id, limit: 200 })
+	const visits = visitsData?.visits || []
+	const totalAvans = visits.reduce((sum, v) => {
+		const over = v.paidAmount - v.totalAmount
+		return sum + (over > 0 ? over : 0)
+	}, 0)
 
 	return (
 		<div className="space-y-4">
@@ -161,6 +173,14 @@ export function PetDetail({ pet: initialPet }: PetDetailProps) {
 					</CardContent>
 				</Card>
 			</div>
+
+			{/* Avans kartı */}
+			{totalAvans > 0 && (
+				<div className="vd-avans-info" style={{borderRadius: 10, marginBottom: 4}}>
+					<AlertCircle className="w-4 h-4 shrink-0" />
+					<span>Bu hastanın <strong>+{formatCurrency(totalAvans)} avans bakiyesi</strong> var. Bir sonraki ziyarette kullanılabilir.</span>
+				</div>
+			)}
 
 			{/* Notes */}
 			{pet.notes && (

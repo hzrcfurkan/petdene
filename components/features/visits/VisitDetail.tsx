@@ -10,14 +10,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import {
 	Stethoscope, CreditCard, Plus, Trash2, Download,
 	Calendar, User, PawPrint, Hash, Banknote, CheckCircle2,
-	Clock, XCircle, Package, ClipboardList, Syringe,
+	Clock, XCircle, Package, ClipboardList, Syringe, Pencil, AlertCircle,
 } from "lucide-react"
 import { format } from "date-fns"
 import { tr } from "date-fns/locale"
 import { useState, useEffect } from "react"
 import {
 	useVisit, useAddVisitService, useRemoveVisitService,
-	useAddVisitPayment, useSaveVisitMedicalRecord, type Visit,
+	useAddVisitPayment, useSaveVisitMedicalRecord,
+	useDeleteVisitPayment, useUpdateVisitPayment, type Visit,
 } from "@/lib/react-query/hooks/visits"
 import { usePetServices } from "@/lib/react-query/hooks/pet-services"
 import { toast } from "sonner"
@@ -58,6 +59,8 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 	const addService = useAddVisitService(visit.id)
 	const removeService = useRemoveVisitService(visit.id)
 	const addPayment = useAddVisitPayment(visit.id)
+	const deletePayment = useDeleteVisitPayment(visit.id)
+	const updatePayment = useUpdateVisitPayment(visit.id)
 	const saveMedicalRecord = useSaveVisitMedicalRecord(visit.id)
 
 	const [activeTab, setActiveTab] = useState("services")
@@ -66,6 +69,11 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 	const [paymentNotes, setPaymentNotes] = useState("")
 	const [addServiceOpen, setAddServiceOpen] = useState(false)
 	const [addPaymentOpen, setAddPaymentOpen] = useState(false)
+	const [editPaymentOpen, setEditPaymentOpen] = useState(false)
+	const [editingPayment, setEditingPayment] = useState<any>(null)
+	const [editMethod, setEditMethod] = useState("nakit")
+	const [editAmount, setEditAmount] = useState("")
+	const [editNotes, setEditNotes] = useState("")
 	const [selectedServiceId, setSelectedServiceId] = useState("")
 	const [serviceQty, setServiceQty] = useState(1)
 
@@ -84,8 +92,9 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 	}, [visit.medicalRecord])
 
 	const balance = visit.totalAmount - visit.paidAmount
+	const avans = balance < 0 ? Math.abs(balance) : 0  // fazla ödeme = avans
 	const isPaid = balance <= 0
-	const payPct = visit.totalAmount > 0 ? Math.min(100, Math.round((visit.paidAmount / visit.totalAmount) * 100)) : 0
+	const payPct = visit.totalAmount > 0 ? Math.min(100, Math.round((visit.paidAmount / visit.totalAmount) * 100)) : (visit.paidAmount > 0 ? 100 : 0)
 
 	const selectedService = services.find((s: any) => s.id === selectedServiceId)
 	const servicePreviewTotal = selectedService ? selectedService.price * serviceQty : 0
@@ -106,14 +115,40 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 	}
 
 	const handleAddPayment = async (fullPay = false) => {
-		const amt = fullPay ? balance : Number(paymentAmount)
+		const amt = fullPay ? Math.max(balance, 0) : Number(paymentAmount)
 		if (!amt || amt <= 0) { toast.error("Geçerli tutar girin"); return }
-		if (amt > balance) { toast.error(`Bakiyeyi aşıyor (${formatCurrency(balance)})`); return }
 		try {
 			await addPayment.mutateAsync({ method: paymentMethod, amount: amt, notes: paymentNotes || undefined })
 			toast.success(fullPay ? "Tam ödeme kaydedildi" : "Ödeme kaydedildi")
 			setAddPaymentOpen(false); setPaymentAmount(""); setPaymentNotes("")
 		} catch (e: any) { toast.error(e?.info?.error || "Ödeme kaydedilemedi") }
+	}
+
+	const handleDeletePayment = async (p: any) => {
+		if (!confirm(`${formatCurrency(p.amount)} tutarındaki ödemeyi iptal etmek istediğinizden emin misiniz?`)) return
+		try {
+			await deletePayment.mutateAsync(p.id)
+			toast.success("Ödeme iptal edildi")
+		} catch (e: any) { toast.error(e?.info?.error || "İptal edilemedi") }
+	}
+
+	const openEditPayment = (p: any) => {
+		setEditingPayment(p)
+		setEditMethod(p.method)
+		setEditAmount(String(p.amount))
+		setEditNotes(p.notes || "")
+		setEditPaymentOpen(true)
+	}
+
+	const handleEditPayment = async () => {
+		if (!editingPayment) return
+		const amt = Number(editAmount)
+		if (!amt || amt <= 0) { toast.error("Geçerli tutar girin"); return }
+		try {
+			await updatePayment.mutateAsync({ paymentId: editingPayment.id, method: editMethod, amount: amt, notes: editNotes || undefined })
+			toast.success("Ödeme güncellendi")
+			setEditPaymentOpen(false); setEditingPayment(null)
+		} catch (e: any) { toast.error(e?.info?.error || "Güncellenemedi") }
 	}
 
 	const handleSaveMedicalRecord = async () => {
@@ -171,8 +206,14 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 							<span className="vd-paid-val">{formatCurrency(visit.paidAmount)}</span>
 							<span className="vd-sep">·</span>
 							<span className="vd-balance-label">Kalan</span>
-							<span className={`vd-balance-val ${balance > 0 ? "vd-balance-due" : "vd-balance-ok"}`}>{formatCurrency(balance)}</span>
+							<span className={`vd-balance-val ${balance > 0 ? "vd-balance-due" : "vd-balance-ok"}`}>{formatCurrency(Math.max(balance, 0))}</span>
 						</div>
+						{avans > 0 && (
+							<div className="vd-avans-badge">
+								<AlertCircle className="w-3.5 h-3.5" />
+								+{formatCurrency(avans)} Avans
+							</div>
+						)}
 						{visit.totalAmount > 0 && (
 							<div className="vd-progress-wrap">
 								<div className="vd-progress-bar">
@@ -415,6 +456,14 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 						</div>
 					</div>
 
+					{/* Avans uyarısı */}
+					{avans > 0 && (
+						<div className="vd-avans-info">
+							<AlertCircle className="w-4 h-4 shrink-0" />
+							<span>Bu ziyarette <strong>+{formatCurrency(avans)} avans</strong> bulunuyor. Bir sonraki ziyarette kullanılabilir.</span>
+						</div>
+					)}
+
 					<div className="vd-table-wrap">
 						{visit.payments && visit.payments.length > 0 ? (
 							<table className="vd-table">
@@ -425,6 +474,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 										<th className="vd-th">Tutar</th>
 										<th className="vd-th">Durum</th>
 										<th className="vd-th">Not</th>
+										{canEdit && <th className="vd-th vd-th-right">İşlemler</th>}
 									</tr>
 								</thead>
 								<tbody>
@@ -434,9 +484,21 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 											<td className="vd-td"><span className="vd-method-badge">{PAYMENT_METHODS.find(m => m.value === p.method)?.label || p.method}</span></td>
 											<td className="vd-td vd-td-bold">{formatCurrency(p.amount)}</td>
 											<td className="vd-td">
-												<Badge variant={p.status === "Tamamlandı" ? "default" : "secondary"}>{p.status}</Badge>
+												<Badge variant={p.status === "COMPLETED" ? "default" : "secondary"}>
+													{p.status === "COMPLETED" ? "Tamamlandı" : p.status}
+												</Badge>
 											</td>
 											<td className="vd-td vd-td-muted">{p.notes || "—"}</td>
+											{canEdit && (
+												<td className="vd-td vd-td-action" style={{width: 80}}>
+													<button className="vd-action-edit" onClick={() => openEditPayment(p)} title="Düzenle">
+														<Pencil className="w-3.5 h-3.5" />
+													</button>
+													<button className="vd-del-btn" onClick={() => handleDeletePayment(p)} title="İptal Et">
+														<Trash2 className="w-3.5 h-3.5" />
+													</button>
+												</td>
+											)}
 										</tr>
 									))}
 								</tbody>
@@ -445,6 +507,38 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 							<div className="vd-empty"><CreditCard className="w-8 h-8" /><span>Henüz ödeme kaydı yok</span></div>
 						)}
 					</div>
+
+					{/* Ödeme düzenleme modal */}
+					<Dialog open={editPaymentOpen} onOpenChange={setEditPaymentOpen}>
+						<DialogContent>
+							<DialogHeader><DialogTitle>Ödeme Düzenle</DialogTitle></DialogHeader>
+							<div className="vd-modal-body">
+								<div className="vd-field">
+									<Label>Ödeme Yöntemi</Label>
+									<Select value={editMethod} onValueChange={setEditMethod}>
+										<SelectTrigger><SelectValue /></SelectTrigger>
+										<SelectContent>
+											{PAYMENT_METHODS.map(m => <SelectItem key={m.value} value={m.value}>{m.label}</SelectItem>)}
+										</SelectContent>
+									</Select>
+								</div>
+								<div className="vd-field">
+									<Label>Tutar</Label>
+									<Input type="number" step="0.01" min="0" value={editAmount} onChange={e => setEditAmount(e.target.value)} />
+								</div>
+								<div className="vd-field">
+									<Label>Not (opsiyonel)</Label>
+									<Input value={editNotes} onChange={e => setEditNotes(e.target.value)} placeholder="Ödeme notu..." />
+								</div>
+								<div className="vd-modal-actions">
+									<button className="vd-btn-ghost" onClick={() => setEditPaymentOpen(false)}>İptal</button>
+									<button className="vd-btn-primary" onClick={handleEditPayment} disabled={updatePayment.isPending}>
+										{updatePayment.isPending ? "Kaydediliyor..." : "Kaydet"}
+									</button>
+								</div>
+							</div>
+						</DialogContent>
+					</Dialog>
 				</div>
 			)}
 		</div>

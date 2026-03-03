@@ -49,14 +49,6 @@ export async function POST(
 			return NextResponse.json({ error: "Visit not found" }, { status: 404 })
 		}
 
-		const remaining = visit.totalAmount - visit.paidAmount
-		if (amt > remaining) {
-			return NextResponse.json(
-				{ error: `Amount exceeds remaining balance ($${remaining.toFixed(2)})` },
-				{ status: 400 }
-			)
-		}
-
 		const [payment, updatedVisit] = await prisma.$transaction([
 			prisma.visitPayment.create({
 				data: {

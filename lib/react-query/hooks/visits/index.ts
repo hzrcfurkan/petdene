@@ -182,3 +182,27 @@ export function useSaveVisitMedicalRecord(visitId: string) {
 		},
 	})
 }
+
+export function useDeleteVisitPayment(visitId: string) {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: (paymentId: string) =>
+			mutationFetcher(`/api/v1/visits/${visitId}/payments/${paymentId}`, { method: "DELETE" }),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["visits", visitId] })
+			queryClient.invalidateQueries({ queryKey: ["visits"] })
+		},
+	})
+}
+
+export function useUpdateVisitPayment(visitId: string) {
+	const queryClient = useQueryClient()
+	return useMutation({
+		mutationFn: ({ paymentId, ...data }: { paymentId: string; method?: string; amount?: number; notes?: string }) =>
+			mutationFetcher(`/api/v1/visits/${visitId}/payments/${paymentId}`, { method: "PUT", body: data }),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["visits", visitId] })
+			queryClient.invalidateQueries({ queryKey: ["visits"] })
+		},
+	})
+}
