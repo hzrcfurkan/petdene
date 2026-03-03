@@ -206,7 +206,7 @@ export function StockList() {
 			<div className="sc-hd">
 				<div>
 					<h1 className="sc-title"><Package className="w-6 h-6" />Stok Yönetimi</h1>
-					<p className="sc-sub">{items.length} stok kalemi · {lowStock.length > 0 && <span className="sc-low-warn"><AlertTriangle className="w-3 h-3" />{lowStock.length} düşük stok</span>}</p>
+					<p className="sc-sub">{items.length} stok kalemi{lowStock.length > 0 && <> · <span className="sc-low-warn"><AlertTriangle className="w-3 h-3" />{lowStock.length} düşük stok</span></>}</p>
 				</div>
 				<button className="sc-btn-primary" onClick={() => { setEditItem(null); setShowForm(true) }}>
 					<Plus className="w-4 h-4" />Yeni Stok Ekle
@@ -234,22 +234,22 @@ export function StockList() {
 				</div>
 			</div>
 
-			{/* Tablo */}
+			{/* Masaüstü Tablo */}
 			<div className="sc-table-wrap">
 				<table className="sc-table">
 					<thead>
 						<tr>
-							<th className="sc-th sc-th-sortable" onClick={() => toggleSort("name")}>
-								Stok Adı <SortIcon col="name" />
+							<th className="sc-th sc-th-sortable sc-td-name" onClick={() => toggleSort("name")}>
+								<span className="sc-th-inner">Stok Adı <SortIcon col="name" /></span>
 							</th>
-							<th className="sc-th">Kategori</th>
-							<th className="sc-th sc-th-sortable" onClick={() => toggleSort("quantity")}>
-								Stok <SortIcon col="quantity" />
+							<th className="sc-th sc-td-cat">Kategori</th>
+							<th className="sc-th sc-th-sortable sc-td-qty" onClick={() => toggleSort("quantity")}>
+								<span className="sc-th-inner">Stok <SortIcon col="quantity" /></span>
 							</th>
-							<th className="sc-th sc-th-sortable" onClick={() => toggleSort("price")}>
-								Satış Fiyatı <SortIcon col="price" />
+							<th className="sc-th sc-th-sortable sc-td-price" onClick={() => toggleSort("price")}>
+								<span className="sc-th-inner">Satış Fiyatı <SortIcon col="price" /></span>
 							</th>
-							<th className="sc-th">Maliyet</th>
+							<th className="sc-th sc-td-price">Maliyet</th>
 							<th className="sc-th">Açıklama</th>
 							<th className="sc-th sc-th-actions">İşlemler</th>
 						</tr>
@@ -265,10 +265,10 @@ export function StockList() {
 									<span className="sc-item-name">{item.name}</span>
 									{item.barcode && <span className="sc-barcode">{item.barcode}</span>}
 								</td>
-								<td className="sc-td">
+								<td className="sc-td sc-td-cat">
 									<span className={`sc-cat-badge ${catColors[item.category] || "sc-cat-diger"}`}>{item.category}</span>
 								</td>
-								<td className="sc-td">
+								<td className="sc-td sc-td-qty">
 									<div className="sc-qty-wrap">
 										<QuickQtyEditor item={item} />
 										<span className="sc-unit">{item.unit}</span>
@@ -292,6 +292,60 @@ export function StockList() {
 						))}
 					</tbody>
 				</table>
+			</div>
+
+			{/* Mobil Card Görünümü */}
+			<div className="sc-mobile-cards">
+				{isLoading ? (
+					<div className="sc-loading">Yükleniyor...</div>
+				) : sorted.length === 0 ? (
+					<div className="sc-empty"><Package className="w-8 h-8" /><span>Stok bulunamadı</span></div>
+				) : sorted.map(item => (
+					<div key={item.id} className="sc-mobile-card">
+						<div className="sc-mc-header">
+							<div>
+								<div className="sc-mc-title">{item.name}</div>
+								{item.barcode && <div className="sc-mc-barcode">{item.barcode}</div>}
+							</div>
+							<div className="sc-mc-actions">
+								<button className="sc-action-btn sc-edit" onClick={() => { setEditItem(item); setShowForm(true) }}>
+									<Edit2 className="w-3.5 h-3.5" />
+								</button>
+								<button className="sc-action-btn sc-delete" onClick={() => handleDelete(item)}>
+									<Trash2 className="w-3.5 h-3.5" />
+								</button>
+							</div>
+						</div>
+						<div className="sc-mc-grid">
+							<div className="sc-mc-item">
+								<span className="sc-mc-label">Kategori</span>
+								<span className={`sc-cat-badge ${catColors[item.category] || "sc-cat-diger"}`} style={{width:"fit-content"}}>{item.category}</span>
+							</div>
+							<div className="sc-mc-item">
+								<span className="sc-mc-label">Stok</span>
+								<div className="sc-qty-wrap">
+									<QuickQtyEditor item={item} />
+									<span className="sc-unit">{item.unit}</span>
+									{item.quantity <= item.minQuantity && <AlertTriangle className="w-3 h-3 text-amber-500" />}
+								</div>
+							</div>
+							<div className="sc-mc-item">
+								<span className="sc-mc-label">Satış Fiyatı</span>
+								<span className="sc-mc-value-price">{formatCurrency(item.price)}</span>
+							</div>
+							<div className="sc-mc-item">
+								<span className="sc-mc-label">Maliyet</span>
+								<span className="sc-mc-value-price">{formatCurrency(item.costPrice)}</span>
+							</div>
+							{item.description && (
+								<div className="sc-mc-item" style={{gridColumn:"1/-1"}}>
+									<span className="sc-mc-label">Açıklama</span>
+									<span className="sc-mc-value">{item.description}</span>
+								</div>
+							)}
+						</div>
+					</div>
+				))}
 			</div>
 
 			{/* Form modal */}
