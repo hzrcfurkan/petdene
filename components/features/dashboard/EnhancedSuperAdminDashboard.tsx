@@ -10,10 +10,14 @@ import {
 	Calendar, PawPrint, DollarSign, FileText,
 	ArrowUpRight, Activity, TrendingUp, Settings,
 	ChevronLeft, ChevronRight, X, Eye, Phone, Mail,
+	AlertTriangle, Clock, Receipt, Pill, Package, CheckCircle2, XCircle, RotateCcw,
 } from "lucide-react"
 import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { useVisits } from "@/lib/react-query/hooks/visits"
 import { useVaccinations } from "@/lib/react-query/hooks/vaccinations"
+import { usePrescriptions } from "@/lib/react-query/hooks/prescriptions"
+import { useStocks } from "@/lib/react-query/hooks/stocks"
+import { useUnpaidVisits } from "@/lib/react-query/hooks/payments"
 
 
 const WA_MSG = encodeURIComponent("Merhaba, sizlere ABC Veteriner kliniğinden ulaşmaktayım.")
@@ -288,14 +292,20 @@ export function EnhancedSuperAdminDashboard() {
 	const { data: petsData } = usePets({ limit: 1000 })
 	const { data: invoicesData } = useInvoices({ limit: 1000 })
 	const { data: visitsData } = useVisits({ limit: 1000 })
-	const { data: vaccinationsData } = useVaccinations({ limit: 1000 })
+	const { data: vaccinationsData }  = useVaccinations({ limit: 1000 })
+	const { data: prescriptionsData } = usePrescriptions({ limit: 1000 })
+	const { data: stocksData }        = useStocks({ limit: 1000 })
+	const { data: unpaidData }        = useUnpaidVisits()
 
 	const users        = usersResponse?.users || []
 	const appointments = appointmentsData?.appointments || []
 	const pets         = petsData?.pets || []
 	const invoices     = invoicesData?.invoices || []
 	const visits       = visitsData?.visits || []
-	const vaccinations = vaccinationsData?.vaccinations || []
+	const vaccinations  = vaccinationsData?.vaccinations || []
+	const prescriptions = prescriptionsData?.prescriptions || []
+	const stocks        = (stocksData as any)?.items || (stocksData as any)?.stocks || []
+	const unpaidVisits  = unpaidData?.unpaidVisits || []
 
 	// ---- Takvim state ----
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -419,7 +429,43 @@ export function EnhancedSuperAdminDashboard() {
 		}
 	}, [appointments, visits, vaccinations, invoices, selectedDate])
 
-	const chartData = useMemo(() => {
+	const todayBottomStats = useMemo(() => {
+		const activeDate = selectedDate || now
+		const todayStr   = format(activeDate, "yyyy-MM-dd")
+
+		// Bugünkü reçeteler
+		const todayRx = prescriptions.filter(p => p.dateIssued?.slice(0,10) === todayStr)
+
+		// Bugün kesilen faturalar
+		const todayInvoices = invoices.filter(i => i.createdAt?.slice(0,10) === todayStr)
+
+		// Bugün iptal/ertelenen randevular
+		const cancelledAppts = appointments.filter(a =>
+			format(new Date(a.date), "yyyy-MM-dd") === todayStr && a.status === "CANCELLED"
+		)
+		const rescheduledAppts = appointments.filter(a =>
+			format(new Date(a.date), "yyyy-MM-dd") === todayStr && a.status === "PENDING"
+		)
+
+		// Kritik stok (minQuantity altında)
+		const criticalStocks = stocks.filter((s: any) => s.isActive && s.quantity <= s.minQuantity)
+
+		// Bekleyen işler: tamamlanmamış bugünkü ziyaretler (IN_PROGRESS)
+		const pendingVisits = visits.filter(v =>
+			v.visitDate?.slice(0,10) === todayStr && v.status === "IN_PROGRESS"
+		)
+		// Ödenmemiş bakiye olan ziyaretler (bakiye > 0)
+		const unpaidToday = unpaidVisits.filter(v => v.visitDate?.slice(0,10) === todayStr)
+
+		return {
+			todayRx, todayInvoices, cancelledAppts, rescheduledAppts,
+			criticalStocks, pendingVisits, unpaidToday,
+			todayInvoiceTotal: todayInvoices.filter(i => i.status === "PAID").reduce((s,i) => s + i.amount, 0),
+			unpaidInvoiceTotal: todayInvoices.filter(i => i.status === "UNPAID").reduce((s,i) => s + i.amount, 0),
+		}
+	}, [prescriptions, invoices, appointments, stocks, visits, unpaidVisits, selectedDate])
+
+		const chartData = useMemo(() => {
 		const apptChart = Array.from({ length: 7 }, (_, i) => {
 			const d = new Date(now); d.setDate(d.getDate() - (6 - i))
 			return { name: format(d, "dd MMM"), value: filteredAppointments.filter(a => format(new Date(a.date),"yyyy-MM-dd")===format(d,"yyyy-MM-dd")).length }
@@ -630,33 +676,214 @@ export function EnhancedSuperAdminDashboard() {
 				monthlyApptData={chartData.monthlyAppt}
 			/>
 
-			{/* Bottom */}
-			<div className="ad-bottom">
-				<div className="ad-panel">
-					<div className="ad-panel-hd">
-						<h3 className="ad-panel-title"><Activity className="w-4 h-4" />Son Kayıt Olan Kullanıcılar</h3>
-						<a href="/super/roles" className="ad-link">Tümünü Yönet →</a>
+			{/* ===== BUGÜN ALT PANELLERİ ===== */}
+			<div className="sa-today-panels-title">
+				<span className="sa-tp-dot" />
+				<span>Bugün</span>
+				<span className="sa-tp-date">{dateLabel}</span>
+			</div>
+
+			{/* Row 1: Reçeteler + Faturalar + İptal Randevular */}
+			<div className="sa-today-panels-grid">
+
+				{/* Bugün Yazılan Reçeteler */}
+				<div className="sa-tp-card">
+					<div className="sa-tp-hd sa-tp-hd-violet">
+						<div className="sa-tp-hd-icon"><Pill className="w-4 h-4" /></div>
+						<div>
+							<p className="sa-tp-hd-title">Bugün Yazılan Reçeteler</p>
+							<p className="sa-tp-hd-count">{todayBottomStats.todayRx.length} reçete</p>
+						</div>
 					</div>
-					<div className="ad-visits">
-						{recentUsers.length === 0 ? (
-							<div className="ad-empty">Henüz kullanıcı yok</div>
-						) : recentUsers.map((u: any) => (
-							<div key={u.id} className="ad-visit-row">
-								<div className="ad-visit-avatar" style={{ background: "var(--pc-violet-lt)", color: "var(--pc-violet)" }}>
-									{(u.name || u.email || "U").charAt(0).toUpperCase()}
+					<div className="sa-tp-list">
+						{todayBottomStats.todayRx.length === 0 ? (
+							<div className="sa-tp-empty"><Pill className="w-5 h-5" /><span>Bugün reçete yazılmadı</span></div>
+						) : todayBottomStats.todayRx.slice(0,5).map((rx: any) => (
+							<div key={rx.id} className="sa-tp-row">
+								<div className="sa-tp-avatar sa-tpa-violet">{(rx.pet?.name||"?").charAt(0)}</div>
+								<div className="sa-tp-info">
+									<p className="sa-tp-main">{rx.pet?.name || "—"} <span className="sa-tp-species">{rx.pet?.species}</span></p>
+									<p className="sa-tp-sub">{rx.medicineName} {rx.dosage ? `· ${rx.dosage}` : ""}</p>
 								</div>
-								<div className="ad-visit-info">
-									<p className="ad-visit-pet">{u.name || "—"}</p>
-									<p className="ad-visit-meta">{u.email}</p>
-								</div>
-								<div className="ad-visit-right">
-									<span className={`ad-badge ${roleCfg[u.role]?.cls || "rb-customer"}`}>{roleCfg[u.role]?.label || u.role}</span>
-									{u.createdAt && <p className="ad-visit-meta">{format(new Date(u.createdAt), "d MMM yyyy")}</p>}
+								<div className="sa-tp-right">
+									{rx.pet?.owner?.phone && (
+										<a href={waLink(rx.pet.owner.phone)!} target="_blank" rel="noopener noreferrer" className="sa-tp-wa"><Phone className="w-3 h-3" /></a>
+									)}
 								</div>
 							</div>
 						))}
 					</div>
 				</div>
+
+				{/* Bugün Kesilen Faturalar */}
+				<div className="sa-tp-card">
+					<div className="sa-tp-hd sa-tp-hd-blue">
+						<div className="sa-tp-hd-icon"><Receipt className="w-4 h-4" /></div>
+						<div>
+							<p className="sa-tp-hd-title">Bugün Kesilen Faturalar</p>
+							<p className="sa-tp-hd-count">{todayBottomStats.todayInvoices.length} fatura · <span className="sa-tp-green">{formatCurrency(todayBottomStats.todayInvoiceTotal)} ödendi</span>{todayBottomStats.unpaidInvoiceTotal > 0 && <span className="sa-tp-amber"> · {formatCurrency(todayBottomStats.unpaidInvoiceTotal)} bekliyor</span>}</p>
+						</div>
+					</div>
+					<div className="sa-tp-list">
+						{todayBottomStats.todayInvoices.length === 0 ? (
+							<div className="sa-tp-empty"><Receipt className="w-5 h-5" /><span>Bugün fatura kesilmedi</span></div>
+						) : todayBottomStats.todayInvoices.slice(0,5).map((inv: any) => (
+							<div key={inv.id} className="sa-tp-row">
+								<div className={`sa-tp-status-dot ${inv.status === "PAID" ? "sa-dot-green" : "sa-dot-amber"}`} />
+								<div className="sa-tp-info">
+									<p className="sa-tp-main">
+										{inv.visit?.pet?.name || inv.appointment?.pet?.name || "—"}
+										{inv.visit && <span className="sa-tp-proto">PRO-{inv.visit.protocolNumber}</span>}
+									</p>
+									<p className="sa-tp-sub">{inv.appointment?.service?.title || "Ziyaret faturası"}</p>
+								</div>
+								<div className="sa-tp-right">
+									<span className={`sa-tp-amt ${inv.status === "PAID" ? "sa-tp-green" : "sa-tp-amber"}`}>{formatCurrency(inv.amount)}</span>
+									<span className={`ad-badge ${inv.status === "PAID" ? "s-completed" : "s-pending"}`}>{inv.status === "PAID" ? "Ödendi" : "Bekliyor"}</span>
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+
+				{/* Bugün İptal / Ertelenen */}
+				<div className="sa-tp-card">
+					<div className="sa-tp-hd sa-tp-hd-red">
+						<div className="sa-tp-hd-icon"><XCircle className="w-4 h-4" /></div>
+						<div>
+							<p className="sa-tp-hd-title">Bugün İptal / Bekleyen</p>
+							<p className="sa-tp-hd-count">
+								{todayBottomStats.cancelledAppts.length > 0 && <span className="sa-tp-red">{todayBottomStats.cancelledAppts.length} iptal</span>}
+								{todayBottomStats.cancelledAppts.length > 0 && todayBottomStats.rescheduledAppts.length > 0 && " · "}
+								{todayBottomStats.rescheduledAppts.length > 0 && <span className="sa-tp-amber">{todayBottomStats.rescheduledAppts.length} bekliyor</span>}
+								{todayBottomStats.cancelledAppts.length === 0 && todayBottomStats.rescheduledAppts.length === 0 && <span>Sorun yok ✓</span>}
+							</p>
+						</div>
+					</div>
+					<div className="sa-tp-list">
+						{todayBottomStats.cancelledAppts.length === 0 && todayBottomStats.rescheduledAppts.length === 0 ? (
+							<div className="sa-tp-empty sa-tp-empty-green"><CheckCircle2 className="w-5 h-5" /><span>Bugün iptal yok, harika!</span></div>
+						) : [...todayBottomStats.cancelledAppts, ...todayBottomStats.rescheduledAppts].slice(0,5).map((a: any) => (
+							<div key={a.id} className="sa-tp-row">
+								<div className="sa-tp-avatar sa-tpa-red">{(a.pet?.name||"?").charAt(0)}</div>
+								<div className="sa-tp-info">
+									<p className="sa-tp-main">{a.pet?.name || "—"} <span className="sa-tp-species">{a.pet?.species}</span></p>
+									<p className="sa-tp-sub">{a.service?.title || "—"} · {format(new Date(a.date), "HH:mm")}</p>
+								</div>
+								<div className="sa-tp-right">
+									<span className={`ad-badge ${a.status === "CANCELLED" ? "s-cancelled" : "s-pending"}`}>{a.status === "CANCELLED" ? "İptal" : "Bekliyor"}</span>
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+			</div>
+
+			{/* Row 2: Bekleyen İşler + Kritik Stok + Ödenmemiş */}
+			<div className="sa-today-panels-grid">
+
+				{/* Bekleyen İşler */}
+				<div className="sa-tp-card">
+					<div className="sa-tp-hd sa-tp-hd-amber">
+						<div className="sa-tp-hd-icon"><Clock className="w-4 h-4" /></div>
+						<div>
+							<p className="sa-tp-hd-title">Bekleyen İşler</p>
+							<p className="sa-tp-hd-count">{todayBottomStats.pendingVisits.length} aktif ziyaret devam ediyor</p>
+						</div>
+					</div>
+					<div className="sa-tp-list">
+						{todayBottomStats.pendingVisits.length === 0 ? (
+							<div className="sa-tp-empty sa-tp-empty-green"><CheckCircle2 className="w-5 h-5" /><span>Tüm işler tamamlandı</span></div>
+						) : todayBottomStats.pendingVisits.slice(0,5).map((v: any) => (
+							<div key={v.id} className="sa-tp-row">
+								<div className="sa-tp-avatar sa-tpa-amber">{(v.pet?.name||"?").charAt(0)}</div>
+								<div className="sa-tp-info">
+									<p className="sa-tp-main">{v.pet?.name || "—"} <span className="sa-tp-species">{v.pet?.species}</span></p>
+									<p className="sa-tp-sub">PRO-{v.protocolNumber} · Bakiye: {formatCurrency((v.totalAmount||0) - (v.paidAmount||0))}</p>
+								</div>
+								<div className="sa-tp-right">
+									{v.pet?.owner?.phone && (
+										<a href={waLink(v.pet.owner.phone)!} target="_blank" rel="noopener noreferrer" className="sa-tp-wa"><Phone className="w-3 h-3" /></a>
+									)}
+									<span className="ad-badge s-inprogress">Devam</span>
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+
+				{/* Kritik Stok */}
+				<div className="sa-tp-card">
+					<div className="sa-tp-hd sa-tp-hd-red">
+						<div className="sa-tp-hd-icon"><Package className="w-4 h-4" /></div>
+						<div>
+							<p className="sa-tp-hd-title">Kritik Stok Uyarıları</p>
+							<p className="sa-tp-hd-count">
+								{todayBottomStats.criticalStocks.length === 0
+									? <span>Tüm stoklar yeterli ✓</span>
+									: <span className="sa-tp-red">{todayBottomStats.criticalStocks.length} ürün kritik seviyede</span>}
+							</p>
+						</div>
+					</div>
+					<div className="sa-tp-list">
+						{todayBottomStats.criticalStocks.length === 0 ? (
+							<div className="sa-tp-empty sa-tp-empty-green"><CheckCircle2 className="w-5 h-5" /><span>Stok seviyeleri normal</span></div>
+						) : todayBottomStats.criticalStocks.slice(0,5).map((s: any) => (
+							<div key={s.id} className="sa-tp-row">
+								<div className={`sa-tp-stock-bar-wrap`}>
+									<div className="sa-tp-stock-bar" style={{ width: `${Math.min(100, (s.quantity / Math.max(s.minQuantity,1)) * 100)}%` }} />
+								</div>
+								<div className="sa-tp-info">
+									<p className="sa-tp-main">{s.name}</p>
+									<p className="sa-tp-sub">{s.category} · Min: {s.minQuantity} {s.unit}</p>
+								</div>
+								<div className="sa-tp-right">
+									<span className={`sa-tp-stock-qty ${s.quantity === 0 ? "sa-tp-red" : "sa-tp-amber"}`}>{s.quantity} {s.unit}</span>
+								</div>
+							</div>
+						))}
+					</div>
+					{todayBottomStats.criticalStocks.length > 0 && (
+						<div className="sa-tp-footer">
+							<a href="/super/stocks" className="sa-tp-link">Stok Yönetimine Git →</a>
+						</div>
+					)}
+				</div>
+
+				{/* Ödenmemiş Bakiyeler */}
+				<div className="sa-tp-card">
+					<div className="sa-tp-hd sa-tp-hd-orange">
+						<div className="sa-tp-hd-icon"><AlertTriangle className="w-4 h-4" /></div>
+						<div>
+							<p className="sa-tp-hd-title">Ödenmemiş Bakiyeler</p>
+							<p className="sa-tp-hd-count">
+								{unpaidVisits.length === 0
+									? <span>Bekleyen borç yok ✓</span>
+									: <span className="sa-tp-red">{unpaidVisits.length} ziyaret · {formatCurrency(unpaidVisits.reduce((s,v)=>s+v.balance,0))} toplam</span>}
+							</p>
+						</div>
+					</div>
+					<div className="sa-tp-list">
+						{unpaidVisits.length === 0 ? (
+							<div className="sa-tp-empty sa-tp-empty-green"><CheckCircle2 className="w-5 h-5" /><span>Tüm ödemeler tamam</span></div>
+						) : unpaidVisits.slice(0,5).map((v: any) => (
+							<div key={v.id} className="sa-tp-row">
+								<div className="sa-tp-avatar sa-tpa-red">{(v.pet?.name||"?").charAt(0)}</div>
+								<div className="sa-tp-info">
+									<p className="sa-tp-main">{v.pet?.name || "—"} <span className="sa-tp-species">{v.pet?.species}</span></p>
+									<p className="sa-tp-sub">{v.pet?.owner?.name || "—"} · {format(new Date(v.visitDate), "d MMM")}</p>
+								</div>
+								<div className="sa-tp-right">
+									{v.pet?.owner?.phone && (
+										<a href={waLink(v.pet.owner.phone)!} target="_blank" rel="noopener noreferrer" className="sa-tp-wa"><Phone className="w-3 h-3" /></a>
+									)}
+									<span className="sa-tp-red sa-tp-bold">{formatCurrency(v.balance)}</span>
+								</div>
+							</div>
+						))}
+					</div>
+				</div>
+
 			</div>
 		</div>
 	)
