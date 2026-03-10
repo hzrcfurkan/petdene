@@ -85,7 +85,7 @@ export function EnhancedSuperAdminDashboard() {
 		})
 		const revChart = Array.from({ length: 6 }, (_, i) => {
 			const d = new Date(now); d.setMonth(d.getMonth() - (5 - i))
-			return { name: format(d, "MMM yy"), value: invoices.filter(inv => format(new Date(inv.createdAt),"yyyy-MM")===format(d,"yyyy-MM") && inv.status==="Ödendi").reduce((s,inv)=>s+inv.amount,0) }
+			return { name: format(d, "MMM yy"), value: invoices.filter(inv => format(new Date(inv.createdAt),"yyyy-MM")===format(d,"yyyy-MM") && inv.status==="PAID").reduce((s,inv)=>s+inv.amount,0) }
 		})
 		const roleChart = [
 			{ name: "Müşteri", value: userStats.customers },
