@@ -199,8 +199,8 @@ export function DashboardCharts({
 			{(() => {
 				const pieData = monthlyApptData.length > 0 ? monthlyApptData : statusData
 				const isMonthly = monthlyApptData.length > 0
-				const now = new Date()
-				const monthName = now.toLocaleString("tr-TR", { month: "long", year: "numeric" })
+				const nowDate = new Date()
+				const monthName = nowDate.toLocaleString("tr-TR", { month: "long", year: "numeric" })
 				return pieData.length > 0 ? (
 				<Card>
 					<CardHeader>

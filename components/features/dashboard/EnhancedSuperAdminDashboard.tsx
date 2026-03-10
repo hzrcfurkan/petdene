@@ -1,13 +1,15 @@
 "use client"
 
-import { useMemo } from "react"
+import { useMemo, useState, useRef, useEffect } from "react"
 import { useStats, useAppointments, usePets, useInvoices } from "@/lib/react-query"
 import { DashboardCharts } from "./DashboardCharts"
-import { format } from "date-fns"
+import { format, isSameDay, startOfDay, endOfDay, startOfMonth, endOfMonth } from "date-fns"
+import { tr } from "date-fns/locale"
 import {
 	Users, UserCheck, Shield, UserPlus,
 	Calendar, PawPrint, DollarSign, FileText,
 	ArrowUpRight, Activity, TrendingUp, Settings,
+	ChevronLeft, ChevronRight, X,
 } from "lucide-react"
 import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { useVisits } from "@/lib/react-query/hooks/visits"
@@ -27,6 +29,63 @@ const visitStatusCfg: Record<string, { label: string; cls: string }> = {
 	IN_PROGRESS: { label: "Devam Ediyor",  cls: "s-inprogress" },
 }
 
+function MiniCalendar({ selected, onChange, onClose }: {
+	selected: Date | null
+	onChange: (d: Date | null) => void
+	onClose: () => void
+}) {
+	const today = new Date()
+	const [viewMonth, setViewMonth] = useState(selected || today)
+	const year  = viewMonth.getFullYear()
+	const month = viewMonth.getMonth()
+	const firstDay = new Date(year, month, 1).getDay() // 0=Sun
+	const daysInMonth = new Date(year, month + 1, 0).getDate()
+	const days: (Date | null)[] = []
+	// Start week on Monday
+	const startOffset = (firstDay + 6) % 7
+	for (let i = 0; i < startOffset; i++) days.push(null)
+	for (let i = 1; i <= daysInMonth; i++) days.push(new Date(year, month, i))
+
+	const prevMonth = () => setViewMonth(new Date(year, month - 1, 1))
+	const nextMonth = () => setViewMonth(new Date(year, month + 1, 1))
+
+	return (
+		<div className="sa-cal-popup">
+			<div className="sa-cal-header">
+				<button className="sa-cal-nav" onClick={prevMonth}><ChevronLeft className="w-4 h-4" /></button>
+				<span className="sa-cal-title">{format(viewMonth, "MMMM yyyy", { locale: tr })}</span>
+				<button className="sa-cal-nav" onClick={nextMonth}><ChevronRight className="w-4 h-4" /></button>
+			</div>
+			<div className="sa-cal-grid">
+				{["Pt","Sa","Ça","Pe","Cu","Ct","Pz"].map(d => (
+					<div key={d} className="sa-cal-dow">{d}</div>
+				))}
+				{days.map((d, i) => {
+					if (!d) return <div key={`e-${i}`} />
+					const isToday    = isSameDay(d, today)
+					const isSel      = selected && isSameDay(d, selected)
+					return (
+						<button
+							key={d.toISOString()}
+							className={`sa-cal-day${isToday ? " sa-cal-today" : ""}${isSel ? " sa-cal-sel" : ""}`}
+							onClick={() => { onChange(isSel ? null : d); onClose() }}
+						>
+							{d.getDate()}
+						</button>
+					)
+				})}
+			</div>
+			{selected && (
+				<div className="sa-cal-footer">
+					<button className="sa-cal-clear" onClick={() => { onChange(null); onClose() }}>
+						<X className="w-3 h-3" /> Filtreyi Kaldır
+					</button>
+				</div>
+			)}
+		</div>
+	)
+}
+
 export function EnhancedSuperAdminDashboard() {
 	const { formatCurrency } = useCurrency()
 	const { data: usersResponse } = useStats()
@@ -35,77 +94,133 @@ export function EnhancedSuperAdminDashboard() {
 	const { data: invoicesData } = useInvoices({ limit: 1000 })
 	const { data: visitsData } = useVisits({ limit: 8 })
 
-	const users       = usersResponse?.users || []
-	const appointments= appointmentsData?.appointments || []
-	const pets        = petsData?.pets || []
-	const invoices    = invoicesData?.invoices || []
-	const visits      = visitsData?.visits || []
+	const users        = usersResponse?.users || []
+	const appointments = appointmentsData?.appointments || []
+	const pets         = petsData?.pets || []
+	const invoices     = invoicesData?.invoices || []
+	const visits       = visitsData?.visits || []
 
-	const now            = new Date()
+	// ---- Takvim state ----
+	const [selectedDate, setSelectedDate] = useState<Date | null>(null)
+	const [calOpen, setCalOpen] = useState(false)
+	const calRef = useRef<HTMLDivElement>(null)
+
+	useEffect(() => {
+		function handleClick(e: MouseEvent) {
+			if (calRef.current && !calRef.current.contains(e.target as Node)) setCalOpen(false)
+		}
+		document.addEventListener("mousedown", handleClick)
+		return () => document.removeEventListener("mousedown", handleClick)
+	}, [])
+
+	const now = new Date()
+
+	// Seçili tarihe göre filtre aralığı
+	const filterStart = selectedDate ? startOfDay(selectedDate) : null
+	const filterEnd   = selectedDate ? endOfDay(selectedDate)   : null
+	const isFiltered  = !!selectedDate
+
+	// Filtrelenmiş veri setleri
+	const filteredAppointments = useMemo(() =>
+		isFiltered
+			? appointments.filter(a => {
+				const d = new Date(a.date)
+				return d >= filterStart! && d <= filterEnd!
+			})
+			: appointments
+	, [appointments, isFiltered, filterStart, filterEnd])
+
+	const filteredInvoices = useMemo(() =>
+		isFiltered
+			? invoices.filter(i => {
+				const d = new Date(i.createdAt)
+				return d >= filterStart! && d <= filterEnd!
+			})
+			: invoices
+	, [invoices, isFiltered, filterStart, filterEnd])
+
+	const filteredVisits = useMemo(() =>
+		isFiltered
+			? visits.filter(v => {
+				const d = new Date(v.visitDate || v.createdAt)
+				return d >= filterStart! && d <= filterEnd!
+			})
+			: visits
+	, [visits, isFiltered, filterStart, filterEnd])
+
 	const thirtyDaysAgo  = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
 	const prevThirtyDays = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000)
 
 	const userStats = useMemo(() => {
-		const newUsers   = users.filter(u => new Date(u.createdAt || now) >= thirtyDaysAgo).length
-		const prevUsers  = users.filter(u => new Date(u.createdAt || now) >= prevThirtyDays && new Date(u.createdAt || now) < thirtyDaysAgo).length
-		const userChange = prevUsers > 0 ? ((newUsers - prevUsers) / prevUsers) * 100 : 0
+		const newUsers  = users.filter(u => new Date(u.createdAt || now) >= thirtyDaysAgo).length
+		const prevUsers = users.filter(u => new Date(u.createdAt || now) >= prevThirtyDays && new Date(u.createdAt || now) < thirtyDaysAgo).length
 		return {
 			total:       users.length,
 			customers:   users.filter(u => u.role === "CUSTOMER").length,
 			admins:      users.filter(u => u.role === "ADMIN").length,
 			superAdmins: users.filter(u => u.role === "SUPER_ADMIN").length,
 			staff:       users.filter(u => u.role === "STAFF").length,
-			newUsers, userChange,
+			newUsers,
+			userChange: prevUsers > 0 ? ((newUsers - prevUsers) / prevUsers) * 100 : 0,
 		}
 	}, [users, thirtyDaysAgo, prevThirtyDays])
 
 	const bizStats = useMemo(() => {
-		const paid       = invoices.filter(i => i.status === "PAID")
-		const unpaid     = invoices.filter(i => i.status === "UNPAID")
-		const monthRev   = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount, 0)
-		const prevRev    = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount, 0)
-		const recentAppts = appointments.filter(a => new Date(a.date) >= thirtyDaysAgo).length
+		const paid    = filteredInvoices.filter(i => i.status === "PAID")
+		const unpaid  = filteredInvoices.filter(i => i.status === "UNPAID")
+		const allPaid = invoices.filter(i => i.status === "PAID")
+
+		const monthRev  = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
+		const prevRev   = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
+		const recentAppts = filteredAppointments.length
+
 		return {
-			totalRev:    paid.reduce((s,i)=>s+i.amount, 0),
+			totalRev:    paid.reduce((s,i)=>s+i.amount,0),
+			allTimeRev:  allPaid.reduce((s,i)=>s+i.amount,0),
 			monthRev,
 			revChange:   prevRev > 0 ? ((monthRev - prevRev) / prevRev) * 100 : 0,
-			totalAppts:  appointments.length,
-			recentAppts, totalPets: pets.length,
-			totalInv:    invoices.length,
+			totalAppts:  filteredAppointments.length,
+			recentAppts,
+			totalPets:   pets.length,
+			totalInv:    filteredInvoices.length,
 			paidCount:   paid.length,
 			unpaidCount: unpaid.length,
-			unpaidAmt:   unpaid.reduce((s,i)=>s+i.amount, 0),
+			unpaidAmt:   unpaid.reduce((s,i)=>s+i.amount,0),
 		}
-	}, [appointments, pets, invoices, thirtyDaysAgo, prevThirtyDays])
+	}, [filteredAppointments, filteredInvoices, pets, invoices, thirtyDaysAgo, prevThirtyDays])
 
 	const chartData = useMemo(() => {
 		const apptChart = Array.from({ length: 7 }, (_, i) => {
 			const d = new Date(now); d.setDate(d.getDate() - (6 - i))
-			return { name: format(d, "dd MMM"), value: appointments.filter(a => format(new Date(a.date),"yyyy-MM-dd")===format(d,"yyyy-MM-dd")).length }
+			return { name: format(d, "dd MMM"), value: filteredAppointments.filter(a => format(new Date(a.date),"yyyy-MM-dd")===format(d,"yyyy-MM-dd")).length }
 		})
 		const revChart = Array.from({ length: 6 }, (_, i) => {
 			const d = new Date(now); d.setMonth(d.getMonth() - (5 - i))
-			return { name: format(d, "MMM yy"), value: invoices.filter(inv => format(new Date(inv.createdAt),"yyyy-MM")===format(d,"yyyy-MM") && inv.status==="PAID").reduce((s,inv)=>s+inv.amount,0) }
+			return { name: format(d, "MMM yy"), value: filteredInvoices.filter(inv => format(new Date(inv.createdAt),"yyyy-MM")===format(d,"yyyy-MM") && inv.status==="PAID").reduce((s,inv)=>s+inv.amount,0) }
 		})
 		const roleChart = [
-			{ name: "Müşteri", value: userStats.customers },
-			{ name: "Personel", value: userStats.staff },
-			{ name: "Admin", value: userStats.admins },
-			{ name: "Süper Admin", value: userStats.superAdmins },
+			{ name: "Müşteri",    value: userStats.customers },
+			{ name: "Personel",   value: userStats.staff },
+			{ name: "Admin",      value: userStats.admins },
+			{ name: "Süper Admin",value: userStats.superAdmins },
 		]
 		// Bu aydaki günlere göre randevu dağılımı (pasta grafik için)
 		const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
 		const monthlyApptChart = Array.from({ length: daysInMonth }, (_, i) => {
 			const d = new Date(now.getFullYear(), now.getMonth(), i + 1)
-			const count = appointments.filter(a => format(new Date(a.date),"yyyy-MM-dd")===format(d,"yyyy-MM-dd")).length
+			const count = filteredAppointments.filter(a => format(new Date(a.date),"yyyy-MM-dd")===format(d,"yyyy-MM-dd")).length
 			return { name: format(d, "d MMM"), value: count }
 		}).filter(d => d.value > 0)
 		return { appt: apptChart, rev: revChart, role: roleChart, monthlyAppt: monthlyApptChart }
-	}, [appointments, invoices, userStats])
+	}, [filteredAppointments, filteredInvoices, userStats])
 
 	const recentUsers = useMemo(() =>
 		[...users].sort((a,b) => new Date(b.createdAt||now).getTime() - new Date(a.createdAt||now).getTime()).slice(0, 6)
 	, [users])
+
+	const dateLabel = selectedDate
+		? format(selectedDate, "d MMMM yyyy", { locale: tr })
+		: format(now, "d MMMM yyyy", { locale: tr })
 
 	return (
 		<div className="ad-wrap">
@@ -113,9 +228,39 @@ export function EnhancedSuperAdminDashboard() {
 			<div className="ad-hd">
 				<div>
 					<h1 className="ad-hd-title">Süper Admin Paneli</h1>
-					<p className="ad-hd-sub">{format(now, "d MMMM yyyy")} — Sistem Yönetimi</p>
+					<p className="ad-hd-sub">
+						{isFiltered
+							? <><span className="sa-date-badge"><Calendar className="w-3 h-3" />{dateLabel} — Tarih Filtresi Aktif</span></>
+							: <>{dateLabel} — Sistem Yönetimi</>
+						}
+					</p>
 				</div>
 				<div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+					{/* Takvim butonu */}
+					<div ref={calRef} style={{ position: "relative" }}>
+						<button
+							className={`sa-cal-btn${isFiltered ? " sa-cal-btn-active" : ""}`}
+							onClick={() => setCalOpen(v => !v)}
+						>
+							<Calendar className="w-4 h-4" />
+							<span>Tarih: {isFiltered ? dateLabel : "Tümü"}</span>
+							{isFiltered && (
+								<span
+									className="sa-cal-x"
+									onClick={(e) => { e.stopPropagation(); setSelectedDate(null) }}
+								>
+									<X className="w-3 h-3" />
+								</span>
+							)}
+						</button>
+						{calOpen && (
+							<MiniCalendar
+								selected={selectedDate}
+								onChange={setSelectedDate}
+								onClose={() => setCalOpen(false)}
+							/>
+						)}
+					</div>
 					<a href="/super/roles" className="sa-mgmt-btn">
 						<Settings className="w-4 h-4" /> Kullanıcı Yönetimi
 					</a>
@@ -126,11 +271,11 @@ export function EnhancedSuperAdminDashboard() {
 			{/* User KPI Row */}
 			<div className="sa-user-grid">
 				{[
-					{ icon: <Users className="w-5 h-5" />,      color: "blue",   label: "Toplam Kullanıcı",   val: userStats.total,       sub: `${userStats.newUsers} bu ay yeni` },
-					{ icon: <UserPlus className="w-5 h-5" />,   color: "teal",   label: "Müşteriler",         val: userStats.customers,   sub: "Müşteri hesabı" },
-					{ icon: <Shield className="w-5 h-5" />,     color: "violet", label: "Adminler",           val: userStats.admins,      sub: "Admin hesabı" },
-					{ icon: <UserCheck className="w-5 h-5" />,  color: "amber",  label: "Personel",           val: userStats.staff,       sub: "Personel hesabı" },
-					{ icon: <Shield className="w-5 h-5" />,     color: "blue",   label: "Süper Adminler",     val: userStats.superAdmins, sub: "Tam yetki" },
+					{ icon: <Users className="w-5 h-5" />,      color: "blue",   label: "Toplam Kullanıcı",  val: userStats.total,       sub: `${userStats.newUsers} bu ay yeni` },
+					{ icon: <UserPlus className="w-5 h-5" />,   color: "teal",   label: "Müşteriler",        val: userStats.customers,   sub: "Müşteri hesabı" },
+					{ icon: <Shield className="w-5 h-5" />,     color: "violet", label: "Adminler",          val: userStats.admins,      sub: "Admin hesabı" },
+					{ icon: <UserCheck className="w-5 h-5" />,  color: "amber",  label: "Personel",          val: userStats.staff,       sub: "Personel hesabı" },
+					{ icon: <Shield className="w-5 h-5" />,     color: "blue",   label: "Süper Adminler",    val: userStats.superAdmins, sub: "Tam yetki" },
 				].map((c, i) => (
 					<div key={i} className={`ad-kpi ad-kpi-${c.color}`} style={{ borderTop: "none", borderLeft: `3px solid var(--pc-${c.color === "blue" ? "blue" : c.color === "teal" ? "teal" : c.color === "violet" ? "violet" : "amber"})` }}>
 						<div className={`ad-kpi-icon ad-ki-${c.color}`}>{c.icon}</div>
@@ -146,10 +291,10 @@ export function EnhancedSuperAdminDashboard() {
 			{/* Business KPI Row */}
 			<div className="ad-kpi-grid">
 				{[
-					{ icon: <DollarSign className="w-5 h-5" />, color: "blue",   label: "Toplam Gelir",       val: formatCurrency(bizStats.totalRev),   sub: `${formatCurrency(bizStats.monthRev)} bu ay`, change: bizStats.revChange },
-					{ icon: <Calendar className="w-5 h-5" />,   color: "teal",   label: "Toplam Randevu",     val: bizStats.totalAppts,                 sub: `${bizStats.recentAppts} son 30 günde`, change: null },
-					{ icon: <PawPrint className="w-5 h-5" />,   color: "violet", label: "Toplam Hasta",       val: bizStats.totalPets,                  sub: "Kayıtlı hayvan", change: null },
-					{ icon: <FileText className="w-5 h-5" />,   color: "amber",  label: "Toplam Fatura",      val: bizStats.totalInv,                   sub: `${bizStats.paidCount} ödendi, ${bizStats.unpaidCount} bekliyor`, change: null },
+					{ icon: <DollarSign className="w-5 h-5" />, color: "blue",   label: isFiltered ? "Günlük Gelir" : "Toplam Gelir",    val: formatCurrency(bizStats.totalRev),  sub: isFiltered ? dateLabel : `${formatCurrency(bizStats.monthRev)} bu ay`, change: isFiltered ? null : bizStats.revChange },
+					{ icon: <Calendar className="w-5 h-5" />,   color: "teal",   label: isFiltered ? "Günlük Randevu" : "Toplam Randevu", val: bizStats.totalAppts,                sub: isFiltered ? `${dateLabel} randevuları` : `${bizStats.recentAppts} son 30 günde`, change: null },
+					{ icon: <PawPrint className="w-5 h-5" />,   color: "violet", label: "Toplam Hasta",      val: bizStats.totalPets,                 sub: "Kayıtlı hayvan", change: null },
+					{ icon: <FileText className="w-5 h-5" />,   color: "amber",  label: isFiltered ? "Günlük Fatura" : "Toplam Fatura",  val: bizStats.totalInv,                  sub: `${bizStats.paidCount} ödendi, ${bizStats.unpaidCount} bekliyor`, change: null },
 				].map((c, i) => (
 					<div key={i} className={`ad-kpi ad-kpi-${c.color}`}>
 						<div className={`ad-kpi-icon ad-ki-${c.color}`}>{c.icon}</div>
@@ -169,6 +314,31 @@ export function EnhancedSuperAdminDashboard() {
 				))}
 			</div>
 
+			{/* Sistem Ozeti - 4 renk kartı */}
+			<div className="sa-ozet-row">
+				<div className="sa-ozet-label">
+					<TrendingUp className="w-4 h-4" />
+					<span>Sistem Özeti</span>
+				</div>
+				<div className="sa-ozet-cards">
+					{[
+						{ icon: <Users className="w-4 h-4" />,      color: "blue",   label: "Toplam Kullanıcı",   val: `${userStats.total}`,                         sub: `${userStats.newUsers} bu ay` },
+						{ icon: <DollarSign className="w-4 h-4" />, color: "teal",   label: "Tahsil Edilen Gelir",val: formatCurrency(bizStats.allTimeRev),            sub: "tüm zamanlar" },
+						{ icon: <FileText className="w-4 h-4" />,   color: "amber",  label: "Bekleyen Tahsilat",  val: formatCurrency(bizStats.unpaidAmt),             sub: `${bizStats.unpaidCount} fatura`, warn: bizStats.unpaidAmt > 0 },
+						{ icon: <PawPrint className="w-4 h-4" />,   color: "violet", label: "Toplam Hasta",       val: `${bizStats.totalPets}`,                        sub: "kayıtlı hayvan" },
+					].map((row, i) => (
+						<div key={i} className={`sa-ozet-card sa-ozet-${row.color}${row.warn ? " sa-ozet-warn" : ""}`}>
+							<div className={`sa-ozet-icon sa-oi-${row.color}`}>{row.icon}</div>
+							<div className="sa-ozet-body">
+								<p className="sa-ozet-lbl">{row.label}</p>
+								<p className={`sa-ozet-val${row.warn ? " sa-ozet-val-warn" : ""}`}>{row.val}</p>
+								<p className="sa-ozet-sub">{row.sub}</p>
+							</div>
+						</div>
+					))}
+				</div>
+			</div>
+
 			{/* Charts */}
 			<DashboardCharts
 				appointmentsData={chartData.appt}
@@ -176,33 +346,6 @@ export function EnhancedSuperAdminDashboard() {
 				statusData={chartData.role}
 				monthlyApptData={chartData.monthlyAppt}
 			/>
-
-			{/* Sistem Ozeti - full-width banner, charts ile aynı satırda */}
-			<div style={{
-				display: "flex", alignItems: "stretch",
-				background: "var(--card)", border: "1px solid var(--border)",
-				borderRadius: "var(--radius)", overflow: "hidden",
-			}}>
-				<div style={{ display: "flex", alignItems: "center", gap: 8, padding: "1rem 1.25rem", borderRight: "1px solid var(--border)", minWidth: 140 }}>
-					<TrendingUp className="w-4 h-4" style={{ color: "var(--muted-foreground)" }} />
-					<span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--muted-foreground)" }}>Sistem Özeti</span>
-				</div>
-				<div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", flex: 1 }}>
-					{[
-						{ dot: "dot-blue",   label: "Toplam Kullanıcı",   val: `${userStats.total}` },
-						{ dot: "dot-green",  label: "Tahsil Edilen Gelir", val: formatCurrency(bizStats.totalRev) },
-						{ dot: "dot-amber",  label: "Bekleyen Tahsilat",   val: formatCurrency(bizStats.unpaidAmt), cls: "text-amber-600" },
-						{ dot: "dot-violet", label: "Toplam Hasta",        val: `${bizStats.totalPets}` },
-					].map((row, i) => (
-						<div key={i} style={{ display: "flex", flexDirection: "column", justifyContent: "center", gap: 4, padding: "0.85rem 1.25rem", borderRight: i < 3 ? "1px solid var(--border)" : "none" }}>
-							<div className="ad-sum-left" style={{ fontSize: "0.73rem", color: "var(--muted-foreground)", display: "flex", alignItems: "center", gap: 5 }}>
-								<span className={`ad-dot ${row.dot}`} />{row.label}
-							</div>
-							<span className={`ad-sum-val ${row.cls || ""}`} style={{ fontSize: "1.15rem", fontWeight: 700 }}>{row.val}</span>
-						</div>
-					))}
-				</div>
-			</div>
 
 			{/* Bottom */}
 			<div className="ad-bottom">
@@ -234,7 +377,6 @@ export function EnhancedSuperAdminDashboard() {
 						))}
 					</div>
 				</div>
-
 			</div>
 		</div>
 	)
