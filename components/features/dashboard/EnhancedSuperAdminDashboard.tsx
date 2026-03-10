@@ -193,7 +193,9 @@ export function EnhancedSuperAdminDashboard() {
 	}, [filteredAppointments, filteredInvoices, pets, invoices, thirtyDaysAgo, prevThirtyDays])
 
 	const todayStats = useMemo(() => {
-		const todayStr = format(now, "yyyy-MM-dd")
+		// Takvimden tarih seçildiyse o günü, yoksa gerçek bugünü kullan
+		const activeDate = selectedDate || now
+		const todayStr = format(activeDate, "yyyy-MM-dd")
 		const todayStart = new Date(todayStr + "T00:00:00.000Z")
 		const todayEnd   = new Date(todayStr + "T23:59:59.999Z")
 
