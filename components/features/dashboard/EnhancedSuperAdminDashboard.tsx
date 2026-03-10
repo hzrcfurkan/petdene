@@ -93,7 +93,14 @@ export function EnhancedSuperAdminDashboard() {
 			{ name: "Admin", value: userStats.admins },
 			{ name: "Süper Admin", value: userStats.superAdmins },
 		]
-		return { appt: apptChart, rev: revChart, role: roleChart }
+		// Bu aydaki günlere göre randevu dağılımı (pasta grafik için)
+		const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
+		const monthlyApptChart = Array.from({ length: daysInMonth }, (_, i) => {
+			const d = new Date(now.getFullYear(), now.getMonth(), i + 1)
+			const count = appointments.filter(a => format(new Date(a.date),"yyyy-MM-dd")===format(d,"yyyy-MM-dd")).length
+			return { name: format(d, "d MMM"), value: count }
+		}).filter(d => d.value > 0)
+		return { appt: apptChart, rev: revChart, role: roleChart, monthlyAppt: monthlyApptChart }
 	}, [appointments, invoices, userStats])
 
 	const recentUsers = useMemo(() =>
@@ -167,7 +174,35 @@ export function EnhancedSuperAdminDashboard() {
 				appointmentsData={chartData.appt}
 				revenueData={chartData.rev}
 				statusData={chartData.role}
+				monthlyApptData={chartData.monthlyAppt}
 			/>
+
+			{/* Sistem Ozeti - full-width banner, charts ile aynı satırda */}
+			<div style={{
+				display: "flex", alignItems: "stretch",
+				background: "var(--card)", border: "1px solid var(--border)",
+				borderRadius: "var(--radius)", overflow: "hidden",
+			}}>
+				<div style={{ display: "flex", alignItems: "center", gap: 8, padding: "1rem 1.25rem", borderRight: "1px solid var(--border)", minWidth: 140 }}>
+					<TrendingUp className="w-4 h-4" style={{ color: "var(--muted-foreground)" }} />
+					<span style={{ fontSize: "0.85rem", fontWeight: 600, color: "var(--muted-foreground)" }}>Sistem Özeti</span>
+				</div>
+				<div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", flex: 1 }}>
+					{[
+						{ dot: "dot-blue",   label: "Toplam Kullanıcı",   val: `${userStats.total}` },
+						{ dot: "dot-green",  label: "Tahsil Edilen Gelir", val: formatCurrency(bizStats.totalRev) },
+						{ dot: "dot-amber",  label: "Bekleyen Tahsilat",   val: formatCurrency(bizStats.unpaidAmt), cls: "text-amber-600" },
+						{ dot: "dot-violet", label: "Toplam Hasta",        val: `${bizStats.totalPets}` },
+					].map((row, i) => (
+						<div key={i} style={{ display: "flex", flexDirection: "column", justifyContent: "center", gap: 4, padding: "0.85rem 1.25rem", borderRight: i < 3 ? "1px solid var(--border)" : "none" }}>
+							<div className="ad-sum-left" style={{ fontSize: "0.73rem", color: "var(--muted-foreground)", display: "flex", alignItems: "center", gap: 5 }}>
+								<span className={`ad-dot ${row.dot}`} />{row.label}
+							</div>
+							<span className={`ad-sum-val ${row.cls || ""}`} style={{ fontSize: "1.15rem", fontWeight: 700 }}>{row.val}</span>
+						</div>
+					))}
+				</div>
+			</div>
 
 			{/* Bottom */}
 			<div className="ad-bottom">
@@ -200,52 +235,6 @@ export function EnhancedSuperAdminDashboard() {
 					</div>
 				</div>
 
-				{/* Side */}
-				<div className="ad-side">
-					<div className="ad-panel">
-						<div className="ad-panel-hd">
-							<h3 className="ad-panel-title"><TrendingUp className="w-4 h-4" />Sistem Özeti</h3>
-						</div>
-						<div className="ad-summary">
-							{[
-								{ dot: "dot-blue",  label: "Toplam Kullanıcı",    val: `${userStats.total}` },
-								{ dot: "dot-green", label: "Tahsil Edilen Gelir",  val: formatCurrency(bizStats.totalRev) },
-								{ dot: "dot-amber", label: "Bekleyen Tahsilat",    val: formatCurrency(bizStats.unpaidAmt), cls: "text-amber-600" },
-								{ dot: "dot-violet",label: "Toplam Hasta",         val: `${bizStats.totalPets}` },
-							].map((row, i) => (
-								<div key={i} className="ad-sum-row">
-									<div className="ad-sum-left"><span className={`ad-dot ${row.dot}`} />{row.label}</div>
-									<span className={`ad-sum-val ${row.cls || ""}`}>{row.val}</span>
-								</div>
-							))}
-						</div>
-					</div>
-
-					<div className="ad-panel">
-						<div className="ad-panel-hd">
-							<h3 className="ad-panel-title"><Users className="w-4 h-4" />Kullanıcı Dağılımı</h3>
-						</div>
-						<div className="sa-role-dist">
-							{[
-								{ label: "Müşteri",      val: userStats.customers,   pct: userStats.total > 0 ? (userStats.customers / userStats.total) * 100 : 0,   color: "#3B82F6" },
-								{ label: "Personel",     val: userStats.staff,       pct: userStats.total > 0 ? (userStats.staff / userStats.total) * 100 : 0,       color: "#0D9488" },
-								{ label: "Admin",        val: userStats.admins,      pct: userStats.total > 0 ? (userStats.admins / userStats.total) * 100 : 0,      color: "#7C3AED" },
-								{ label: "Süper Admin",  val: userStats.superAdmins, pct: userStats.total > 0 ? (userStats.superAdmins / userStats.total) * 100 : 0, color: "#D97706" },
-							].map((row, i) => (
-								<div key={i} className="sa-role-row">
-									<div className="sa-role-info">
-										<span style={{ width: 10, height: 10, borderRadius: "50%", background: row.color, display: "inline-block", marginRight: 8, flexShrink: 0 }} />
-										<span className="sa-role-label">{row.label}</span>
-										<span className="sa-role-count">{row.val}</span>
-									</div>
-									<div className="sa-role-bar-wrap">
-										<div className="sa-role-bar" style={{ width: `${row.pct}%`, background: row.color }} />
-									</div>
-								</div>
-							))}
-						</div>
-					</div>
-				</div>
 			</div>
 		</div>
 	)

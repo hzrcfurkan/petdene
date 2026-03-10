@@ -34,6 +34,7 @@ interface DashboardChartsProps {
 	revenueData?: ChartData[]
 	statusData?: ChartData[]
 	serviceData?: ChartData[]
+	monthlyApptData?: ChartData[]
 }
 
 const CHART_COLORS = [
@@ -90,6 +91,7 @@ export function DashboardCharts({
 	revenueData = [],
 	statusData = [],
 	serviceData = [],
+	monthlyApptData = [],
 }: DashboardChartsProps) {
 	const { formatCurrency } = useCurrency()
 	return (
@@ -193,16 +195,21 @@ export function DashboardCharts({
 				</Card>
 			)}
 
-			{/* Status Distribution */}
-			{statusData.length > 0 && (
+			{/* Monthly Appointment Distribution */}
+			{(() => {
+				const pieData = monthlyApptData.length > 0 ? monthlyApptData : statusData
+				const isMonthly = monthlyApptData.length > 0
+				const now = new Date()
+				const monthName = now.toLocaleString("tr-TR", { month: "long", year: "numeric" })
+				return pieData.length > 0 ? (
 				<Card>
 					<CardHeader>
 						<CardTitle>Durum Dağılımı</CardTitle>
-						<CardDescription>Randevu durumlarının dağılımı</CardDescription>
+						<CardDescription>{isMonthly ? `${monthName} günlük randevu dağılımı` : "Randevu durumlarının dağılımı"}</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<ChartContainer
-							config={createStatusChartConfig(statusData)}
+							config={createStatusChartConfig(pieData)}
 							className="aspect-auto mx-auto h-[280px] w-full max-w-[280px]"
 						>
 							<PieChart>
@@ -211,14 +218,14 @@ export function DashboardCharts({
 										<ChartTooltipContent
 											hideIndicator
 											formatter={(value, name) => {
-												const total = statusData.reduce((a, b) => a + b.value, 0)
+												const total = pieData.reduce((a, b) => a + b.value, 0)
 												const numVal = typeof value === "number" ? value : Number(value)
 												const pct = total > 0 ? Math.round((numVal / total) * 100) : 0
 												return (
 													<div className="flex flex-1 justify-between leading-none items-center">
 														<span className="text-muted-foreground">{name}</span>
 														<span className="text-foreground font-mono font-medium tabular-nums">
-															{numVal} ({pct}%)
+															{numVal} randevu ({pct}%)
 														</span>
 													</div>
 												)
@@ -227,7 +234,7 @@ export function DashboardCharts({
 									}
 								/>
 								<Pie
-									data={statusData}
+									data={pieData}
 									cx="50%"
 									cy="50%"
 									innerRadius={50}
@@ -238,7 +245,7 @@ export function DashboardCharts({
 									strokeWidth={1}
 									stroke="var(--border)"
 								>
-									{statusData.map((_, index) => (
+									{pieData.map((_, index) => (
 										<Cell
 											key={`cell-${index}`}
 											fill={CHART_COLORS[index % CHART_COLORS.length]}
@@ -250,7 +257,8 @@ export function DashboardCharts({
 						</ChartContainer>
 					</CardContent>
 				</Card>
-			)}
+				) : null
+			})()}
 
 			{/* Service Popularity */}
 			{serviceData.length > 0 && (
