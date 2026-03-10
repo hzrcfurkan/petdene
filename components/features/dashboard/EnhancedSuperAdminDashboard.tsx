@@ -9,10 +9,11 @@ import {
 	Users, UserCheck, Shield, UserPlus,
 	Calendar, PawPrint, DollarSign, FileText,
 	ArrowUpRight, Activity, TrendingUp, Settings,
-	ChevronLeft, ChevronRight, X,
+	ChevronLeft, ChevronRight, X, Syringe,
 } from "lucide-react"
 import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { useVisits } from "@/lib/react-query/hooks/visits"
+import { useVaccinations } from "@/lib/react-query/hooks/vaccinations"
 
 const roleCfg: Record<string, { label: string; cls: string }> = {
 	SUPER_ADMIN: { label: "Süper Admin", cls: "rb-super" },
@@ -92,13 +93,15 @@ export function EnhancedSuperAdminDashboard() {
 	const { data: appointmentsData } = useAppointments({ limit: 1000 })
 	const { data: petsData } = usePets({ limit: 1000 })
 	const { data: invoicesData } = useInvoices({ limit: 1000 })
-	const { data: visitsData } = useVisits({ limit: 8 })
+	const { data: visitsData } = useVisits({ limit: 1000 })
+	const { data: vaccinationsData } = useVaccinations({ limit: 1000 })
 
 	const users        = usersResponse?.users || []
 	const appointments = appointmentsData?.appointments || []
 	const pets         = petsData?.pets || []
 	const invoices     = invoicesData?.invoices || []
 	const visits       = visitsData?.visits || []
+	const vaccinations = vaccinationsData?.vaccinations || []
 
 	// ---- Takvim state ----
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null)
@@ -189,6 +192,52 @@ export function EnhancedSuperAdminDashboard() {
 		}
 	}, [filteredAppointments, filteredInvoices, pets, invoices, thirtyDaysAgo, prevThirtyDays])
 
+	const todayStats = useMemo(() => {
+		const todayStr = format(now, "yyyy-MM-dd")
+		const todayStart = new Date(todayStr + "T00:00:00.000Z")
+		const todayEnd   = new Date(todayStr + "T23:59:59.999Z")
+
+		// Bugünkü randevular
+		const todayAppts = appointments.filter(a =>
+			format(new Date(a.date), "yyyy-MM-dd") === todayStr
+		)
+		const completedAppts = todayAppts.filter(a => a.status === "COMPLETED").length
+		const pendingAppts   = todayAppts.filter(a => ["PENDING","CONFIRMED"].includes(a.status)).length
+
+		// Bugün gelen hasta (visit)
+		const todayVisits = visits.filter(v =>
+			format(new Date(v.visitDate || v.createdAt), "yyyy-MM-dd") === todayStr
+		)
+		const activeVisits = todayVisits.filter(v => v.status === "IN_PROGRESS").length
+
+		// Bugün yapılacak aşılar (nextDue = bugün)
+		const todayVaccinations = vaccinations.filter(v =>
+			v.nextDue && format(new Date(v.nextDue), "yyyy-MM-dd") === todayStr
+		)
+
+		// Bugünkü ciro (ödenen visit payments)
+		const todayCiro = visits
+			.filter(v => format(new Date(v.visitDate || v.createdAt), "yyyy-MM-dd") === todayStr)
+			.reduce((s, v) => s + (v.paidAmount || 0), 0)
+
+		// Bu ayki ciro
+		const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
+		const monthCiro  = invoices
+			.filter(i => i.status === "PAID" && new Date(i.createdAt) >= monthStart)
+			.reduce((s, i) => s + i.amount, 0)
+
+		return {
+			todayAppts:        todayAppts.length,
+			completedAppts,
+			pendingAppts,
+			todayVisits:       todayVisits.length,
+			activeVisits,
+			todayVaccinations: todayVaccinations.length,
+			todayCiro,
+			monthCiro,
+		}
+	}, [appointments, visits, vaccinations, invoices])
+
 	const chartData = useMemo(() => {
 		const apptChart = Array.from({ length: 7 }, (_, i) => {
 			const d = new Date(now); d.setDate(d.getDate() - (6 - i))
@@ -268,24 +317,70 @@ export function EnhancedSuperAdminDashboard() {
 				</div>
 			</div>
 
-			{/* User KPI Row */}
+			{/* Bugün KPI Row */}
 			<div className="sa-user-grid">
-				{[
-					{ icon: <Users className="w-5 h-5" />,      color: "blue",   label: "Toplam Kullanıcı",  val: userStats.total,       sub: `${userStats.newUsers} bu ay yeni` },
-					{ icon: <UserPlus className="w-5 h-5" />,   color: "teal",   label: "Müşteriler",        val: userStats.customers,   sub: "Müşteri hesabı" },
-					{ icon: <Shield className="w-5 h-5" />,     color: "violet", label: "Adminler",          val: userStats.admins,      sub: "Admin hesabı" },
-					{ icon: <UserCheck className="w-5 h-5" />,  color: "amber",  label: "Personel",          val: userStats.staff,       sub: "Personel hesabı" },
-					{ icon: <Shield className="w-5 h-5" />,     color: "blue",   label: "Süper Adminler",    val: userStats.superAdmins, sub: "Tam yetki" },
-				].map((c, i) => (
-					<div key={i} className={`ad-kpi ad-kpi-${c.color}`} style={{ borderTop: "none", borderLeft: `3px solid var(--pc-${c.color === "blue" ? "blue" : c.color === "teal" ? "teal" : c.color === "violet" ? "violet" : "amber"})` }}>
-						<div className={`ad-kpi-icon ad-ki-${c.color}`}>{c.icon}</div>
-						<div className="ad-kpi-body">
-							<p className="ad-kpi-lbl">{c.label}</p>
-							<p className="ad-kpi-val">{c.val}</p>
-							<p className="ad-kpi-desc">{c.sub}</p>
+				{/* Bugünkü Randevular */}
+				<div className="ad-kpi ad-kpi-blue sa-today-kpi">
+					<div className="ad-kpi-icon ad-ki-blue"><Calendar className="w-5 h-5" /></div>
+					<div className="ad-kpi-body">
+						<p className="ad-kpi-lbl">Bugünkü Randevular</p>
+						<p className="ad-kpi-val">{todayStats.todayAppts}</p>
+						<div className="sa-today-sub">
+							<span className="sa-today-chip sa-chip-green">{todayStats.completedAppts} tamamlandı</span>
+							<span className="sa-today-chip sa-chip-amber">{todayStats.pendingAppts} bekliyor</span>
 						</div>
 					</div>
-				))}
+				</div>
+
+				{/* Bugün Gelen Hasta */}
+				<div className="ad-kpi ad-kpi-teal sa-today-kpi">
+					<div className="ad-kpi-icon ad-ki-teal"><PawPrint className="w-5 h-5" /></div>
+					<div className="ad-kpi-body">
+						<p className="ad-kpi-lbl">Bugün Gelen Hasta</p>
+						<p className="ad-kpi-val">{todayStats.todayVisits}</p>
+						<div className="sa-today-sub">
+							{todayStats.activeVisits > 0
+								? <span className="sa-today-chip sa-chip-blue">{todayStats.activeVisits} aktif</span>
+								: <span className="sa-today-chip sa-chip-gray">aktif ziyaret yok</span>
+							}
+						</div>
+					</div>
+				</div>
+
+				{/* Bugün Yapılacak Aşılar */}
+				<div className="ad-kpi ad-kpi-violet sa-today-kpi">
+					<div className="ad-kpi-icon ad-ki-violet"><Syringe className="w-5 h-5" /></div>
+					<div className="ad-kpi-body">
+						<p className="ad-kpi-lbl">Bugün Yapılacak Aşılar</p>
+						<p className="ad-kpi-val">{todayStats.todayVaccinations}</p>
+						<div className="sa-today-sub">
+							{todayStats.todayVaccinations > 0
+								? <span className="sa-today-chip sa-chip-violet">hatırlatma var</span>
+								: <span className="sa-today-chip sa-chip-gray">aşı yok</span>
+							}
+						</div>
+					</div>
+				</div>
+
+				{/* Bugünkü Ciro */}
+				<div className="ad-kpi ad-kpi-amber sa-today-kpi">
+					<div className="ad-kpi-icon ad-ki-amber"><DollarSign className="w-5 h-5" /></div>
+					<div className="ad-kpi-body">
+						<p className="ad-kpi-lbl">Bugünkü Ciro</p>
+						<p className="ad-kpi-val">{formatCurrency(todayStats.todayCiro)}</p>
+						<p className="ad-kpi-desc">bugün tahsil edildi</p>
+					</div>
+				</div>
+
+				{/* Bu Ayki Ciro */}
+				<div className="ad-kpi ad-kpi-blue sa-today-kpi">
+					<div className="ad-kpi-icon ad-ki-blue"><TrendingUp className="w-5 h-5" /></div>
+					<div className="ad-kpi-body">
+						<p className="ad-kpi-lbl">Bu Ayki Ciro</p>
+						<p className="ad-kpi-val">{formatCurrency(todayStats.monthCiro)}</p>
+						<p className="ad-kpi-desc">{format(now, "MMMM yyyy", { locale: tr })} toplam</p>
+					</div>
+				</div>
 			</div>
 
 			{/* Business KPI Row */}

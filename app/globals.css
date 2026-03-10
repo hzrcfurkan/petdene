@@ -1125,3 +1125,17 @@
 
 /* dot-violet için eksikti */
 .dot-violet { background: var(--pc-violet); }
+
+/* ---- BUGÜN KPI CHIPS ---- */
+.sa-today-kpi { position: relative; }
+.sa-today-sub { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 7px; }
+.sa-today-chip {
+  font-size: 10.5px; font-weight: 600;
+  padding: 2px 8px; border-radius: 20px;
+  display: inline-flex; align-items: center;
+}
+.sa-chip-green  { background: var(--pc-green-lt);  color: var(--pc-green); }
+.sa-chip-amber  { background: var(--pc-amber-lt);  color: var(--pc-amber); }
+.sa-chip-blue   { background: var(--pc-blue-lt);   color: var(--pc-blue); }
+.sa-chip-violet { background: var(--pc-violet-lt); color: var(--pc-violet); }
+.sa-chip-gray   { background: var(--pc-bg);        color: var(--pc-text-sm); }
