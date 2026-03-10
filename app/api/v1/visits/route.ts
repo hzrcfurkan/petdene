@@ -106,6 +106,15 @@ export async function GET(req: NextRequest) {
 								_count: {
 									select: { services: true, payments: true },
 								},
+								payments: {
+									select: {
+										id: true,
+										amount: true,
+										status: true,
+										paidAt: true,
+										method: true,
+									},
+								},
 							}),
 				},
 				orderBy,

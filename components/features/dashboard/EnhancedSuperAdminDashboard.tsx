@@ -219,15 +219,21 @@ export function EnhancedSuperAdminDashboard() {
 			return dueDateStr === todayStr
 		})
 
-		// Bugünkü ciro (ödenen visit payments)
-		const todayCiro = visits
-			.filter(v => format(new Date(v.visitDate || v.createdAt), "yyyy-MM-dd") === todayStr)
-			.reduce((s, v) => s + (v.paidAmount || 0), 0)
+		// Bugünkü ciro = bugün oluşturulan/güncellenen ziyaretlerin TOPLAM hizmet bedeli (ödensın ya da ödenmesın)
+		const todayVisitList = visits.filter(v =>
+			v.visitDate?.slice(0, 10) === todayStr || v.createdAt?.slice(0, 10) === todayStr
+		)
+		const todayCiro = todayVisitList.reduce((s, v) => s + (v.totalAmount || 0), 0)
 
-		// Bugünkü tahsilat (bugün ödenen invoice'lar)
-		const todayTahsilat = invoices
-			.filter(i => i.status === "PAID" && format(new Date(i.updatedAt || i.createdAt), "yyyy-MM-dd") === todayStr)
-			.reduce((s, i) => s + i.amount, 0)
+		// Bugünkü tahsilat = bugün paidAt olan ödemeler (tüm visit'lerden)
+		const todayTahsilat = visits.reduce((sum, v) => {
+			if (v.payments && v.payments.length > 0) {
+				return sum + v.payments
+					.filter(p => p.status === "COMPLETED" && p.paidAt?.slice(0, 10) === todayStr)
+					.reduce((s, p) => s + (p.amount || 0), 0)
+			}
+			return sum
+		}, 0)
 
 		return {
 			todayAppts:        todayAppts.length,
