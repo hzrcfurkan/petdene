@@ -247,7 +247,7 @@ export function EnhancedSuperAdminDashboard() {
 			todayCiro,
 			todayTahsilat,
 		}
-	}, [appointments, visits, vaccinations, invoices])
+	}, [appointments, visits, vaccinations, invoices, selectedDate])
 
 	const chartData = useMemo(() => {
 		const apptChart = Array.from({ length: 7 }, (_, i) => {
