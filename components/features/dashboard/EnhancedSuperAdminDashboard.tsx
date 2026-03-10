@@ -220,10 +220,9 @@ export function EnhancedSuperAdminDashboard() {
 			.filter(v => format(new Date(v.visitDate || v.createdAt), "yyyy-MM-dd") === todayStr)
 			.reduce((s, v) => s + (v.paidAmount || 0), 0)
 
-		// Bu ayki ciro
-		const monthStart = new Date(now.getFullYear(), now.getMonth(), 1)
-		const monthCiro  = invoices
-			.filter(i => i.status === "PAID" && new Date(i.createdAt) >= monthStart)
+		// Bugünkü tahsilat (bugün ödenen invoice'lar)
+		const todayTahsilat = invoices
+			.filter(i => i.status === "PAID" && format(new Date(i.updatedAt || i.createdAt), "yyyy-MM-dd") === todayStr)
 			.reduce((s, i) => s + i.amount, 0)
 
 		return {
@@ -234,7 +233,7 @@ export function EnhancedSuperAdminDashboard() {
 			activeVisits,
 			todayVaccinations: todayVaccinations.length,
 			todayCiro,
-			monthCiro,
+			todayTahsilat,
 		}
 	}, [appointments, visits, vaccinations, invoices])
 
@@ -372,13 +371,13 @@ export function EnhancedSuperAdminDashboard() {
 					</div>
 				</div>
 
-				{/* Bu Ayki Ciro */}
-				<div className="ad-kpi ad-kpi-blue sa-today-kpi">
-					<div className="ad-kpi-icon ad-ki-blue"><TrendingUp className="w-5 h-5" /></div>
+				{/* Bugünkü Tahsilat */}
+				<div className="ad-kpi ad-kpi-teal sa-today-kpi">
+					<div className="ad-kpi-icon ad-ki-teal"><TrendingUp className="w-5 h-5" /></div>
 					<div className="ad-kpi-body">
-						<p className="ad-kpi-lbl">Bu Ayki Ciro</p>
-						<p className="ad-kpi-val">{formatCurrency(todayStats.monthCiro)}</p>
-						<p className="ad-kpi-desc">{format(now, "MMMM yyyy", { locale: tr })} toplam</p>
+						<p className="ad-kpi-lbl">Bugünkü Tahsilat</p>
+						<p className="ad-kpi-val">{formatCurrency(todayStats.todayTahsilat)}</p>
+						<p className="ad-kpi-desc">bugün ödenen faturalar</p>
 					</div>
 				</div>
 			</div>
