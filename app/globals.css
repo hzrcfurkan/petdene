@@ -1223,3 +1223,10 @@
 .sa-pt-phone    { display: inline-flex; align-items: center; gap: 4px; color: var(--pc-blue); text-decoration: none; font-size: 12px; }
 .sa-pt-phone:hover { text-decoration: underline; }
 .sa-pt-none     { color: var(--pc-text-sm); }
+
+/* WhatsApp link */
+.sa-pt-wa {
+  color: #25D366 !important;
+  font-weight: 600;
+}
+.sa-pt-wa:hover { color: #128C7E !important; }

@@ -15,6 +15,16 @@ import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { useVisits } from "@/lib/react-query/hooks/visits"
 import { useVaccinations } from "@/lib/react-query/hooks/vaccinations"
 
+
+const WA_MSG = encodeURIComponent("Merhaba, sizlere ABC Veteriner kliniğinden ulaşmaktayım.")
+
+function waLink(phone: string | null | undefined): string | null {
+	if (!phone) return null
+	// Sadece rakamları al, başındaki 0 veya +90 varsa temizle
+	const digits = phone.replace(/\D/g, "").replace(/^0/, "").replace(/^90/, "")
+	return `https://wa.me/90${digits}?text=${WA_MSG}`
+}
+
 const roleCfg: Record<string, { label: string; cls: string }> = {
 	SUPER_ADMIN: { label: "Süper Admin", cls: "rb-super" },
 	ADMIN:       { label: "Admin",       cls: "rb-admin" },
@@ -129,8 +139,8 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 											<td>{a.pet?.species || "—"}</td>
 											<td>{a.pet?.owner?.name || a.pet?.owner?.email || "—"}</td>
 											<td>
-												{a.pet?.owner?.phone
-													? <a href={`tel:${a.pet.owner.phone}`} className="sa-pt-phone"><Phone className="w-3 h-3" />{a.pet.owner.phone}</a>
+												{waLink(a.pet?.owner?.phone)
+													? <a href={waLink(a.pet?.owner?.phone)!} target="_blank" rel="noopener noreferrer" className="sa-pt-phone sa-pt-wa"><Phone className="w-3 h-3" />{a.pet?.owner?.phone}</a>
 													: <span className="sa-pt-none">—</span>}
 											</td>
 											<td>{a.service?.title || "—"}</td>
@@ -158,8 +168,8 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 											<td>{v.pet?.species || "—"}</td>
 											<td>{v.pet?.owner?.name || v.pet?.owner?.email || "—"}</td>
 											<td>
-												{v.pet?.owner?.phone
-													? <a href={`tel:${v.pet.owner.phone}`} className="sa-pt-phone"><Phone className="w-3 h-3" />{v.pet.owner.phone}</a>
+												{waLink(v.pet?.owner?.phone)
+													? <a href={waLink(v.pet?.owner?.phone)!} target="_blank" rel="noopener noreferrer" className="sa-pt-phone sa-pt-wa"><Phone className="w-3 h-3" />{v.pet?.owner?.phone}</a>
 													: <span className="sa-pt-none">—</span>}
 											</td>
 											<td>{formatCurrency(v.totalAmount || 0)}</td>
@@ -187,8 +197,8 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 											<td>{v.pet?.species || "—"}</td>
 											<td>{v.pet?.owner?.name || "—"}</td>
 											<td>
-												{v.pet?.owner?.phone
-													? <a href={`tel:${v.pet.owner.phone}`} className="sa-pt-phone"><Phone className="w-3 h-3" />{v.pet.owner.phone}</a>
+												{waLink(v.pet?.owner?.phone)
+													? <a href={waLink(v.pet?.owner?.phone)!} target="_blank" rel="noopener noreferrer" className="sa-pt-phone sa-pt-wa"><Phone className="w-3 h-3" />{v.pet?.owner?.phone}</a>
 													: <span className="sa-pt-none">—</span>}
 											</td>
 											<td>
@@ -218,8 +228,8 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 											<td><span className="sa-pt-name">{v.pet?.name || "—"}</span></td>
 											<td>{v.pet?.owner?.name || "—"}</td>
 											<td>
-												{v.pet?.owner?.phone
-													? <a href={`tel:${v.pet.owner.phone}`} className="sa-pt-phone"><Phone className="w-3 h-3" />{v.pet.owner.phone}</a>
+												{waLink(v.pet?.owner?.phone)
+													? <a href={waLink(v.pet?.owner?.phone)!} target="_blank" rel="noopener noreferrer" className="sa-pt-phone sa-pt-wa"><Phone className="w-3 h-3" />{v.pet?.owner?.phone}</a>
 													: <span className="sa-pt-none">—</span>}
 											</td>
 											<td>{v._count?.services ?? "—"} hizmet</td>
@@ -251,8 +261,8 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 											<td><span className="sa-pt-name">{row.petName || "—"}</span></td>
 											<td>{row.ownerName || "—"}</td>
 											<td>
-												{row.ownerPhone
-													? <a href={`tel:${row.ownerPhone}`} className="sa-pt-phone"><Phone className="w-3 h-3" />{row.ownerPhone}</a>
+												{waLink(row.ownerPhone)
+													? <a href={waLink(row.ownerPhone)!} target="_blank" rel="noopener noreferrer" className="sa-pt-phone sa-pt-wa"><Phone className="w-3 h-3" />{row.ownerPhone}</a>
 													: <span className="sa-pt-none">—</span>}
 											</td>
 											<td>{row.method === "cash" ? "Nakit" : row.method === "card" ? "Kart" : row.method}</td>
