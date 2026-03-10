@@ -9,7 +9,7 @@ import {
 	Users, UserCheck, Shield, UserPlus,
 	Calendar, PawPrint, DollarSign, FileText,
 	ArrowUpRight, Activity, TrendingUp, Settings,
-	ChevronLeft, ChevronRight, X, Syringe,
+	ChevronLeft, ChevronRight, X, 
 } from "lucide-react"
 import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { useVisits } from "@/lib/react-query/hooks/visits"
@@ -210,10 +210,14 @@ export function EnhancedSuperAdminDashboard() {
 		)
 		const activeVisits = todayVisits.filter(v => v.status === "IN_PROGRESS").length
 
-		// Bugün yapılacak aşılar (nextDue = bugün)
-		const todayVaccinations = vaccinations.filter(v =>
-			v.nextDue && format(new Date(v.nextDue), "yyyy-MM-dd") === todayStr
-		)
+		// Bugün yapılacak aşılar (nextDue = bugün) - UTC/local timezone safe
+		const todayVaccinations = vaccinations.filter(v => {
+			if (!v.nextDue) return false
+			// nextDue "2026-03-11" veya "2026-03-11T00:00:00.000Z" şeklinde gelebilir
+			// Her iki formatta da ilk 10 karakteri al (YYYY-MM-DD)
+			const dueDateStr = v.nextDue.slice(0, 10)
+			return dueDateStr === todayStr
+		})
 
 		// Bugünkü ciro (ödenen visit payments)
 		const todayCiro = visits
@@ -348,7 +352,7 @@ export function EnhancedSuperAdminDashboard() {
 
 				{/* Bugün Yapılacak Aşılar */}
 				<div className="ad-kpi ad-kpi-violet sa-today-kpi">
-					<div className="ad-kpi-icon ad-ki-violet"><Syringe className="w-5 h-5" /></div>
+					<div className="ad-kpi-icon ad-ki-violet"><Activity className="w-5 h-5" /></div>
 					<div className="ad-kpi-body">
 						<p className="ad-kpi-lbl">Bugün Yapılacak Aşılar</p>
 						<p className="ad-kpi-val">{todayStats.todayVaccinations}</p>
