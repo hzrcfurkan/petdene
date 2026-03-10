@@ -3,13 +3,13 @@
 import { useMemo, useState, useRef, useEffect } from "react"
 import { useStats, useAppointments, usePets, useInvoices } from "@/lib/react-query"
 import { DashboardCharts } from "./DashboardCharts"
-import { format, isSameDay, startOfDay, endOfDay, startOfMonth, endOfMonth } from "date-fns"
+import { format, isSameDay, startOfDay, endOfDay } from "date-fns"
 import { tr } from "date-fns/locale"
 import {
 	Users, UserCheck, Shield, UserPlus,
 	Calendar, PawPrint, DollarSign, FileText,
 	ArrowUpRight, Activity, TrendingUp, Settings,
-	ChevronLeft, ChevronRight, X, 
+	ChevronLeft, ChevronRight, X, Eye, Phone, Mail,
 } from "lucide-react"
 import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { useVisits } from "@/lib/react-query/hooks/visits"
@@ -22,14 +22,7 @@ const roleCfg: Record<string, { label: string; cls: string }> = {
 	CUSTOMER:    { label: "Müşteri",     cls: "rb-customer" },
 }
 
-const visitStatusCfg: Record<string, { label: string; cls: string }> = {
-	PENDING:     { label: "Bekliyor",      cls: "s-pending" },
-	CONFIRMED:   { label: "Onaylandı",     cls: "s-confirmed" },
-	COMPLETED:   { label: "Tamamlandı",    cls: "s-completed" },
-	CANCELLED:   { label: "İptal",         cls: "s-cancelled" },
-	IN_PROGRESS: { label: "Devam Ediyor",  cls: "s-inprogress" },
-}
-
+// ---- MINI CALENDAR ----
 function MiniCalendar({ selected, onChange, onClose }: {
 	selected: Date | null
 	onChange: (d: Date | null) => void
@@ -39,38 +32,29 @@ function MiniCalendar({ selected, onChange, onClose }: {
 	const [viewMonth, setViewMonth] = useState(selected || today)
 	const year  = viewMonth.getFullYear()
 	const month = viewMonth.getMonth()
-	const firstDay = new Date(year, month, 1).getDay() // 0=Sun
+	const firstDay = new Date(year, month, 1).getDay()
 	const daysInMonth = new Date(year, month + 1, 0).getDate()
 	const days: (Date | null)[] = []
-	// Start week on Monday
 	const startOffset = (firstDay + 6) % 7
 	for (let i = 0; i < startOffset; i++) days.push(null)
 	for (let i = 1; i <= daysInMonth; i++) days.push(new Date(year, month, i))
 
-	const prevMonth = () => setViewMonth(new Date(year, month - 1, 1))
-	const nextMonth = () => setViewMonth(new Date(year, month + 1, 1))
-
 	return (
 		<div className="sa-cal-popup">
 			<div className="sa-cal-header">
-				<button className="sa-cal-nav" onClick={prevMonth}><ChevronLeft className="w-4 h-4" /></button>
+				<button className="sa-cal-nav" onClick={() => setViewMonth(new Date(year, month - 1, 1))}><ChevronLeft className="w-4 h-4" /></button>
 				<span className="sa-cal-title">{format(viewMonth, "MMMM yyyy", { locale: tr })}</span>
-				<button className="sa-cal-nav" onClick={nextMonth}><ChevronRight className="w-4 h-4" /></button>
+				<button className="sa-cal-nav" onClick={() => setViewMonth(new Date(year, month + 1, 1))}><ChevronRight className="w-4 h-4" /></button>
 			</div>
 			<div className="sa-cal-grid">
-				{["Pt","Sa","Ça","Pe","Cu","Ct","Pz"].map(d => (
-					<div key={d} className="sa-cal-dow">{d}</div>
-				))}
+				{["Pt","Sa","Ça","Pe","Cu","Ct","Pz"].map(d => <div key={d} className="sa-cal-dow">{d}</div>)}
 				{days.map((d, i) => {
 					if (!d) return <div key={`e-${i}`} />
-					const isToday    = isSameDay(d, today)
-					const isSel      = selected && isSameDay(d, selected)
+					const isToday = isSameDay(d, today)
+					const isSel   = selected && isSameDay(d, selected)
 					return (
-						<button
-							key={d.toISOString()}
-							className={`sa-cal-day${isToday ? " sa-cal-today" : ""}${isSel ? " sa-cal-sel" : ""}`}
-							onClick={() => { onChange(isSel ? null : d); onClose() }}
-						>
+						<button key={d.toISOString()} className={`sa-cal-day${isToday ? " sa-cal-today" : ""}${isSel ? " sa-cal-sel" : ""}`}
+							onClick={() => { onChange(isSel ? null : d); onClose() }}>
 							{d.getDate()}
 						</button>
 					)
@@ -87,6 +71,206 @@ function MiniCalendar({ selected, onChange, onClose }: {
 	)
 }
 
+// ---- DETAIL POPUP ----
+type PopupType = "appointments" | "visits" | "vaccinations" | "ciro" | "tahsilat" | null
+
+function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
+	type: PopupType
+	data: any
+	dateLabel: string
+	onClose: () => void
+	formatCurrency: (n: number) => string
+}) {
+	if (!type) return null
+
+	const titles: Record<string, string> = {
+		appointments:  "Bugünkü Randevular",
+		visits:        "Bugün Gelen Hastalar",
+		vaccinations:  "Bugün Yapılacak Aşılar",
+		ciro:          "Bugünkü Ciro Detayı",
+		tahsilat:      "Bugünkü Tahsilat Detayı",
+	}
+
+	const statusLabel: Record<string, { label: string; cls: string }> = {
+		PENDING:     { label: "Bekliyor",     cls: "s-pending" },
+		CONFIRMED:   { label: "Onaylandı",    cls: "s-confirmed" },
+		COMPLETED:   { label: "Tamamlandı",   cls: "s-completed" },
+		CANCELLED:   { label: "İptal",        cls: "s-cancelled" },
+		IN_PROGRESS: { label: "Devam Ediyor", cls: "s-inprogress" },
+	}
+
+	return (
+		<div className="sa-popup-overlay" onClick={onClose}>
+			<div className="sa-popup" onClick={e => e.stopPropagation()}>
+				{/* Header */}
+				<div className="sa-popup-hd">
+					<div>
+						<h2 className="sa-popup-title">{titles[type]}</h2>
+						<p className="sa-popup-sub">{dateLabel}</p>
+					</div>
+					<button className="sa-popup-close" onClick={onClose}><X className="w-5 h-5" /></button>
+				</div>
+
+				{/* Content */}
+				<div className="sa-popup-body">
+
+					{/* RANDEVULAR */}
+					{type === "appointments" && (
+						data.length === 0
+							? <div className="sa-popup-empty">Bu gün randevu bulunmuyor.</div>
+							: <table className="sa-popup-table">
+								<thead><tr>
+									<th>Hasta</th><th>Tür</th><th>Sahip</th><th>Telefon</th><th>Hizmet</th><th>Saat</th><th>Durum</th>
+								</tr></thead>
+								<tbody>
+									{data.map((a: any) => (
+										<tr key={a.id}>
+											<td><span className="sa-pt-name">{a.pet?.name || "—"}</span></td>
+											<td>{a.pet?.species || "—"}</td>
+											<td>{a.pet?.owner?.name || a.pet?.owner?.email || "—"}</td>
+											<td>
+												{a.pet?.owner?.phone
+													? <a href={`tel:${a.pet.owner.phone}`} className="sa-pt-phone"><Phone className="w-3 h-3" />{a.pet.owner.phone}</a>
+													: <span className="sa-pt-none">—</span>}
+											</td>
+											<td>{a.service?.title || "—"}</td>
+											<td>{format(new Date(a.date), "HH:mm")}</td>
+											<td><span className={`ad-badge ${statusLabel[a.status]?.cls || ""}`}>{statusLabel[a.status]?.label || a.status}</span></td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+					)}
+
+					{/* HASTALAR (ZİYARETLER) */}
+					{type === "visits" && (
+						data.length === 0
+							? <div className="sa-popup-empty">Bu gün ziyaret bulunmuyor.</div>
+							: <table className="sa-popup-table">
+								<thead><tr>
+									<th>Protokol</th><th>Hasta</th><th>Tür</th><th>Sahip</th><th>Telefon</th><th>Toplam</th><th>Ödenen</th><th>Durum</th>
+								</tr></thead>
+								<tbody>
+									{data.map((v: any) => (
+										<tr key={v.id}>
+											<td><span className="sa-pt-protocol">PRO-{v.protocolNumber}</span></td>
+											<td><span className="sa-pt-name">{v.pet?.name || "—"}</span></td>
+											<td>{v.pet?.species || "—"}</td>
+											<td>{v.pet?.owner?.name || v.pet?.owner?.email || "—"}</td>
+											<td>
+												{v.pet?.owner?.phone
+													? <a href={`tel:${v.pet.owner.phone}`} className="sa-pt-phone"><Phone className="w-3 h-3" />{v.pet.owner.phone}</a>
+													: <span className="sa-pt-none">—</span>}
+											</td>
+											<td>{formatCurrency(v.totalAmount || 0)}</td>
+											<td>{formatCurrency(v.paidAmount || 0)}</td>
+											<td><span className={`ad-badge ${statusLabel[v.status]?.cls || ""}`}>{statusLabel[v.status]?.label || v.status}</span></td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+					)}
+
+					{/* AŞILAR */}
+					{type === "vaccinations" && (
+						data.length === 0
+							? <div className="sa-popup-empty">Bu gün yapılacak aşı bulunmuyor.</div>
+							: <table className="sa-popup-table">
+								<thead><tr>
+									<th>Aşı Adı</th><th>Hasta</th><th>Tür</th><th>Sahip</th><th>Telefon</th><th>E-posta</th><th>Son Aşı</th>
+								</tr></thead>
+								<tbody>
+									{data.map((v: any) => (
+										<tr key={v.id}>
+											<td><span className="sa-pt-name">{v.vaccineName}</span></td>
+											<td>{v.pet?.name || "—"}</td>
+											<td>{v.pet?.species || "—"}</td>
+											<td>{v.pet?.owner?.name || "—"}</td>
+											<td>
+												{v.pet?.owner?.phone
+													? <a href={`tel:${v.pet.owner.phone}`} className="sa-pt-phone"><Phone className="w-3 h-3" />{v.pet.owner.phone}</a>
+													: <span className="sa-pt-none">—</span>}
+											</td>
+											<td>
+												{v.pet?.owner?.email
+													? <a href={`mailto:${v.pet.owner.email}`} className="sa-pt-phone"><Mail className="w-3 h-3" />{v.pet.owner.email}</a>
+													: <span className="sa-pt-none">—</span>}
+											</td>
+											<td>{v.dateGiven ? format(new Date(v.dateGiven), "d MMM yyyy") : "—"}</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+					)}
+
+					{/* CİRO */}
+					{type === "ciro" && (
+						data.length === 0
+							? <div className="sa-popup-empty">Bu gün oluşturulan ziyaret bulunmuyor.</div>
+							: <table className="sa-popup-table">
+								<thead><tr>
+									<th>Protokol</th><th>Hasta</th><th>Sahip</th><th>Telefon</th><th>Hizmetler</th><th>Toplam</th><th>Ödenen</th><th>Bakiye</th>
+								</tr></thead>
+								<tbody>
+									{data.map((v: any) => (
+										<tr key={v.id}>
+											<td><span className="sa-pt-protocol">PRO-{v.protocolNumber}</span></td>
+											<td><span className="sa-pt-name">{v.pet?.name || "—"}</span></td>
+											<td>{v.pet?.owner?.name || "—"}</td>
+											<td>
+												{v.pet?.owner?.phone
+													? <a href={`tel:${v.pet.owner.phone}`} className="sa-pt-phone"><Phone className="w-3 h-3" />{v.pet.owner.phone}</a>
+													: <span className="sa-pt-none">—</span>}
+											</td>
+											<td>{v._count?.services ?? "—"} hizmet</td>
+											<td><strong>{formatCurrency(v.totalAmount || 0)}</strong></td>
+											<td>{formatCurrency(v.paidAmount || 0)}</td>
+											<td>
+												{(v.totalAmount - v.paidAmount) > 0
+													? <span style={{ color: "var(--pc-red)", fontWeight: 600 }}>{formatCurrency(v.totalAmount - v.paidAmount)}</span>
+													: <span style={{ color: "var(--pc-green)", fontWeight: 600 }}>Ödendi</span>}
+											</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+					)}
+
+					{/* TAHSİLAT */}
+					{type === "tahsilat" && (
+						data.length === 0
+							? <div className="sa-popup-empty">Bu gün tahsilat bulunmuyor.</div>
+							: <table className="sa-popup-table">
+								<thead><tr>
+									<th>Protokol</th><th>Hasta</th><th>Sahip</th><th>Telefon</th><th>Yöntem</th><th>Tahsilat</th><th>Saat</th>
+								</tr></thead>
+								<tbody>
+									{data.map((row: any, i: number) => (
+										<tr key={i}>
+											<td><span className="sa-pt-protocol">PRO-{row.protocolNumber}</span></td>
+											<td><span className="sa-pt-name">{row.petName || "—"}</span></td>
+											<td>{row.ownerName || "—"}</td>
+											<td>
+												{row.ownerPhone
+													? <a href={`tel:${row.ownerPhone}`} className="sa-pt-phone"><Phone className="w-3 h-3" />{row.ownerPhone}</a>
+													: <span className="sa-pt-none">—</span>}
+											</td>
+											<td>{row.method === "cash" ? "Nakit" : row.method === "card" ? "Kart" : row.method}</td>
+											<td><strong>{formatCurrency(row.amount)}</strong></td>
+											<td>{row.paidAt ? format(new Date(row.paidAt), "HH:mm") : "—"}</td>
+										</tr>
+									))}
+								</tbody>
+							</table>
+					)}
+
+				</div>
+			</div>
+		</div>
+	)
+}
+
+// ---- MAIN DASHBOARD ----
 export function EnhancedSuperAdminDashboard() {
 	const { formatCurrency } = useCurrency()
 	const { data: usersResponse } = useStats()
@@ -105,7 +289,8 @@ export function EnhancedSuperAdminDashboard() {
 
 	// ---- Takvim state ----
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null)
-	const [calOpen, setCalOpen] = useState(false)
+	const [calOpen, setCalOpen]           = useState(false)
+	const [popup, setPopup]               = useState<PopupType>(null)
 	const calRef = useRef<HTMLDivElement>(null)
 
 	useEffect(() => {
@@ -118,37 +303,20 @@ export function EnhancedSuperAdminDashboard() {
 
 	const now = new Date()
 
-	// Seçili tarihe göre filtre aralığı
 	const filterStart = selectedDate ? startOfDay(selectedDate) : null
 	const filterEnd   = selectedDate ? endOfDay(selectedDate)   : null
 	const isFiltered  = !!selectedDate
 
-	// Filtrelenmiş veri setleri
 	const filteredAppointments = useMemo(() =>
-		isFiltered
-			? appointments.filter(a => {
-				const d = new Date(a.date)
-				return d >= filterStart! && d <= filterEnd!
-			})
-			: appointments
+		isFiltered ? appointments.filter(a => { const d = new Date(a.date); return d >= filterStart! && d <= filterEnd! }) : appointments
 	, [appointments, isFiltered, filterStart, filterEnd])
 
 	const filteredInvoices = useMemo(() =>
-		isFiltered
-			? invoices.filter(i => {
-				const d = new Date(i.createdAt)
-				return d >= filterStart! && d <= filterEnd!
-			})
-			: invoices
+		isFiltered ? invoices.filter(i => { const d = new Date(i.createdAt); return d >= filterStart! && d <= filterEnd! }) : invoices
 	, [invoices, isFiltered, filterStart, filterEnd])
 
 	const filteredVisits = useMemo(() =>
-		isFiltered
-			? visits.filter(v => {
-				const d = new Date(v.visitDate || v.createdAt)
-				return d >= filterStart! && d <= filterEnd!
-			})
-			: visits
+		isFiltered ? visits.filter(v => { const d = new Date(v.visitDate || v.createdAt); return d >= filterStart! && d <= filterEnd! }) : visits
 	, [visits, isFiltered, filterStart, filterEnd])
 
 	const thirtyDaysAgo  = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
@@ -172,18 +340,15 @@ export function EnhancedSuperAdminDashboard() {
 		const paid    = filteredInvoices.filter(i => i.status === "PAID")
 		const unpaid  = filteredInvoices.filter(i => i.status === "UNPAID")
 		const allPaid = invoices.filter(i => i.status === "PAID")
-
 		const monthRev  = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
 		const prevRev   = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
-		const recentAppts = filteredAppointments.length
-
 		return {
 			totalRev:    paid.reduce((s,i)=>s+i.amount,0),
 			allTimeRev:  allPaid.reduce((s,i)=>s+i.amount,0),
 			monthRev,
 			revChange:   prevRev > 0 ? ((monthRev - prevRev) / prevRev) * 100 : 0,
 			totalAppts:  filteredAppointments.length,
-			recentAppts,
+			recentAppts: filteredAppointments.length,
 			totalPets:   pets.length,
 			totalInv:    filteredInvoices.length,
 			paidCount:   paid.length,
@@ -193,59 +358,54 @@ export function EnhancedSuperAdminDashboard() {
 	}, [filteredAppointments, filteredInvoices, pets, invoices, thirtyDaysAgo, prevThirtyDays])
 
 	const todayStats = useMemo(() => {
-		// Takvimden tarih seçildiyse o günü, yoksa gerçek bugünü kullan
 		const activeDate = selectedDate || now
-		const todayStr = format(activeDate, "yyyy-MM-dd")
-		const todayStart = new Date(todayStr + "T00:00:00.000Z")
-		const todayEnd   = new Date(todayStr + "T23:59:59.999Z")
+		const todayStr   = format(activeDate, "yyyy-MM-dd")
 
-		// Bugünkü randevular
-		const todayAppts = appointments.filter(a =>
-			format(new Date(a.date), "yyyy-MM-dd") === todayStr
-		)
+		const todayAppts = appointments.filter(a => format(new Date(a.date), "yyyy-MM-dd") === todayStr)
 		const completedAppts = todayAppts.filter(a => a.status === "COMPLETED").length
 		const pendingAppts   = todayAppts.filter(a => ["PENDING","CONFIRMED"].includes(a.status)).length
 
-		// Bugün gelen hasta (visit)
-		const todayVisits = visits.filter(v =>
-			format(new Date(v.visitDate || v.createdAt), "yyyy-MM-dd") === todayStr
-		)
-		const activeVisits = todayVisits.filter(v => v.status === "IN_PROGRESS").length
-
-		// Bugün yapılacak aşılar (nextDue = bugün) - UTC/local timezone safe
-		const todayVaccinations = vaccinations.filter(v => {
-			if (!v.nextDue) return false
-			// nextDue "2026-03-11" veya "2026-03-11T00:00:00.000Z" şeklinde gelebilir
-			// Her iki formatta da ilk 10 karakteri al (YYYY-MM-DD)
-			const dueDateStr = v.nextDue.slice(0, 10)
-			return dueDateStr === todayStr
-		})
-
-		// Bugünkü ciro = bugün oluşturulan/güncellenen ziyaretlerin TOPLAM hizmet bedeli (ödensın ya da ödenmesın)
 		const todayVisitList = visits.filter(v =>
-			v.visitDate?.slice(0, 10) === todayStr || v.createdAt?.slice(0, 10) === todayStr
+			(v.visitDate?.slice(0,10) === todayStr) || (v.createdAt?.slice(0,10) === todayStr)
 		)
+		const activeVisits = todayVisitList.filter(v => v.status === "IN_PROGRESS").length
+
+		const todayVaccinationList = vaccinations.filter(v => v.nextDue?.slice(0, 10) === todayStr)
+
 		const todayCiro = todayVisitList.reduce((s, v) => s + (v.totalAmount || 0), 0)
 
-		// Bugünkü tahsilat = bugün paidAt olan ödemeler (tüm visit'lerden)
-		const todayTahsilat = visits.reduce((sum, v) => {
+		// Tahsilat: payments array varsa kullan, yoksa paidAmount
+		const todayTahsilatRows: any[] = []
+		visits.forEach(v => {
 			if (v.payments && v.payments.length > 0) {
-				return sum + v.payments
-					.filter(p => p.status === "COMPLETED" && p.paidAt?.slice(0, 10) === todayStr)
-					.reduce((s, p) => s + (p.amount || 0), 0)
+				v.payments
+					.filter((p: any) => p.status === "COMPLETED" && p.paidAt?.slice(0,10) === todayStr)
+					.forEach((p: any) => {
+						todayTahsilatRows.push({
+							protocolNumber: v.protocolNumber,
+							petName:   v.pet?.name,
+							ownerName: v.pet?.owner?.name || v.pet?.owner?.email,
+							ownerPhone:v.pet?.owner?.phone,
+							method:    p.method,
+							amount:    p.amount,
+							paidAt:    p.paidAt,
+						})
+					})
 			}
-			return sum
-		}, 0)
+		})
+		const todayTahsilat = todayTahsilatRows.reduce((s, r) => s + r.amount, 0)
 
 		return {
-			todayAppts:        todayAppts.length,
-			completedAppts,
-			pendingAppts,
-			todayVisits:       todayVisits.length,
-			activeVisits,
-			todayVaccinations: todayVaccinations.length,
-			todayCiro,
-			todayTahsilat,
+			todayAppts: todayAppts.length, completedAppts, pendingAppts,
+			todayVisits: todayVisitList.length, activeVisits,
+			todayVaccinations: todayVaccinationList.length,
+			todayCiro, todayTahsilat,
+			// popup data
+			apptList:        todayAppts,
+			visitList:       todayVisitList,
+			vaccinationList: todayVaccinationList,
+			ciroList:        todayVisitList,
+			tahsilatList:    todayTahsilatRows,
 		}
 	}, [appointments, visits, vaccinations, invoices, selectedDate])
 
@@ -259,12 +419,11 @@ export function EnhancedSuperAdminDashboard() {
 			return { name: format(d, "MMM yy"), value: filteredInvoices.filter(inv => format(new Date(inv.createdAt),"yyyy-MM")===format(d,"yyyy-MM") && inv.status==="PAID").reduce((s,inv)=>s+inv.amount,0) }
 		})
 		const roleChart = [
-			{ name: "Müşteri",    value: userStats.customers },
-			{ name: "Personel",   value: userStats.staff },
-			{ name: "Admin",      value: userStats.admins },
-			{ name: "Süper Admin",value: userStats.superAdmins },
+			{ name: "Müşteri", value: userStats.customers },
+			{ name: "Personel", value: userStats.staff },
+			{ name: "Admin", value: userStats.admins },
+			{ name: "Süper Admin", value: userStats.superAdmins },
 		]
-		// Bu aydaki günlere göre randevu dağılımı (pasta grafik için)
 		const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
 		const monthlyApptChart = Array.from({ length: daysInMonth }, (_, i) => {
 			const d = new Date(now.getFullYear(), now.getMonth(), i + 1)
@@ -278,52 +437,57 @@ export function EnhancedSuperAdminDashboard() {
 		[...users].sort((a,b) => new Date(b.createdAt||now).getTime() - new Date(a.createdAt||now).getTime()).slice(0, 6)
 	, [users])
 
-	const dateLabel = selectedDate
-		? format(selectedDate, "d MMMM yyyy", { locale: tr })
-		: format(now, "d MMMM yyyy", { locale: tr })
+	const dateLabel = selectedDate ? format(selectedDate, "d MMMM yyyy", { locale: tr }) : format(now, "d MMMM yyyy", { locale: tr })
+
+	// popup data resolver
+	const popupData = useMemo(() => {
+		if (!popup) return []
+		if (popup === "appointments")  return todayStats.apptList
+		if (popup === "visits")        return todayStats.visitList
+		if (popup === "vaccinations")  return todayStats.vaccinationList
+		if (popup === "ciro")          return todayStats.ciroList
+		if (popup === "tahsilat")      return todayStats.tahsilatList
+		return []
+	}, [popup, todayStats])
 
 	return (
 		<div className="ad-wrap">
+			{/* Popup */}
+			{popup && (
+				<DetailPopup
+					type={popup}
+					data={popupData}
+					dateLabel={dateLabel}
+					onClose={() => setPopup(null)}
+					formatCurrency={formatCurrency}
+				/>
+			)}
+
 			{/* Header */}
 			<div className="ad-hd">
 				<div>
 					<h1 className="ad-hd-title">Süper Admin Paneli</h1>
 					<p className="ad-hd-sub">
 						{isFiltered
-							? <><span className="sa-date-badge"><Calendar className="w-3 h-3" />{dateLabel} — Tarih Filtresi Aktif</span></>
+							? <span className="sa-date-badge"><Calendar className="w-3 h-3" />{dateLabel} — Tarih Filtresi Aktif</span>
 							: <>{dateLabel} — Sistem Yönetimi</>
 						}
 					</p>
 				</div>
 				<div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-					{/* Takvim butonu */}
 					<div ref={calRef} style={{ position: "relative" }}>
-						<button
-							className={`sa-cal-btn${isFiltered ? " sa-cal-btn-active" : ""}`}
-							onClick={() => setCalOpen(v => !v)}
-						>
+						<button className={`sa-cal-btn${isFiltered ? " sa-cal-btn-active" : ""}`} onClick={() => setCalOpen(v => !v)}>
 							<Calendar className="w-4 h-4" />
 							<span>Tarih: {isFiltered ? dateLabel : "Tümü"}</span>
 							{isFiltered && (
-								<span
-									className="sa-cal-x"
-									onClick={(e) => { e.stopPropagation(); setSelectedDate(null) }}
-								>
+								<span className="sa-cal-x" onClick={e => { e.stopPropagation(); setSelectedDate(null) }}>
 									<X className="w-3 h-3" />
 								</span>
 							)}
 						</button>
-						{calOpen && (
-							<MiniCalendar
-								selected={selectedDate}
-								onChange={setSelectedDate}
-								onClose={() => setCalOpen(false)}
-							/>
-						)}
+						{calOpen && <MiniCalendar selected={selectedDate} onChange={setSelectedDate} onClose={() => setCalOpen(false)} />}
 					</div>
-					<a href="/super/roles" className="sa-mgmt-btn">
-						<Settings className="w-4 h-4" /> Kullanıcı Yönetimi
-					</a>
+					<a href="/super/roles" className="sa-mgmt-btn"><Settings className="w-4 h-4" /> Kullanıcı Yönetimi</a>
 					<span className="ad-live"><span className="ad-live-dot" />Canlı</span>
 				</div>
 			</div>
@@ -341,6 +505,7 @@ export function EnhancedSuperAdminDashboard() {
 							<span className="sa-today-chip sa-chip-amber">{todayStats.pendingAppts} bekliyor</span>
 						</div>
 					</div>
+					<button className="sa-incele-btn" onClick={() => setPopup("appointments")}><Eye className="w-3.5 h-3.5" />İncele</button>
 				</div>
 
 				{/* Bugün Gelen Hasta */}
@@ -352,10 +517,10 @@ export function EnhancedSuperAdminDashboard() {
 						<div className="sa-today-sub">
 							{todayStats.activeVisits > 0
 								? <span className="sa-today-chip sa-chip-blue">{todayStats.activeVisits} aktif</span>
-								: <span className="sa-today-chip sa-chip-gray">aktif ziyaret yok</span>
-							}
+								: <span className="sa-today-chip sa-chip-gray">aktif yok</span>}
 						</div>
 					</div>
+					<button className="sa-incele-btn" onClick={() => setPopup("visits")}><Eye className="w-3.5 h-3.5" />İncele</button>
 				</div>
 
 				{/* Bugün Yapılacak Aşılar */}
@@ -367,10 +532,10 @@ export function EnhancedSuperAdminDashboard() {
 						<div className="sa-today-sub">
 							{todayStats.todayVaccinations > 0
 								? <span className="sa-today-chip sa-chip-violet">hatırlatma var</span>
-								: <span className="sa-today-chip sa-chip-gray">aşı yok</span>
-							}
+								: <span className="sa-today-chip sa-chip-gray">aşı yok</span>}
 						</div>
 					</div>
+					<button className="sa-incele-btn" onClick={() => setPopup("vaccinations")}><Eye className="w-3.5 h-3.5" />İncele</button>
 				</div>
 
 				{/* Bugünkü Ciro */}
@@ -379,8 +544,9 @@ export function EnhancedSuperAdminDashboard() {
 					<div className="ad-kpi-body">
 						<p className="ad-kpi-lbl">Bugünkü Ciro</p>
 						<p className="ad-kpi-val">{formatCurrency(todayStats.todayCiro)}</p>
-						<p className="ad-kpi-desc">bugün tahsil edildi</p>
+						<p className="ad-kpi-desc">toplam hizmet bedeli</p>
 					</div>
+					<button className="sa-incele-btn" onClick={() => setPopup("ciro")}><Eye className="w-3.5 h-3.5" />İncele</button>
 				</div>
 
 				{/* Bugünkü Tahsilat */}
@@ -391,6 +557,7 @@ export function EnhancedSuperAdminDashboard() {
 						<p className="ad-kpi-val">{formatCurrency(todayStats.todayTahsilat)}</p>
 						<p className="ad-kpi-desc">bugün ödenen faturalar</p>
 					</div>
+					<button className="sa-incele-btn" onClick={() => setPopup("tahsilat")}><Eye className="w-3.5 h-3.5" />İncele</button>
 				</div>
 			</div>
 
@@ -420,7 +587,7 @@ export function EnhancedSuperAdminDashboard() {
 				))}
 			</div>
 
-			{/* Sistem Ozeti - 4 renk kartı */}
+			{/* Sistem Ozeti */}
 			<div className="sa-ozet-row">
 				<div className="sa-ozet-label">
 					<TrendingUp className="w-4 h-4" />
@@ -428,16 +595,16 @@ export function EnhancedSuperAdminDashboard() {
 				</div>
 				<div className="sa-ozet-cards">
 					{[
-						{ icon: <Users className="w-4 h-4" />,      color: "blue",   label: "Toplam Kullanıcı",   val: `${userStats.total}`,                         sub: `${userStats.newUsers} bu ay` },
-						{ icon: <DollarSign className="w-4 h-4" />, color: "teal",   label: "Tahsil Edilen Gelir",val: formatCurrency(bizStats.allTimeRev),            sub: "tüm zamanlar" },
-						{ icon: <FileText className="w-4 h-4" />,   color: "amber",  label: "Bekleyen Tahsilat",  val: formatCurrency(bizStats.unpaidAmt),             sub: `${bizStats.unpaidCount} fatura`, warn: bizStats.unpaidAmt > 0 },
-						{ icon: <PawPrint className="w-4 h-4" />,   color: "violet", label: "Toplam Hasta",       val: `${bizStats.totalPets}`,                        sub: "kayıtlı hayvan" },
+						{ icon: <Users className="w-4 h-4" />,      color: "blue",   label: "Toplam Kullanıcı",   val: `${userStats.total}`,              sub: `${userStats.newUsers} bu ay` },
+						{ icon: <DollarSign className="w-4 h-4" />, color: "teal",   label: "Tahsil Edilen Gelir",val: formatCurrency(bizStats.allTimeRev), sub: "tüm zamanlar" },
+						{ icon: <FileText className="w-4 h-4" />,   color: "amber",  label: "Bekleyen Tahsilat",  val: formatCurrency(bizStats.unpaidAmt),  sub: `${bizStats.unpaidCount} fatura`, warn: bizStats.unpaidAmt > 0 },
+						{ icon: <PawPrint className="w-4 h-4" />,   color: "violet", label: "Toplam Hasta",       val: `${bizStats.totalPets}`,            sub: "kayıtlı hayvan" },
 					].map((row, i) => (
-						<div key={i} className={`sa-ozet-card sa-ozet-${row.color}${row.warn ? " sa-ozet-warn" : ""}`}>
+						<div key={i} className={`sa-ozet-card sa-ozet-${row.color}${(row as any).warn ? " sa-ozet-warn" : ""}`}>
 							<div className={`sa-ozet-icon sa-oi-${row.color}`}>{row.icon}</div>
 							<div className="sa-ozet-body">
 								<p className="sa-ozet-lbl">{row.label}</p>
-								<p className={`sa-ozet-val${row.warn ? " sa-ozet-val-warn" : ""}`}>{row.val}</p>
+								<p className={`sa-ozet-val${(row as any).warn ? " sa-ozet-val-warn" : ""}`}>{row.val}</p>
 								<p className="sa-ozet-sub">{row.sub}</p>
 							</div>
 						</div>
@@ -455,7 +622,6 @@ export function EnhancedSuperAdminDashboard() {
 
 			{/* Bottom */}
 			<div className="ad-bottom">
-				{/* Recent Users */}
 				<div className="ad-panel">
 					<div className="ad-panel-hd">
 						<h3 className="ad-panel-title"><Activity className="w-4 h-4" />Son Kayıt Olan Kullanıcılar</h3>
@@ -474,9 +640,7 @@ export function EnhancedSuperAdminDashboard() {
 									<p className="ad-visit-meta">{u.email}</p>
 								</div>
 								<div className="ad-visit-right">
-									<span className={`ad-badge ${roleCfg[u.role]?.cls || "rb-customer"}`}>
-										{roleCfg[u.role]?.label || u.role}
-									</span>
+									<span className={`ad-badge ${roleCfg[u.role]?.cls || "rb-customer"}`}>{roleCfg[u.role]?.label || u.role}</span>
 									{u.createdAt && <p className="ad-visit-meta">{format(new Date(u.createdAt), "d MMM yyyy")}</p>}
 								</div>
 							</div>
