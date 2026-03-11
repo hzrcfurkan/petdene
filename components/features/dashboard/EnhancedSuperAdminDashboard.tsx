@@ -953,6 +953,7 @@ export function EnhancedSuperAdminDashboard() {
 					</div>
 				</div>
 
+			</div>{/* /sa-today-panels-grid row2 */}
 
 			{/* ===== İSTATİSTİKLER ===== */}
 			<div className="sa-charts-title">
