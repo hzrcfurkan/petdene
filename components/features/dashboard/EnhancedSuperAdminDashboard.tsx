@@ -954,9 +954,9 @@ export function EnhancedSuperAdminDashboard() {
 					</div>
 				</div>
 
-			</div>{/* /sa-today-panels-grid row2 */}
-			</div>{/* /ad-wrap-inner */}
-		</div>{/* /ad-wrap */}
+			</div>
+			</div>
+		</div>
 
 		<div style={{padding:"0 24px 24px 24px", gridColumn:"1/-1", width:"100%"}}>
 			<div className="sa-charts-title" style={{marginBottom:"16px"}}>
