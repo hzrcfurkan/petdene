@@ -1,75 +1,296 @@
 "use client"
 
-import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { useCurrency } from "@/components/providers/CurrencyProvider"
+import {
+	ChartConfig,
+	ChartContainer,
+	ChartLegend,
+	ChartLegendContent,
+	ChartTooltip,
+	ChartTooltipContent,
+} from "@/components/ui/chart"
+import {
+	Bar,
+	BarChart,
+	CartesianGrid,
+	Cell,
+	Line,
+	LineChart,
+	Pie,
+	PieChart,
+	XAxis,
+	YAxis,
+} from "recharts"
 
-interface ChartData { name: string; value: number }
+interface ChartData {
+	name: string
+	value: number
+	[key: string]: string | number
+}
 
 interface DashboardChartsProps {
 	appointmentsData?: ChartData[]
 	revenueData?: ChartData[]
 	statusData?: ChartData[]
 	serviceData?: ChartData[]
-	monthlyApptData?: ChartData[]
 }
 
-const COLORS = ["#3B82F6","#10B981","#8B5CF6","#F59E0B","#EF4444","#06B6D4"]
+const CHART_COLORS = [
+	"var(--chart-1)",
+	"var(--chart-2)",
+	"var(--chart-3)",
+	"var(--chart-4)",
+	"var(--chart-5)",
+] as const
+
+const appointmentsChartConfig = {
+	value: {
+		label: "Randevular",
+		color: "var(--chart-1)",
+	},
+	name: {
+		label: "Tarih",
+	},
+} satisfies ChartConfig
+
+const revenueChartConfig = {
+	value: {
+		label: "Gelir",
+		color: "var(--chart-2)",
+	},
+	name: {
+		label: "Period",
+	},
+} satisfies ChartConfig
+
+const createStatusChartConfig = (statusData: ChartData[]) =>
+	({
+		value: { label: "Count", color: "var(--chart-1)" },
+		...Object.fromEntries(
+			statusData.map((item, i) => [
+				item.name,
+				{ label: item.name, color: CHART_COLORS[i % CHART_COLORS.length] },
+			])
+		),
+	}) satisfies ChartConfig
+
+const serviceChartConfig = {
+	value: {
+		label: "Bookings",
+		color: "var(--chart-4)",
+	},
+	name: {
+		label: "Service",
+	},
+} satisfies ChartConfig
 
 export function DashboardCharts({
 	appointmentsData = [],
 	revenueData = [],
 	statusData = [],
+	serviceData = [],
 }: DashboardChartsProps) {
 	const { formatCurrency } = useCurrency()
-
 	return (
-		<div style={{display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:"20px", width:"100%", boxSizing:"border-box"}}>
+		<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+			{/* Appointments Over Time */}
+			{appointmentsData.length > 0 && (
+				<Card>
+					<CardHeader>
+						<CardTitle>Zaman İçinde Randevular</CardTitle>
+						<CardDescription>Tarihe göre randevu trendleri</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<ChartContainer
+							config={appointmentsChartConfig}
+							className="aspect-auto h-[280px] w-full"
+						>
+							<LineChart
+								data={appointmentsData}
+								margin={{ left: 12, right: 12, top: 12, bottom: 0 }}
+							>
+								<CartesianGrid strokeDasharray="3 3" vertical={false} />
+								<XAxis
+									dataKey="name"
+									tickLine={false}
+									axisLine={false}
+									tickMargin={8}
+								/>
+								<YAxis hide />
+								<ChartTooltip content={<ChartTooltipContent indicator="line" />} />
+								<ChartLegend content={<ChartLegendContent />} />
+								<Line
+									type="monotone"
+									dataKey="value"
+									stroke="var(--color-value)"
+									strokeWidth={2}
+									dot={{ fill: "var(--color-value)", r: 3 }}
+									activeDot={{ r: 5 }}
+								/>
+							</LineChart>
+						</ChartContainer>
+					</CardContent>
+				</Card>
+			)}
 
-			{/* Randevu Trendi */}
-			<div style={{background:"var(--pc-surface,#fff)", borderRadius:"14px", border:"1px solid var(--pc-border,#e5e7eb)", padding:"20px", minHeight:"380px"}}>
-				<p style={{fontWeight:700, fontSize:"15px", marginBottom:"4px", color:"var(--pc-text,#111)"}}>Zaman İçinde Randevular</p>
-				<p style={{fontSize:"12px", color:"var(--pc-text-sm,#6b7280)", marginBottom:"16px"}}>Tarihe göre randevu trendleri</p>
-				<ResponsiveContainer width="100%" height={280}>
-					<LineChart data={appointmentsData} margin={{left:0,right:8,top:4,bottom:0}}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-						<XAxis dataKey="name" tick={{fontSize:11}} tickLine={false} axisLine={false} />
-						<YAxis hide />
-						<Tooltip formatter={(v:any) => [v, "Randevu"]} />
-						<Line type="monotone" dataKey="value" stroke="#3B82F6" strokeWidth={2} dot={{r:3, fill:"#3B82F6"}} name="Randevular" />
-					</LineChart>
-				</ResponsiveContainer>
-			</div>
+			{/* Revenue Chart */}
+			{revenueData.length > 0 && (
+				<Card>
+					<CardHeader>
+						<CardTitle>Gelir Genel Bakış</CardTitle>
+						<CardDescription>Döneme göre gelir</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<ChartContainer
+							config={revenueChartConfig}
+							className="aspect-auto h-[280px] w-full"
+						>
+							<BarChart
+								data={revenueData}
+								margin={{ left: 12, right: 12, top: 12, bottom: 0 }}
+							>
+								<CartesianGrid strokeDasharray="3 3" vertical={false} />
+								<XAxis
+									dataKey="name"
+									tickLine={false}
+									axisLine={false}
+									tickMargin={8}
+								/>
+								<YAxis hide />
+								<ChartTooltip
+									content={
+										<ChartTooltipContent
+											formatter={(value, name, item) => (
+												<>
+													<div
+														className="shrink-0 rounded-[2px] h-2.5 w-2.5"
+														style={{
+															backgroundColor:
+																item.color || (item.payload as { fill?: string })?.fill || "var(--chart-2)",
+														}}
+													/>
+													<div className="flex flex-1 justify-between leading-none items-center">
+														<span className="text-muted-foreground">{name}</span>
+														<span className="text-foreground font-mono font-medium tabular-nums">
+															{formatCurrency(Number(value))}
+														</span>
+													</div>
+												</>
+											)}
+										/>
+									}
+								/>
+								<ChartLegend content={<ChartLegendContent />} />
+								<Bar
+									dataKey="value"
+									fill="var(--color-value)"
+									radius={[4, 4, 0, 0]}
+								/>
+							</BarChart>
+						</ChartContainer>
+					</CardContent>
+				</Card>
+			)}
 
-			{/* Gelir Genel Bakış */}
-			<div style={{background:"var(--pc-surface,#fff)", borderRadius:"14px", border:"1px solid var(--pc-border,#e5e7eb)", padding:"20px", minHeight:"380px"}}>
-				<p style={{fontWeight:700, fontSize:"15px", marginBottom:"4px", color:"var(--pc-text,#111)"}}>Gelir Genel Bakış</p>
-				<p style={{fontSize:"12px", color:"var(--pc-text-sm,#6b7280)", marginBottom:"16px"}}>Döneme göre gelir</p>
-				<ResponsiveContainer width="100%" height={280}>
-					<BarChart data={revenueData} margin={{left:0,right:8,top:4,bottom:0}}>
-						<CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
-						<XAxis dataKey="name" tick={{fontSize:11}} tickLine={false} axisLine={false} />
-						<YAxis hide />
-						<Tooltip formatter={(v:any) => [formatCurrency(Number(v)), "Gelir"]} />
-						<Bar dataKey="value" fill="#3B82F6" radius={[4,4,0,0]} name="Gelir" />
-					</BarChart>
-				</ResponsiveContainer>
-			</div>
+			{/* Status Distribution */}
+			{statusData.length > 0 && (
+				<Card>
+					<CardHeader>
+						<CardTitle>Durum Dağılımı</CardTitle>
+						<CardDescription>Randevu durumlarının dağılımı</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<ChartContainer
+							config={createStatusChartConfig(statusData)}
+							className="aspect-auto mx-auto h-[280px] w-full max-w-[280px]"
+						>
+							<PieChart>
+								<ChartTooltip
+									content={
+										<ChartTooltipContent
+											hideIndicator
+											formatter={(value, name) => {
+												const total = statusData.reduce((a, b) => a + b.value, 0)
+												const numVal = typeof value === "number" ? value : Number(value)
+												const pct = total > 0 ? Math.round((numVal / total) * 100) : 0
+												return (
+													<div className="flex flex-1 justify-between leading-none items-center">
+														<span className="text-muted-foreground">{name}</span>
+														<span className="text-foreground font-mono font-medium tabular-nums">
+															{numVal} ({pct}%)
+														</span>
+													</div>
+												)
+											}}
+										/>
+									}
+								/>
+								<Pie
+									data={statusData}
+									cx="50%"
+									cy="50%"
+									innerRadius={50}
+									outerRadius={90}
+									paddingAngle={2}
+									dataKey="value"
+									nameKey="name"
+									strokeWidth={1}
+									stroke="var(--border)"
+								>
+									{statusData.map((_, index) => (
+										<Cell
+											key={`cell-${index}`}
+											fill={CHART_COLORS[index % CHART_COLORS.length]}
+										/>
+									))}
+								</Pie>
+								<ChartLegend content={<ChartLegendContent nameKey="name" />} />
+							</PieChart>
+						</ChartContainer>
+					</CardContent>
+				</Card>
+			)}
 
-			{/* Durum Dağılımı */}
-			<div style={{background:"var(--pc-surface,#fff)", borderRadius:"14px", border:"1px solid var(--pc-border,#e5e7eb)", padding:"20px", minHeight:"380px"}}>
-				<p style={{fontWeight:700, fontSize:"15px", marginBottom:"4px", color:"var(--pc-text,#111)"}}>Durum Dağılımı</p>
-				<p style={{fontSize:"12px", color:"var(--pc-text-sm,#6b7280)", marginBottom:"16px"}}>Randevu durumlarının dağılımı</p>
-				<ResponsiveContainer width="100%" height={220}>
-					<PieChart>
-						<Pie data={statusData} cx="50%" cy="50%" innerRadius={55} outerRadius={90} dataKey="value" nameKey="name" paddingAngle={2}>
-							{statusData.map((_,i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-						</Pie>
-						<Tooltip />
-						<Legend />
-					</PieChart>
-				</ResponsiveContainer>
-			</div>
-
+			{/* Service Popularity */}
+			{serviceData.length > 0 && (
+				<Card>
+					<CardHeader>
+						<CardTitle>Service Popularity</CardTitle>
+						<CardDescription>Most booked services</CardDescription>
+					</CardHeader>
+					<CardContent>
+						<ChartContainer
+							config={serviceChartConfig}
+							className="aspect-auto h-[280px] w-full"
+						>
+							<BarChart
+								data={serviceData}
+								layout="vertical"
+								margin={{ left: 12, right: 12, top: 0, bottom: 0 }}
+							>
+								<CartesianGrid strokeDasharray="3 3" horizontal={false} />
+								<XAxis type="number" tickLine={false} axisLine={false} />
+								<YAxis
+									dataKey="name"
+									type="category"
+									width={100}
+									tickLine={false}
+									axisLine={false}
+									tickMargin={8}
+								/>
+								<ChartTooltip content={<ChartTooltipContent />} />
+								<ChartLegend content={<ChartLegendContent />} />
+								<Bar
+									dataKey="value"
+									fill="var(--color-value)"
+									radius={[0, 4, 4, 0]}
+								/>
+							</BarChart>
+						</ChartContainer>
+					</CardContent>
+				</Card>
+			)}
 		</div>
 	)
 }
