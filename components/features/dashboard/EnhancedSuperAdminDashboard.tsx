@@ -86,6 +86,15 @@ function MiniCalendar({ selected, onChange, onClose }: {
 }
 
 // ---- DETAIL POPUP ----
+function safeFormat(val: any, fmt: string, opts?: any): string {
+	try {
+		if (!val) return "—"
+		const d = new Date(val)
+		if (isNaN(d.getTime())) return "—"
+		return opts ? format(d, fmt, opts) : format(d, fmt)
+	} catch { return "—" }
+}
+
 type PopupType = "appointments" | "visits" | "vaccinations" | "ciro" | "tahsilat" | null
 
 function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
@@ -148,7 +157,7 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 													: <span className="sa-pt-none">—</span>}
 											</td>
 											<td>{a.service?.title || "—"}</td>
-											<td>{format(new Date(a.date), "HH:mm")}</td>
+											<td>{safeFormat(a.date, "HH:mm")}</td>
 											<td><span className={`ad-badge ${statusLabel[a.status]?.cls || ""}`}>{statusLabel[a.status]?.label || a.status}</span></td>
 										</tr>
 									))}
@@ -210,7 +219,7 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 													? <a href={`mailto:${v.pet.owner.email}`} className="sa-pt-phone"><Mail className="w-3 h-3" />{v.pet.owner.email}</a>
 													: <span className="sa-pt-none">—</span>}
 											</td>
-											<td>{v.dateGiven ? format(new Date(v.dateGiven), "d MMM yyyy") : "—"}</td>
+											<td>{v.dateGiven ? safeFormat(v.dateGiven, "d MMM yyyy") : "—"}</td>
 										</tr>
 									))}
 								</tbody>
@@ -271,7 +280,7 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 											</td>
 											<td>{row.method === "cash" ? "Nakit" : row.method === "card" ? "Kart" : row.method}</td>
 											<td><strong>{formatCurrency(row.amount)}</strong></td>
-											<td>{row.paidAt ? format(new Date(row.paidAt), "HH:mm") : "—"}</td>
+											<td>{row.paidAt ? safeFormat(row.paidAt, "HH:mm") : "—"}</td>
 										</tr>
 									))}
 								</tbody>
@@ -279,18 +288,6 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 					)}
 
 				</div>
-
-			{/* ===== GRAFİKLER ===== */}
-			<div className="sa-charts-title">
-				<span className="sa-tp-dot" style={{background:"var(--pc-violet)"}} />
-				<span>İstatistikler</span>
-			</div>
-			<DashboardCharts
-				appointmentsData={chartData.appt}
-				revenueData={chartData.rev}
-				statusData={chartData.role}
-				monthlyApptData={chartData.monthlyAppt}
-			/>
 			</div>
 		</div>
 	)
@@ -840,7 +837,7 @@ export function EnhancedSuperAdminDashboard() {
 								<div className="sa-tp-avatar sa-tpa-red">{(a.pet?.name||"?").charAt(0)}</div>
 								<div className="sa-tp-info">
 									<p className="sa-tp-main">{a.pet?.name || "—"} <span className="sa-tp-species">{a.pet?.species}</span></p>
-									<p className="sa-tp-sub">{a.service?.title || "—"} · {format(new Date(a.date), "HH:mm")}</p>
+									<p className="sa-tp-sub">{a.service?.title || "—"} · {safeFormat(a.date, "HH:mm")}</p>
 								</div>
 								<div className="sa-tp-right">
 									<span className={`ad-badge ${a.status === "CANCELLED" ? "s-cancelled" : "s-pending"}`}>{a.status === "CANCELLED" ? "İptal" : "Bekliyor"}</span>
@@ -943,7 +940,7 @@ export function EnhancedSuperAdminDashboard() {
 								<div className="sa-tp-avatar sa-tpa-red">{(v.pet?.name||"?").charAt(0)}</div>
 								<div className="sa-tp-info">
 									<p className="sa-tp-main">{v.pet?.name || "—"} <span className="sa-tp-species">{v.pet?.species}</span></p>
-									<p className="sa-tp-sub">{v.pet?.owner?.name || "—"} · {format(new Date(v.visitDate), "d MMM")}</p>
+									<p className="sa-tp-sub">{v.pet?.owner?.name || "—"} · {safeFormat(v.visitDate, "d MMM")}</p>
 								</div>
 								<div className="sa-tp-right">
 									{v.pet?.owner?.phone && (
@@ -957,11 +954,12 @@ export function EnhancedSuperAdminDashboard() {
 				</div>
 
 
-			{/* ===== GRAFİKLER ===== */}
+			{/* ===== İSTATİSTİKLER ===== */}
 			<div className="sa-charts-title">
 				<span className="sa-tp-dot" style={{background:"var(--pc-violet)"}} />
 				<span>İstatistikler</span>
 			</div>
+			{/* Charts */}
 			<DashboardCharts
 				appointmentsData={chartData.appt}
 				revenueData={chartData.rev}

@@ -93,7 +93,7 @@ export function DashboardCharts({
 }: DashboardChartsProps) {
 	const { formatCurrency } = useCurrency()
 	return (
-		<div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
+		<div style={{display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"20px"}}>
 			{/* Appointments Over Time */}
 			{appointmentsData.length > 0 && (
 				<Card>
@@ -104,7 +104,7 @@ export function DashboardCharts({
 					<CardContent>
 						<ChartContainer
 							config={appointmentsChartConfig}
-							className="aspect-auto h-[320px] w-full"
+							className="aspect-auto h-[340px] w-full"
 						>
 							<LineChart
 								data={appointmentsData}
@@ -144,7 +144,7 @@ export function DashboardCharts({
 					<CardContent>
 						<ChartContainer
 							config={revenueChartConfig}
-							className="aspect-auto h-[320px] w-full"
+							className="aspect-auto h-[340px] w-full"
 						>
 							<BarChart
 								data={revenueData}
@@ -203,7 +203,7 @@ export function DashboardCharts({
 					<CardContent>
 						<ChartContainer
 							config={createStatusChartConfig(statusData)}
-							className="aspect-auto mx-auto h-[320px] w-full"
+							className="aspect-auto h-[340px] w-full"
 						>
 							<PieChart>
 								<ChartTooltip
@@ -262,7 +262,7 @@ export function DashboardCharts({
 					<CardContent>
 						<ChartContainer
 							config={serviceChartConfig}
-							className="aspect-auto h-[320px] w-full"
+							className="aspect-auto h-[340px] w-full"
 						>
 							<BarChart
 								data={serviceData}
