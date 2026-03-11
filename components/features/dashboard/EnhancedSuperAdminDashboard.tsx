@@ -960,7 +960,7 @@ export function EnhancedSuperAdminDashboard() {
 			</div>{/* /ad-wrap-inner */}
 		</div>{/* /ad-wrap */}
 
-		<div style={{padding:"0 24px 24px 24px"}}>
+		<div style={{padding:"0 24px 24px 24px", gridColumn:"1/-1", width:"100%"}}>
 			<div className="sa-charts-title" style={{marginBottom:"16px"}}>
 				<span className="sa-tp-dot" style={{background:"var(--pc-violet)"}} />
 				<span>İstatistikler</span>
