@@ -1141,3 +1141,6 @@
 .sa-cal-footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--pc-border); display: flex; justify-content: center; }
 .sa-cal-clear  { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--pc-red,#DC2626); background: none; border: none; cursor: pointer; font-weight: 500; padding: 4px 8px; border-radius: 6px; }
 .sa-cal-clear:hover { background: var(--pc-red-lt,#FEE2E2); }
+
+/* ===== GRAFİK BAŞLIĞI ===== */
+.sa-charts-title { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 700; color: var(--pc-text); margin-bottom: -8px; }

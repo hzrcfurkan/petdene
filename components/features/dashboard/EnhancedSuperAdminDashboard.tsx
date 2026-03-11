@@ -280,7 +280,11 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 
 				</div>
 
-			{/* Charts */}
+			{/* ===== GRAFİKLER ===== */}
+			<div className="sa-charts-title">
+				<span className="sa-tp-dot" style={{background:"var(--pc-violet)"}} />
+				<span>İstatistikler</span>
+			</div>
 			<DashboardCharts
 				appointmentsData={chartData.appt}
 				revenueData={chartData.rev}
@@ -953,7 +957,11 @@ export function EnhancedSuperAdminDashboard() {
 				</div>
 
 
-			{/* Charts */}
+			{/* ===== GRAFİKLER ===== */}
+			<div className="sa-charts-title">
+				<span className="sa-tp-dot" style={{background:"var(--pc-violet)"}} />
+				<span>İstatistikler</span>
+			</div>
 			<DashboardCharts
 				appointmentsData={chartData.appt}
 				revenueData={chartData.rev}

@@ -34,7 +34,6 @@ interface DashboardChartsProps {
 	revenueData?: ChartData[]
 	statusData?: ChartData[]
 	serviceData?: ChartData[]
-	monthlyApptData?: ChartData[]
 }
 
 const CHART_COLORS = [
@@ -91,11 +90,10 @@ export function DashboardCharts({
 	revenueData = [],
 	statusData = [],
 	serviceData = [],
-	monthlyApptData = [],
 }: DashboardChartsProps) {
 	const { formatCurrency } = useCurrency()
 	return (
-		<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+		<div className="grid gap-6 grid-cols-1 md:grid-cols-2 xl:grid-cols-3">
 			{/* Appointments Over Time */}
 			{appointmentsData.length > 0 && (
 				<Card>
@@ -106,7 +104,7 @@ export function DashboardCharts({
 					<CardContent>
 						<ChartContainer
 							config={appointmentsChartConfig}
-							className="aspect-auto h-[280px] w-full"
+							className="aspect-auto h-[320px] w-full"
 						>
 							<LineChart
 								data={appointmentsData}
@@ -146,7 +144,7 @@ export function DashboardCharts({
 					<CardContent>
 						<ChartContainer
 							config={revenueChartConfig}
-							className="aspect-auto h-[280px] w-full"
+							className="aspect-auto h-[320px] w-full"
 						>
 							<BarChart
 								data={revenueData}
@@ -195,22 +193,17 @@ export function DashboardCharts({
 				</Card>
 			)}
 
-			{/* Monthly Appointment Distribution */}
-			{(() => {
-				const pieData = monthlyApptData.length > 0 ? monthlyApptData : statusData
-				const isMonthly = monthlyApptData.length > 0
-				const nowDate = new Date()
-				const monthName = nowDate.toLocaleString("tr-TR", { month: "long", year: "numeric" })
-				return pieData.length > 0 ? (
+			{/* Status Distribution */}
+			{statusData.length > 0 && (
 				<Card>
 					<CardHeader>
 						<CardTitle>Durum Dağılımı</CardTitle>
-						<CardDescription>{isMonthly ? `${monthName} günlük randevu dağılımı` : "Randevu durumlarının dağılımı"}</CardDescription>
+						<CardDescription>Randevu durumlarının dağılımı</CardDescription>
 					</CardHeader>
 					<CardContent>
 						<ChartContainer
-							config={createStatusChartConfig(pieData)}
-							className="aspect-auto mx-auto h-[280px] w-full max-w-[280px]"
+							config={createStatusChartConfig(statusData)}
+							className="aspect-auto mx-auto h-[320px] w-full"
 						>
 							<PieChart>
 								<ChartTooltip
@@ -218,14 +211,14 @@ export function DashboardCharts({
 										<ChartTooltipContent
 											hideIndicator
 											formatter={(value, name) => {
-												const total = pieData.reduce((a, b) => a + b.value, 0)
+												const total = statusData.reduce((a, b) => a + b.value, 0)
 												const numVal = typeof value === "number" ? value : Number(value)
 												const pct = total > 0 ? Math.round((numVal / total) * 100) : 0
 												return (
 													<div className="flex flex-1 justify-between leading-none items-center">
 														<span className="text-muted-foreground">{name}</span>
 														<span className="text-foreground font-mono font-medium tabular-nums">
-															{numVal} randevu ({pct}%)
+															{numVal} ({pct}%)
 														</span>
 													</div>
 												)
@@ -234,7 +227,7 @@ export function DashboardCharts({
 									}
 								/>
 								<Pie
-									data={pieData}
+									data={statusData}
 									cx="50%"
 									cy="50%"
 									innerRadius={50}
@@ -245,7 +238,7 @@ export function DashboardCharts({
 									strokeWidth={1}
 									stroke="var(--border)"
 								>
-									{pieData.map((_, index) => (
+									{statusData.map((_, index) => (
 										<Cell
 											key={`cell-${index}`}
 											fill={CHART_COLORS[index % CHART_COLORS.length]}
@@ -257,8 +250,7 @@ export function DashboardCharts({
 						</ChartContainer>
 					</CardContent>
 				</Card>
-				) : null
-			})()}
+			)}
 
 			{/* Service Popularity */}
 			{serviceData.length > 0 && (
@@ -270,7 +262,7 @@ export function DashboardCharts({
 					<CardContent>
 						<ChartContainer
 							config={serviceChartConfig}
-							className="aspect-auto h-[280px] w-full"
+							className="aspect-auto h-[320px] w-full"
 						>
 							<BarChart
 								data={serviceData}
