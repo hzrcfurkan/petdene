@@ -960,12 +960,14 @@ export function EnhancedSuperAdminDashboard() {
 				<span>İstatistikler</span>
 			</div>
 			{/* Charts */}
+			<div style={{width:"100%",minWidth:0}}>
 			<DashboardCharts
 				appointmentsData={chartData.appt}
 				revenueData={chartData.rev}
 				statusData={chartData.role}
 				monthlyApptData={chartData.monthlyAppt}
 			/>
+			</div>
 			</div>
 		</div>
 	)

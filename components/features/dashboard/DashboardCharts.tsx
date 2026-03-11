@@ -34,6 +34,7 @@ interface DashboardChartsProps {
 	revenueData?: ChartData[]
 	statusData?: ChartData[]
 	serviceData?: ChartData[]
+	monthlyApptData?: ChartData[]
 }
 
 const CHART_COLORS = [
@@ -90,13 +91,14 @@ export function DashboardCharts({
 	revenueData = [],
 	statusData = [],
 	serviceData = [],
+	monthlyApptData = [],
 }: DashboardChartsProps) {
 	const { formatCurrency } = useCurrency()
 	return (
 		<div style={{display:"grid", gridTemplateColumns:"repeat(3,1fr)", gap:"20px"}}>
 			{/* Appointments Over Time */}
 			{appointmentsData.length > 0 && (
-				<Card>
+				<Card style={{minHeight:'420px',display:'flex',flexDirection:'column'}}>
 					<CardHeader>
 						<CardTitle>Zaman İçinde Randevular</CardTitle>
 						<CardDescription>Tarihe göre randevu trendleri</CardDescription>
@@ -136,7 +138,7 @@ export function DashboardCharts({
 
 			{/* Revenue Chart */}
 			{revenueData.length > 0 && (
-				<Card>
+				<Card style={{minHeight:'420px',display:'flex',flexDirection:'column'}}>
 					<CardHeader>
 						<CardTitle>Gelir Genel Bakış</CardTitle>
 						<CardDescription>Döneme göre gelir</CardDescription>
@@ -195,7 +197,7 @@ export function DashboardCharts({
 
 			{/* Status Distribution */}
 			{statusData.length > 0 && (
-				<Card>
+				<Card style={{minHeight:'420px',display:'flex',flexDirection:'column'}}>
 					<CardHeader>
 						<CardTitle>Durum Dağılımı</CardTitle>
 						<CardDescription>Randevu durumlarının dağılımı</CardDescription>
