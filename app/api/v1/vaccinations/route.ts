@@ -76,7 +76,7 @@ export async function GET(req: NextRequest) {
 							name: true,
 							species: true,
 							owner: {
-								select: { id: true, name: true, email: true },
+								select: { id: true, name: true, email: true, phone: true },
 							},
 						},
 					},
