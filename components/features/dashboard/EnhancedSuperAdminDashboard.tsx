@@ -279,6 +279,14 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 					)}
 
 				</div>
+
+			{/* Charts */}
+			<DashboardCharts
+				appointmentsData={chartData.appt}
+				revenueData={chartData.rev}
+				statusData={chartData.role}
+				monthlyApptData={chartData.monthlyAppt}
+			/>
 			</div>
 		</div>
 	)
@@ -736,14 +744,6 @@ export function EnhancedSuperAdminDashboard() {
 				</div>
 			</div>
 
-			{/* Charts */}
-			<DashboardCharts
-				appointmentsData={chartData.appt}
-				revenueData={chartData.rev}
-				statusData={chartData.role}
-				monthlyApptData={chartData.monthlyAppt}
-			/>
-
 			{/* ===== BUGÜN ALT PANELLERİ ===== */}
 			<div className="sa-today-panels-title">
 				<span className="sa-tp-dot" />
@@ -952,6 +952,14 @@ export function EnhancedSuperAdminDashboard() {
 					</div>
 				</div>
 
+
+			{/* Charts */}
+			<DashboardCharts
+				appointmentsData={chartData.appt}
+				revenueData={chartData.rev}
+				statusData={chartData.role}
+				monthlyApptData={chartData.monthlyAppt}
+			/>
 			</div>
 		</div>
 	)
