@@ -1,7 +1,7 @@
 "use client"
 
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts"
-import { useCurrency } from "@/hooks/use-currency"
+import { useCurrency } from "@/components/providers/CurrencyProvider"
 
 interface ChartData { name: string; value: number }
 

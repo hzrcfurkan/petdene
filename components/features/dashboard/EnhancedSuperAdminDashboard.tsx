@@ -82,7 +82,6 @@ function MiniCalendar({ selected, onChange, onClose }: {
 				</div>
 			)}
 		</div>
-		</>
 	)
 }
 
@@ -291,7 +290,6 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 				</div>
 			</div>
 		</div>
-		</>
 	)
 }
 
