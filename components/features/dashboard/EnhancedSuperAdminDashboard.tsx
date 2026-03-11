@@ -10,7 +10,7 @@ import {
 	Calendar, PawPrint, DollarSign, FileText,
 	ArrowUpRight, Activity, TrendingUp, Settings,
 	ChevronLeft, ChevronRight, X, Eye, Phone, Mail,
-	AlertTriangle, Clock, Receipt, Pill, Package, CheckCircle2, XCircle, RotateCcw,
+	AlertTriangle, AlertCircle, Clock, Receipt, Pill, Package, CheckCircle2, XCircle, RotateCcw,
 } from "lucide-react"
 import { useCurrency } from "@/components/providers/CurrencyProvider"
 import { useVisits } from "@/lib/react-query/hooks/visits"
@@ -360,22 +360,44 @@ export function EnhancedSuperAdminDashboard() {
 		const paid    = filteredInvoices.filter(i => i.status === "PAID")
 		const unpaid  = filteredInvoices.filter(i => i.status === "UNPAID")
 		const allPaid = invoices.filter(i => i.status === "PAID")
+
+		// Bu ay / geçen ay ciro
 		const monthRev  = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
 		const prevRev   = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
+		const revChange = prevRev > 0 ? ((monthRev - prevRev) / prevRev) * 100 : 0
+
+		// Doluluk oranı: bu aydaki randevuların kaçı COMPLETED
+		const monthAppts     = appointments.filter(a => new Date(a.date) >= thirtyDaysAgo)
+		const completedMonth = monthAppts.filter(a => a.status === "COMPLETED").length
+		const doluluk        = monthAppts.length > 0 ? Math.round((completedMonth / monthAppts.length) * 100) : 0
+		const prevMonthAppts     = appointments.filter(a => new Date(a.date) >= prevThirtyDays && new Date(a.date) < thirtyDaysAgo)
+		const prevCompleted      = prevMonthAppts.filter(a => a.status === "COMPLETED").length
+		const prevDoluluk        = prevMonthAppts.length > 0 ? Math.round((prevCompleted / prevMonthAppts.length) * 100) : 0
+		const dolulukChange      = prevDoluluk > 0 ? doluluk - prevDoluluk : 0
+
+		// Yeni hasta: bu ay ilk kez kayıt olan hayvanlar
+		const newPetsMonth  = pets.filter(p => p.createdAt && new Date(p.createdAt) >= thirtyDaysAgo).length
+		const prevPetsMonth = pets.filter(p => p.createdAt && new Date(p.createdAt) >= prevThirtyDays && new Date(p.createdAt) < thirtyDaysAgo).length
+		const newPetsChange = prevPetsMonth > 0 ? ((newPetsMonth - prevPetsMonth) / prevPetsMonth) * 100 : 0
+
+		// Tahsilat bekleyen
+		const unpaidAmt = unpaid.reduce((s,i)=>s+i.amount,0)
+
 		return {
 			totalRev:    paid.reduce((s,i)=>s+i.amount,0),
 			allTimeRev:  allPaid.reduce((s,i)=>s+i.amount,0),
-			monthRev,
-			revChange:   prevRev > 0 ? ((monthRev - prevRev) / prevRev) * 100 : 0,
+			monthRev, revChange, prevRev,
+			doluluk, dolulukChange, completedMonth, monthAppts: monthAppts.length,
+			newPetsMonth, newPetsChange,
+			unpaidAmt,
 			totalAppts:  filteredAppointments.length,
 			recentAppts: filteredAppointments.length,
 			totalPets:   pets.length,
 			totalInv:    filteredInvoices.length,
 			paidCount:   paid.length,
 			unpaidCount: unpaid.length,
-			unpaidAmt:   unpaid.reduce((s,i)=>s+i.amount,0),
 		}
-	}, [filteredAppointments, filteredInvoices, pets, invoices, thirtyDaysAgo, prevThirtyDays])
+	}, [filteredAppointments, filteredInvoices, pets, appointments, invoices, thirtyDaysAgo, prevThirtyDays])
 
 	const todayStats = useMemo(() => {
 		const activeDate = selectedDate || now
@@ -617,30 +639,76 @@ export function EnhancedSuperAdminDashboard() {
 				</div>
 			</div>
 
-			{/* Business KPI Row */}
+			{/* Klinik Nabzı — Bu Ay */}
 			<div className="ad-kpi-grid">
-				{[
-					{ icon: <DollarSign className="w-5 h-5" />, color: "blue",   label: isFiltered ? "Günlük Gelir" : "Toplam Gelir",    val: formatCurrency(bizStats.totalRev),  sub: isFiltered ? dateLabel : `${formatCurrency(bizStats.monthRev)} bu ay`, change: isFiltered ? null : bizStats.revChange },
-					{ icon: <Calendar className="w-5 h-5" />,   color: "teal",   label: isFiltered ? "Günlük Randevu" : "Toplam Randevu", val: bizStats.totalAppts,                sub: isFiltered ? `${dateLabel} randevuları` : `${bizStats.recentAppts} son 30 günde`, change: null },
-					{ icon: <PawPrint className="w-5 h-5" />,   color: "violet", label: "Toplam Hasta",      val: bizStats.totalPets,                 sub: "Kayıtlı hayvan", change: null },
-					{ icon: <FileText className="w-5 h-5" />,   color: "amber",  label: isFiltered ? "Günlük Fatura" : "Toplam Fatura",  val: bizStats.totalInv,                  sub: `${bizStats.paidCount} ödendi, ${bizStats.unpaidCount} bekliyor`, change: null },
-				].map((c, i) => (
-					<div key={i} className={`ad-kpi ad-kpi-${c.color}`}>
-						<div className={`ad-kpi-icon ad-ki-${c.color}`}>{c.icon}</div>
-						<div className="ad-kpi-body">
-							<p className="ad-kpi-lbl">{c.label}</p>
-							<p className="ad-kpi-val">{c.val}</p>
-							{c.change !== null ? (
-								<div className={`ad-kpi-chg ${c.change! >= 0 ? "ad-up" : "ad-dn"}`}>
-									<ArrowUpRight className="w-3 h-3" />
-									<span>%{Math.abs(c.change!).toFixed(1)} geçen aya göre</span>
-								</div>
-							) : (
-								<p className="ad-kpi-desc">{c.sub}</p>
-							)}
-						</div>
+
+				{/* Bu Ay Ciro */}
+				<div className="ad-kpi ad-kpi-blue">
+					<div className="ad-kpi-icon ad-ki-blue"><TrendingUp className="w-5 h-5" /></div>
+					<div className="ad-kpi-body">
+						<p className="ad-kpi-lbl">Bu Ay Ciro</p>
+						<p className="ad-kpi-val">{formatCurrency(bizStats.monthRev)}</p>
+						{bizStats.prevRev > 0 ? (
+							<div className={`ad-kpi-chg ${bizStats.revChange >= 0 ? "ad-up" : "ad-dn"}`}>
+								<ArrowUpRight className="w-3 h-3" />
+								<span>%{Math.abs(bizStats.revChange).toFixed(1)} geçen aya göre</span>
+							</div>
+						) : (
+							<p className="ad-kpi-desc">geçen ay veri yok</p>
+						)}
 					</div>
-				))}
+				</div>
+
+				{/* Doluluk Oranı */}
+				<div className="ad-kpi ad-kpi-teal">
+					<div className="ad-kpi-icon ad-ki-teal"><Activity className="w-5 h-5" /></div>
+					<div className="ad-kpi-body">
+						<p className="ad-kpi-lbl">Doluluk Oranı</p>
+						<p className="ad-kpi-val">%{bizStats.doluluk}</p>
+						{bizStats.dolulukChange !== 0 ? (
+							<div className={`ad-kpi-chg ${bizStats.dolulukChange >= 0 ? "ad-up" : "ad-dn"}`}>
+								<ArrowUpRight className="w-3 h-3" />
+								<span>{bizStats.dolulukChange > 0 ? "+" : ""}{bizStats.dolulukChange} puan geçen aya göre</span>
+							</div>
+						) : (
+							<p className="ad-kpi-desc">{bizStats.completedMonth}/{bizStats.monthAppts} randevu tamamlandı</p>
+						)}
+					</div>
+				</div>
+
+				{/* Yeni Hasta */}
+				<div className="ad-kpi ad-kpi-violet">
+					<div className="ad-kpi-icon ad-ki-violet"><PawPrint className="w-5 h-5" /></div>
+					<div className="ad-kpi-body">
+						<p className="ad-kpi-lbl">Yeni Hasta</p>
+						<p className="ad-kpi-val">{bizStats.newPetsMonth}</p>
+						{bizStats.newPetsChange !== 0 ? (
+							<div className={`ad-kpi-chg ${bizStats.newPetsChange >= 0 ? "ad-up" : "ad-dn"}`}>
+								<ArrowUpRight className="w-3 h-3" />
+								<span>%{Math.abs(bizStats.newPetsChange).toFixed(1)} geçen aya göre</span>
+							</div>
+						) : (
+							<p className="ad-kpi-desc">bu ay kayıt olan hayvan</p>
+						)}
+					</div>
+				</div>
+
+				{/* Tahsilat Bekleyen */}
+				<div className={`ad-kpi ${bizStats.unpaidAmt > 0 ? "ad-kpi-amber" : "ad-kpi-teal"}`}>
+					<div className={`ad-kpi-icon ${bizStats.unpaidAmt > 0 ? "ad-ki-amber" : "ad-ki-teal"}`}>
+						<AlertCircle className="w-5 h-5" />
+					</div>
+					<div className="ad-kpi-body">
+						<p className="ad-kpi-lbl">Tahsilat Bekleyen</p>
+						<p className="ad-kpi-val">{formatCurrency(bizStats.unpaidAmt)}</p>
+						{bizStats.unpaidAmt > 0 ? (
+							<p className="ad-kpi-desc sa-warn-txt">{bizStats.unpaidCount} fatura ödeme bekliyor</p>
+						) : (
+							<p className="ad-kpi-desc">tüm ödemeler tamam ✓</p>
+						)}
+					</div>
+				</div>
+
 			</div>
 
 			{/* Sistem Ozeti */}
