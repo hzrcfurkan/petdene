@@ -1125,3 +1125,19 @@
 .sa-tp-link  { font-size: 12px; color: var(--pc-blue); text-decoration: none; font-weight: 500; }
 .sa-tp-link:hover { text-decoration: underline; }
 @media (max-width: 900px) { .sa-today-panels-grid { grid-template-columns: 1fr; } }
+
+/* ===== MİNİ TAKVİM POPUP ===== */
+.sa-cal-popup { position: absolute; top: calc(100% + 8px); right: 0; background: var(--pc-surface); border: 1px solid var(--pc-border); border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,.14); z-index: 999; padding: 14px; min-width: 260px; }
+.sa-cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.sa-cal-title  { font-size: 14px; font-weight: 700; color: var(--pc-text); text-transform: capitalize; }
+.sa-cal-nav    { width: 28px; height: 28px; border: 1px solid var(--pc-border); background: var(--pc-bg); border-radius: 7px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--pc-text-sm); transition: background .15s; }
+.sa-cal-nav:hover { background: var(--pc-blue-lt); color: var(--pc-blue); border-color: var(--pc-blue); }
+.sa-cal-grid   { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.sa-cal-dow    { font-size: 11px; font-weight: 600; color: var(--pc-text-sm); text-align: center; padding: 4px 0; }
+.sa-cal-day    { width: 100%; aspect-ratio: 1; border: none; background: transparent; border-radius: 7px; font-size: 13px; color: var(--pc-text); cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background .12s; }
+.sa-cal-day:hover  { background: var(--pc-blue-lt); color: var(--pc-blue); }
+.sa-cal-today  { background: var(--pc-bg); font-weight: 700; color: var(--pc-blue); }
+.sa-cal-sel    { background: var(--pc-blue) !important; color: #fff !important; font-weight: 700; }
+.sa-cal-footer { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--pc-border); display: flex; justify-content: center; }
+.sa-cal-clear  { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: var(--pc-red,#DC2626); background: none; border: none; cursor: pointer; font-weight: 500; padding: 4px 8px; border-radius: 6px; }
+.sa-cal-clear:hover { background: var(--pc-red-lt,#FEE2E2); }
