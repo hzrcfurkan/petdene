@@ -82,6 +82,7 @@ function MiniCalendar({ selected, onChange, onClose }: {
 				</div>
 			)}
 		</div>
+		</>
 	)
 }
 
@@ -290,6 +291,7 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 				</div>
 			</div>
 		</div>
+		</>
 	)
 }
 
@@ -538,6 +540,7 @@ export function EnhancedSuperAdminDashboard() {
 	}, [popup, todayStats])
 
 	return (
+		<>
 		<div className="ad-wrap">
 			{/* Popup */}
 			{popup && (
@@ -954,22 +957,21 @@ export function EnhancedSuperAdminDashboard() {
 				</div>
 
 			</div>{/* /sa-today-panels-grid row2 */}
+			</div>{/* /ad-wrap-inner */}
+		</div>{/* /ad-wrap */}
 
-			{/* ===== İSTATİSTİKLER ===== */}
-			<div className="sa-charts-title">
+		<div style={{padding:"0 24px 24px 24px"}}>
+			<div className="sa-charts-title" style={{marginBottom:"16px"}}>
 				<span className="sa-tp-dot" style={{background:"var(--pc-violet)"}} />
 				<span>İstatistikler</span>
 			</div>
-			{/* Charts */}
-			<div style={{width:"100%",minWidth:0}}>
 			<DashboardCharts
 				appointmentsData={chartData.appt}
 				revenueData={chartData.rev}
 				statusData={chartData.role}
 				monthlyApptData={chartData.monthlyAppt}
 			/>
-			</div>
-			</div>
 		</div>
+		</>
 	)
 }
