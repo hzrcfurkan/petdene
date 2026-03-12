@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -50,7 +50,6 @@ export function HastaKayitForm({ onSuccess, onCancel }: HastaKayitFormProps) {
 	const [petWeight,  setPetWeight]  = useState("")
 	const [petNotes,   setPetNotes]   = useState("")
 
-	// Sahip arama
 	const handleSearch = async () => {
 		if (!ownerSearch.trim()) return
 		setSearching(true)
@@ -62,6 +61,13 @@ export function HastaKayitForm({ onSuccess, onCancel }: HastaKayitFormProps) {
 		} catch { setOwnerResults([]) }
 		finally { setSearching(false) }
 	}
+
+	// Yazarken otomatik ara (400ms debounce)
+	useEffect(() => {
+		if (!ownerSearch.trim()) { setOwnerResults([]); return }
+		const t = setTimeout(() => { handleSearch() }, 400)
+		return () => clearTimeout(t)
+	}, [ownerSearch])
 
 	const handleSubmit = async () => {
 		setIsSubmitting(true)
