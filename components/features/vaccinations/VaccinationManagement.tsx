@@ -99,7 +99,7 @@ export function VaccinationManagement() {
 				</TabsContent>
 
 				<TabsContent value="upcoming" className="space-y-4">
-					<VaccinationList upcoming={true} showActions={true} isPlanned={false} />
+					<VaccinationList upcoming={true} showActions={true} />
 				</TabsContent>
 			</Tabs>
 		</div>
