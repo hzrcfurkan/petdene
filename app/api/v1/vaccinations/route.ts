@@ -14,7 +14,8 @@ export async function GET(req: NextRequest) {
 		const vaccineName = searchParams.get("vaccineName")
 		const dateFrom = searchParams.get("dateFrom")
 		const dateTo = searchParams.get("dateTo")
-		const upcoming = searchParams.get("upcoming") // "true" to only show vaccinations with nextDue in future
+		const upcoming = searchParams.get("upcoming")
+		const plannedParam = searchParams.get("isPlanned") // "true" to only show vaccinations with nextDue in future
 		const page = Number.parseInt(searchParams.get("page") || "1")
 		const limit = Number.parseInt(searchParams.get("limit") || "10")
 		const sort = searchParams.get("sort") || "date-desc"
@@ -52,6 +53,13 @@ export async function GET(req: NextRequest) {
 
 		if (upcoming === "true") {
 			where.nextDue = { not: null, gte: new Date() }
+		}
+
+		// isPlanned filtresi: "true" → sadece planlamalar, "false" → sadece gerçek aşılar
+		if (plannedParam === "true") {
+			where.isPlanned = true
+		} else if (plannedParam === "false") {
+			where.isPlanned = false
 		}
 
 		let orderBy: any = { dateGiven: "desc" }

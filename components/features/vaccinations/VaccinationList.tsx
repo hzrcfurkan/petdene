@@ -25,9 +25,10 @@ interface VaccinationListProps {
 	petId?: string
 	upcoming?: boolean
 	showActions?: boolean
+	isPlanned?: boolean  // true=sadece planlamalar, false=sadece gerçek aşılar
 }
 
-export function VaccinationList({ petId, upcoming, showActions = true }: VaccinationListProps) {
+export function VaccinationList({ petId, upcoming, showActions = true, isPlanned }: VaccinationListProps) {
 	const [page, setPage] = useState(1)
 	const [sortBy, setSortBy] = useState<string>("date-desc")
 	const [vaccineNameFilter, setVaccineNameFilter] = useState<string>("")
@@ -51,6 +52,7 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 		dateFrom: dateFrom || undefined,
 		dateTo: dateTo || undefined,
 		upcoming: upcoming || undefined,
+		isPlanned: isPlanned,
 	})
 
 	const vaccinations = data?.vaccinations || []
@@ -100,6 +102,7 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 					</div>
 					{showActions && canEdit && (
 						<div className="flex gap-2">
+							{/* Planlama sekmesinde sadece Yeni Aşı Planla, Aşı sekmesinde sadece Aşı Ekle */}
 							<Dialog open={isPlanFormOpen} onOpenChange={setIsPlanFormOpen}>
 								<DialogTrigger asChild>
 									<Button variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50">
@@ -216,8 +219,8 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 									<TableRow>
 										<TableHead>Aşı Adı</TableHead>
 										<TableHead>Hasta</TableHead>
-										<TableHead>Date Given</TableHead>
-										<TableHead>Next Due</TableHead>
+										<TableHead>{isPlanned ? "Planlanan Tarih" : "Uygulama Tarihi"}</TableHead>
+										{isPlanned ? <TableHead>Saat</TableHead> : <TableHead>Next Due</TableHead>}
 										<TableHead>Sahip</TableHead>
 										{showActions && <TableHead className="text-right">İşlemler</TableHead>}
 									</TableRow>

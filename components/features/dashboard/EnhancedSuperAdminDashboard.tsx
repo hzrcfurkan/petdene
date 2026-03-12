@@ -414,7 +414,10 @@ export function EnhancedSuperAdminDashboard() {
 		})
 		const activeVisits = todayVisitList.length // bugün kaydı açılan tüm hayvanlar
 
-		const todayVaccinationList = vaccinations.filter(v => v.nextDue?.slice(0, 10) === todayStr)
+		const todayVaccinationList = vaccinations.filter(v =>
+			v.nextDue?.slice(0, 10) === todayStr ||
+			(v as any).scheduledDate?.slice(0, 10) === todayStr
+		)
 
 		const todayCiro = todayVisitList.reduce((s, v) => s + (v.totalAmount || 0), 0)
 

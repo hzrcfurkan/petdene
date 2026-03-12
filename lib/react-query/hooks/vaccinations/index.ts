@@ -42,6 +42,7 @@ export interface UseVaccinationsParams {
 	dateFrom?: string
 	dateTo?: string
 	upcoming?: boolean
+	isPlanned?: boolean
 }
 
 export function useVaccinations(params?: UseVaccinationsParams) {
