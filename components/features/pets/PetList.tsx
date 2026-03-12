@@ -16,6 +16,7 @@ import { format } from "date-fns"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ResponsiveTableWrapper } from "@/components/ui/responsive-table"
 import { PetForm } from "./PetForm"
+import { HastaKayitForm } from "./HastaKayitForm"
 import { PetDetail } from "./PetDetail"
 import { currentUserClient } from "@/lib/auth/client"
 
@@ -95,30 +96,34 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 						<CardDescription>Hastaları yönetin ve görüntüleyin</CardDescription>
 					</div>
 					{showActions && canEdit && (
-						<Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-							<DialogTrigger asChild>
-								<Button onClick={() => setEditingPet(null)}>
-									<Plus className="w-4 h-4 mr-2" />
-									Yeni Hasta Kaydı
-								</Button>
-							</DialogTrigger>
-							<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-								<DialogHeader>
-									<DialogTitle>{editingPet ? "Hasta Düzenle" : "Add Yeni Hasta Kaydı"}</DialogTitle>
-									<DialogDescription>
-										{editingPet ? "Hasta bilgilerini güncelle" : "Sisteme yeni hasta ekle"}
-									</DialogDescription>
-								</DialogHeader>
-								<PetForm
-									pet={editingPet}
-									onSuccess={handleFormSuccess}
-									onCancel={() => {
-										setIsFormOpen(false)
-										setEditingPet(null)
-									}}
-								/>
-							</DialogContent>
-						</Dialog>
+						<>
+							{/* YENİ KAYIT — Wizard */}
+							<Dialog open={isFormOpen && !editingPet} onOpenChange={v => { if (!v) { setIsFormOpen(false); setEditingPet(null) } }}>
+								<DialogTrigger asChild>
+									<Button onClick={() => { setEditingPet(null); setIsFormOpen(true) }} className="bg-violet-600 hover:bg-violet-700">
+										<Plus className="w-4 h-4 mr-2" />Yeni Hasta Kaydı
+									</Button>
+								</DialogTrigger>
+								<DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+									<DialogHeader>
+										<DialogTitle>🐾 Yeni Hasta Kaydı</DialogTitle>
+										<DialogDescription>Sahip ve hayvan bilgilerini adım adım girin</DialogDescription>
+									</DialogHeader>
+									<HastaKayitForm onSuccess={handleFormSuccess} onCancel={() => setIsFormOpen(false)} />
+								</DialogContent>
+							</Dialog>
+
+							{/* DÜZENLEME — Eski form */}
+							<Dialog open={isFormOpen && !!editingPet} onOpenChange={v => { if (!v) { setIsFormOpen(false); setEditingPet(null) } }}>
+								<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+									<DialogHeader>
+										<DialogTitle>Hasta Düzenle</DialogTitle>
+										<DialogDescription>Hasta bilgilerini güncelle</DialogDescription>
+									</DialogHeader>
+									<PetForm pet={editingPet} onSuccess={handleFormSuccess} onCancel={() => { setIsFormOpen(false); setEditingPet(null) }} />
+								</DialogContent>
+							</Dialog>
+							</>
 					)}
 				</div>
 			</CardHeader>

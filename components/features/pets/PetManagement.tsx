@@ -36,7 +36,7 @@ export function PetManagement() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Dogs</CardTitle>
+						<CardTitle className="text-sm font-medium">Köpekler</CardTitle>
 						<PawPrint className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
@@ -47,7 +47,7 @@ export function PetManagement() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Cats</CardTitle>
+						<CardTitle className="text-sm font-medium">Kediler</CardTitle>
 						<PawPrint className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
@@ -58,7 +58,7 @@ export function PetManagement() {
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Others</CardTitle>
+						<CardTitle className="text-sm font-medium">Diğerleri</CardTitle>
 						<Heart className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
