@@ -24,9 +24,6 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 	const [dateGiven, setDateGiven] = useState(
 		vaccination?.dateGiven ? new Date(vaccination.dateGiven).toISOString().split("T")[0] : ""
 	)
-	const [nextDue, setNextDue] = useState(
-		vaccination?.nextDue ? new Date(vaccination.nextDue).toISOString().split("T")[0] : ""
-	)
 	const [notes, setNotes] = useState(vaccination?.notes || "")
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
@@ -59,7 +56,6 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 				petId,
 				vaccineName,
 				dateGiven: new Date(dateGiven).toISOString(),
-				nextDue: nextDue ? new Date(nextDue).toISOString() : undefined,
 				notes: notes || undefined,
 			}
 
@@ -82,7 +78,7 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 		<form onSubmit={handleSubmit} className="space-y-4">
 			<div className="grid gap-4 md:grid-cols-2">
 				<div className="space-y-2">
-					<Label htmlFor="petId">Patient (Pet) *</Label>
+					<Label htmlFor="petId">Hasta (Hayvan) *</Label>
 					<SearchSelect
 						options={petOptions}
 						value={petId}
@@ -109,7 +105,7 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 				</div>
 
 				<div className="space-y-2">
-					<Label htmlFor="vaccineName">Vaccine Name *</Label>
+					<Label htmlFor="vaccineName">Aşı Adı *</Label>
 					<Input
 						id="vaccineName"
 						value={vaccineName}
@@ -120,7 +116,7 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 				</div>
 
 				<div className="space-y-2">
-					<Label htmlFor="dateGiven">Date Given *</Label>
+					<Label htmlFor="dateGiven">Uygulama Tarihi *</Label>
 					<DatePicker
 						id="dateGiven"
 						value={dateGiven}
@@ -130,15 +126,6 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 					/>
 				</div>
 
-				<div className="space-y-2">
-					<Label htmlFor="nextDue">Sonraki Aşı Tarihi</Label>
-					<DatePicker
-						id="nextDue"
-						value={nextDue}
-						onChange={setNextDue}
-						placeholder="Select next due date"
-					/>
-				</div>
 			</div>
 
 			<div className="space-y-2">
@@ -157,7 +144,7 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 					Cancel
 				</Button>
 				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? "Kaydediliyor..." : vaccination ? "Güncelle" : "Oluştur"} Vaccination
+					{isSubmitting ? "Kaydediliyor..." : vaccination ? "Güncelle" : "Kaydet"}
 				</Button>
 			</div>
 		</form>

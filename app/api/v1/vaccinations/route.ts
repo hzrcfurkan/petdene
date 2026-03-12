@@ -70,6 +70,11 @@ export async function GET(req: NextRequest) {
 					dateGiven: true,
 					nextDue: true,
 					notes: true,
+					isPlanned: true,
+					scheduledDate: true,
+					scheduledTime: true,
+					stockItemId: true,
+					createdAt: true,
 					pet: {
 						select: {
 							id: true,
@@ -115,9 +120,12 @@ export async function POST(req: NextRequest) {
 		}
 
 		const body = await req.json()
-		const { petId, vaccineName, dateGiven, nextDue, notes } = body
+		const { petId, vaccineName, dateGiven, nextDue, notes, isPlanned, scheduledDate, scheduledTime, stockItemId } = body
 
-		if (!petId || !vaccineName || !dateGiven) {
+		if (!petId || !vaccineName) {
+			return NextResponse.json({ error: "petId ve vaccineName zorunludur" }, { status: 400 })
+		}
+		if (!isPlanned && !dateGiven) {
 			return NextResponse.json(
 				{ error: "Pet ID, vaccine name, and date given are required" },
 				{ status: 400 }

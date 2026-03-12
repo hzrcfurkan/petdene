@@ -147,13 +147,20 @@ export async function GET(req: NextRequest) {
 				},
 			}),
 
-			// Bugün yapılacak aşılar
+			// Bugün yapılacak / planlanan aşılar
 			prisma.vaccination.findMany({
-				where: { nextDue: { gte: dayStart, lte: dayEnd } },
+				where: {
+					OR: [
+						{ nextDue: { gte: dayStart, lte: dayEnd } },
+						{ scheduledDate: { gte: dayStart, lte: dayEnd }, isPlanned: true },
+					],
+				},
 				select: {
 					id: true, vaccineName: true, nextDue: true, dateGiven: true,
+					isPlanned: true, scheduledDate: true, scheduledTime: true,
 					pet: { select: { name: true, species: true, owner: { select: { name: true, phone: true, email: true } } } },
 				},
+				orderBy: { scheduledTime: "asc" },
 			}),
 
 			// Son 7 günlük randevu (grafik)

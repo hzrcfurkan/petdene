@@ -183,14 +183,21 @@ model Appointment {
 }
 
 model Vaccination {
-    id          String    @id @default(uuid())
-    petId       String
-    vaccineName String
-    dateGiven   DateTime
-    nextDue     DateTime?
-    notes       String?
+    id             String    @id @default(uuid())
+    petId          String
+    vaccineName    String
+    dateGiven      DateTime?
+    nextDue        DateTime?
+    notes          String?
+    isPlanned      Boolean   @default(false)
+    scheduledDate  DateTime?
+    scheduledTime  String?
+    stockItemId    String?
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime  @updatedAt
 
-    pet Pet @relation(fields: [petId], references: [id], onDelete: Cascade)
+    pet       Pet        @relation(fields: [petId], references: [id], onDelete: Cascade)
+    stockItem StockItem? @relation(fields: [stockItemId], references: [id], onDelete: SetNull)
 }
 
 model MedicalRecord {
@@ -273,7 +280,8 @@ model StockItem {
     createdAt    DateTime @default(now())
     updatedAt    DateTime @updatedAt
 
-    usages VisitStockUsage[]
+    usages       VisitStockUsage[]
+    vaccinations Vaccination[]
 }
 
 model VisitStockUsage {

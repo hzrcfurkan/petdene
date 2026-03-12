@@ -9,7 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { DatePicker } from "@/components/ui/date-picker"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Search, Filter, Plus, Eye, Edit, Trash2, Syringe } from "lucide-react"
+import { Search, Filter, Plus, Eye, Edit, Trash2, Syringe, CalendarPlus } from "lucide-react"
 import { useState } from "react"
 import { useVaccinations, useDeleteVaccination, type Vaccination } from "@/lib/react-query/hooks/vaccinations"
 import { toast } from "sonner"
@@ -17,6 +17,7 @@ import { format, isAfter } from "date-fns"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ResponsiveTableWrapper } from "@/components/ui/responsive-table"
 import { VaccinationForm } from "./VaccinationForm"
+import { VaccinationPlanForm } from "./VaccinationPlanForm"
 import { VaccinationDetail } from "./VaccinationDetail"
 import { currentUserClient } from "@/lib/auth/client"
 
@@ -35,6 +36,7 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 	const [editingVaccination, setEditingVaccination] = useState<Vaccination | null>(null)
 	const [viewingVaccination, setViewingVaccination] = useState<Vaccination | null>(null)
 	const [isFormOpen, setIsFormOpen] = useState(false)
+	const [isPlanFormOpen, setIsPlanFormOpen] = useState(false)
 
 	const currentUser = currentUserClient()
 	const pathname = usePathname()
