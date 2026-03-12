@@ -373,6 +373,7 @@ export function PetDetail({ pet: initialPet }: PetDetailProps) {
 					</DialogHeader>
 					<VisitForm
 						defaultPetId={pet.id}
+						defaultPetLabel={`${pet.name} • ${pet.species}${pet.breed ? " • " + pet.breed : ""}${pet.owner ? " / " + (pet.owner.name || pet.owner.email) : ""}`}
 						onSuccess={() => { setShowNewVisit(false); refetchVisits() }}
 						onCancel={() => setShowNewVisit(false)}
 					/>

@@ -18,6 +18,7 @@ interface VisitFormProps {
 	onSuccess: () => void
 	onCancel: () => void
 	defaultPetId?: string
+	defaultPetLabel?: string
 	defaultAppointmentId?: string
 }
 
@@ -25,8 +26,10 @@ export function VisitForm({
 	onSuccess,
 	onCancel,
 	defaultPetId = "",
+	defaultPetLabel,
 	defaultAppointmentId = "",
 }: VisitFormProps) {
+	const fixedPet = !!defaultPetId
 	const currentUser = currentUserClient()
 	const isStaffOrAdmin = currentUser && (currentUser.isAdmin || currentUser.isSuperAdmin || currentUser.isStaff)
 	// For customers, owner is always themselves
@@ -117,9 +120,17 @@ export function VisitForm({
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-4">
+			{/* Hasta kartından açıldıysa - sadece etiketi göster */}
+			{fixedPet && defaultPetLabel && (
+				<div className="flex items-center gap-2 px-3 py-2 bg-violet-50 dark:bg-violet-950/30 rounded-xl text-sm">
+					<span className="text-violet-600">🐾</span>
+					<span className="text-muted-foreground">Hasta:</span>
+					<span className="font-semibold text-violet-700">{defaultPetLabel}</span>
+				</div>
+			)}
 			<div className="grid gap-4 md:grid-cols-2">
-				{/* Step 1: Search & Select Owner */}
-				{(currentUser?.isAdmin || currentUser?.isSuperAdmin || currentUser?.isStaff) && (
+				{/* Sahip + Hayvan seçimi: sadece sabit hasta yoksa göster */}
+				{!fixedPet && (currentUser?.isAdmin || currentUser?.isSuperAdmin || currentUser?.isStaff) && (
 					<div className="space-y-2 md:col-span-2">
 						<Label htmlFor="ownerId">Hasta Sahibi *</Label>
 						<SearchSelect
@@ -143,20 +154,40 @@ export function VisitForm({
 					</div>
 				)}
 
-				{/* Step 2: Search & Select Pet (only when owner selected) */}
-				<div className="space-y-2">
-					<Label htmlFor="petId">Hayvan *</Label>
-					{isStaffOrAdmin ? (
-						effectiveOwnerId ? (
+				{!fixedPet && (
+					<div className="space-y-2">
+						<Label htmlFor="petId">Hayvan *</Label>
+						{isStaffOrAdmin ? (
+							effectiveOwnerId ? (
+								<SearchSelect
+									options={petOptions}
+									value={petId}
+									onValueChange={setPetId}
+									placeholder="Hayvan adı, ırk veya tür ile ara..."
+									searchPlaceholder="Hayvan adı, ırk veya tür ile ara..."
+									emptyText={pets.length === 0 ? "Bu sahibin kayıtlı hayvanı yok." : "Hayvan bulunamadı."}
+									onSearchChange={setPetSearch}
+									loading={petsLoading}
+									renderOption={(opt) => (
+										<>
+											<span>{opt.label}</span>
+											{opt.subLabel && (
+												<span className="ml-2 text-muted-foreground text-xs">({opt.subLabel})</span>
+											)}
+										</>
+									)}
+								/>
+							) : (
+								<Input disabled placeholder="Önce yukarıdan sahip seçin" className="bg-muted" />
+							)
+						) : (
 							<SearchSelect
 								options={petOptions}
 								value={petId}
 								onValueChange={setPetId}
-								placeholder="Hayvan adı, ırk veya tür ile ara..."
-								searchPlaceholder="Hayvan adı, ırk veya tür ile ara..."
-								emptyText={pets.length === 0 ? "Bu sahibin kayıtlı hayvanı yok." : "Hayvan bulunamadı."}
-								onSearchChange={setPetSearch}
-								loading={petsLoading}
+								placeholder="Hayvanınızı seçin..."
+								searchPlaceholder="Hayvan ara..."
+								emptyText={pets.length === 0 ? "Kayıtlı hayvanınız yok." : "Hayvan bulunamadı."}
 								renderOption={(opt) => (
 									<>
 										<span>{opt.label}</span>
@@ -166,32 +197,9 @@ export function VisitForm({
 									</>
 								)}
 							/>
-						) : (
-							<Input
-								disabled
-								placeholder="Önce yukarıdan sahip seçin"
-								className="bg-muted"
-							/>
-						)
-					) : (
-						<SearchSelect
-							options={petOptions}
-							value={petId}
-							onValueChange={setPetId}
-							placeholder="Hayvanınızı seçin..."
-							searchPlaceholder="Hayvan ara..."
-							emptyText={pets.length === 0 ? "Kayıtlı hayvanınız yok." : "Hayvan bulunamadı."}
-							renderOption={(opt) => (
-								<>
-									<span>{opt.label}</span>
-									{opt.subLabel && (
-										<span className="ml-2 text-muted-foreground text-xs">({opt.subLabel})</span>
-									)}
-								</>
-							)}
-						/>
-					)}
-				</div>
+						)}
+					</div>
+				)}
 
 				<div className="space-y-2">
 					<Label htmlFor="visitDate">Muayene Tarihi ve Saati *</Label>
