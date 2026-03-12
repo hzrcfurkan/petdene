@@ -1,9 +1,10 @@
 "use client"
 
 import { useMemo, useState, useRef, useEffect } from "react"
-import { useStats, useAppointments, usePets, useInvoices } from "@/lib/react-query"
+import { useStats } from "@/lib/react-query"
+import { useQuery } from "@tanstack/react-query"
 import { DashboardCharts } from "./DashboardCharts"
-import { format, isSameDay, startOfDay, endOfDay } from "date-fns"
+import { format, isSameDay } from "date-fns"
 import { tr } from "date-fns/locale"
 import {
 	Users, UserCheck, Shield, UserPlus,
@@ -13,11 +14,6 @@ import {
 	AlertTriangle, AlertCircle, Clock, Receipt, Pill, Package, CheckCircle2, XCircle, RotateCcw,
 } from "lucide-react"
 import { useCurrency } from "@/components/providers/CurrencyProvider"
-import { useVisits } from "@/lib/react-query/hooks/visits"
-import { useVaccinations } from "@/lib/react-query/hooks/vaccinations"
-import { usePrescriptions } from "@/lib/react-query/hooks/prescriptions"
-import { useStocks } from "@/lib/react-query/hooks/stocks"
-import { useUnpaidVisits } from "@/lib/react-query/hooks/payments"
 
 
 const WA_MSG = encodeURIComponent("Merhaba, sizlere ABC Veteriner kliniğinden ulaşmaktayım.")
@@ -288,30 +284,14 @@ function DetailPopup({ type, data, dateLabel, onClose, formatCurrency }: {
 export function EnhancedSuperAdminDashboard() {
 	const { formatCurrency } = useCurrency()
 	const { data: usersResponse } = useStats()
-	const { data: appointmentsData } = useAppointments({ limit: 1000 })
-	const { data: petsData } = usePets({ limit: 1000 })
-	const { data: invoicesData } = useInvoices({ limit: 1000 })
-	const { data: visitsData } = useVisits({ limit: 1000 })
-	const { data: vaccinationsData }  = useVaccinations({ limit: 1000 })
-	const { data: prescriptionsData } = usePrescriptions({ limit: 1000 })
-	const { data: stocksData }        = useStocks({ limit: 1000 })
-	const { data: unpaidData }        = useUnpaidVisits()
+	const users = usersResponse?.users || []
 
-	const users        = usersResponse?.users || []
-	const appointments = appointmentsData?.appointments || []
-	const pets         = petsData?.pets || []
-	const invoices     = invoicesData?.invoices || []
-	const visits       = visitsData?.visits || []
-	const vaccinations  = vaccinationsData?.vaccinations || []
-	const prescriptions = prescriptionsData?.prescriptions || []
-	const stocks        = (stocksData as any)?.items || (stocksData as any)?.stocks || []
-	const unpaidVisits  = unpaidData?.unpaidVisits || []
-
-	// ---- Takvim state ----
+	// ---- State ----
 	const [selectedDate, setSelectedDate] = useState<Date | null>(null)
 	const [calOpen, setCalOpen]           = useState(false)
 	const [popup, setPopup]               = useState<PopupType>(null)
 	const calRef = useRef<HTMLDivElement>(null)
+	const now = new Date()
 
 	useEffect(() => {
 		function handleClick(e: MouseEvent) {
@@ -321,28 +301,28 @@ export function EnhancedSuperAdminDashboard() {
 		return () => document.removeEventListener("mousedown", handleClick)
 	}, [])
 
-	const now = new Date()
+	// ---- Dashboard API (limit yok, server'da hesaplanıyor) ----
+	const dateKey = selectedDate ? format(selectedDate, "yyyy-MM-dd") : format(now, "yyyy-MM-dd")
+	const { data: dashData } = useQuery({
+		queryKey: ["dashboard-stats", dateKey],
+		queryFn: async () => {
+			const res = await fetch(`/api/v1/dashboard?date=${dateKey}`)
+			if (!res.ok) throw new Error("Dashboard API hatası")
+			return res.json()
+		},
+		staleTime: 30_000,
+		refetchInterval: 60_000,
+	})
 
-	const filterStart = selectedDate ? startOfDay(selectedDate) : null
-	const filterEnd   = selectedDate ? endOfDay(selectedDate)   : null
-	const isFiltered  = !!selectedDate
+	const todayD   = dashData?.today
+	const monthD   = dashData?.month
+	const generalD = dashData?.general
 
-	const filteredAppointments = useMemo(() =>
-		isFiltered ? appointments.filter(a => { const d = new Date(a.date); return d >= filterStart! && d <= filterEnd! }) : appointments
-	, [appointments, isFiltered, filterStart, filterEnd])
-
-	const filteredInvoices = useMemo(() =>
-		isFiltered ? invoices.filter(i => { const d = new Date(i.createdAt); return d >= filterStart! && d <= filterEnd! }) : invoices
-	, [invoices, isFiltered, filterStart, filterEnd])
-
-	const filteredVisits = useMemo(() =>
-		isFiltered ? visits.filter(v => { const d = new Date(v.visitDate || v.createdAt); return d >= filterStart! && d <= filterEnd! }) : visits
-	, [visits, isFiltered, filterStart, filterEnd])
-
-	const thirtyDaysAgo  = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
-	const prevThirtyDays = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000)
+	const isFiltered = !!selectedDate
 
 	const userStats = useMemo(() => {
+		const thirtyDaysAgo  = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000)
+		const prevThirtyDays = new Date(now.getTime() - 60 * 24 * 60 * 60 * 1000)
 		const newUsers  = users.filter(u => new Date(u.createdAt || now) >= thirtyDaysAgo).length
 		const prevUsers = users.filter(u => new Date(u.createdAt || now) >= prevThirtyDays && new Date(u.createdAt || now) < thirtyDaysAgo).length
 		return {
@@ -354,173 +334,84 @@ export function EnhancedSuperAdminDashboard() {
 			newUsers,
 			userChange: prevUsers > 0 ? ((newUsers - prevUsers) / prevUsers) * 100 : 0,
 		}
-	}, [users, thirtyDaysAgo, prevThirtyDays])
+	}, [users])
 
 	const bizStats = useMemo(() => {
-		const paid    = filteredInvoices.filter(i => i.status === "PAID")
-		const unpaid  = filteredInvoices.filter(i => i.status === "UNPAID")
-		const allPaid = invoices.filter(i => i.status === "PAID")
-
-		// Bu ay / geçen ay ciro
-		const monthRev  = invoices.filter(i => new Date(i.createdAt) >= thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
-		const prevRev   = invoices.filter(i => new Date(i.createdAt) >= prevThirtyDays && new Date(i.createdAt) < thirtyDaysAgo && i.status === "PAID").reduce((s,i)=>s+i.amount,0)
-		const revChange = prevRev > 0 ? ((monthRev - prevRev) / prevRev) * 100 : 0
-
-		// Doluluk oranı: bu aydaki randevuların kaçı COMPLETED
-		const monthAppts     = appointments.filter(a => new Date(a.date) >= thirtyDaysAgo)
-		const completedMonth = monthAppts.filter(a => a.status === "COMPLETED").length
-		const doluluk        = monthAppts.length > 0 ? Math.round((completedMonth / monthAppts.length) * 100) : 0
-		const prevMonthAppts     = appointments.filter(a => new Date(a.date) >= prevThirtyDays && new Date(a.date) < thirtyDaysAgo)
-		const prevCompleted      = prevMonthAppts.filter(a => a.status === "COMPLETED").length
-		const prevDoluluk        = prevMonthAppts.length > 0 ? Math.round((prevCompleted / prevMonthAppts.length) * 100) : 0
-		const dolulukChange      = prevDoluluk > 0 ? doluluk - prevDoluluk : 0
-
-		// Yeni hasta: bu ay ilk kez kayıt olan hayvanlar
-		const newPetsMonth  = pets.filter(p => p.createdAt && new Date(p.createdAt) >= thirtyDaysAgo).length
-		const prevPetsMonth = pets.filter(p => p.createdAt && new Date(p.createdAt) >= prevThirtyDays && new Date(p.createdAt) < thirtyDaysAgo).length
-		const newPetsChange = prevPetsMonth > 0 ? ((newPetsMonth - prevPetsMonth) / prevPetsMonth) * 100 : 0
-
-		// Tahsilat bekleyen
-		const unpaidAmt = unpaid.reduce((s,i)=>s+i.amount,0)
-
+		// Klinik Nabzı - server'dan hesaplanmış veriler
 		return {
-			totalRev:    paid.reduce((s,i)=>s+i.amount,0),
-			allTimeRev:  allPaid.reduce((s,i)=>s+i.amount,0),
-			monthRev, revChange, prevRev,
-			doluluk, dolulukChange, completedMonth, monthAppts: monthAppts.length,
-			newPetsMonth, newPetsChange,
-			unpaidAmt,
-			totalAppts:  filteredAppointments.length,
-			recentAppts: filteredAppointments.length,
-			totalPets:   pets.length,
-			totalInv:    filteredInvoices.length,
-			paidCount:   paid.length,
-			unpaidCount: unpaid.length,
+			monthRev:       monthD?.ciro?.amount ?? 0,
+			revChange:      monthD?.ciro?.change ?? 0,
+			prevRev:        0, // kıyas API'de hesaplanıyor, burada sadece change % kullanılıyor
+			doluluk:        monthD?.doluluk?.percent ?? 0,
+			dolulukChange:  0,
+			completedMonth: monthD?.doluluk?.completed ?? 0,
+			monthAppts:     monthD?.doluluk?.total ?? 0,
+			newPetsMonth:   monthD?.newPets ?? 0,
+			newPetsChange:  0,
+			unpaidAmt:      monthD?.unpaid?.amount ?? 0,
+			unpaidCount:    monthD?.unpaid?.count ?? 0,
+			allTimeRev:     generalD?.allTimeRevenue ?? 0,
+			totalPets:      generalD?.totalPets ?? 0,
 		}
-	}, [filteredAppointments, filteredInvoices, pets, appointments, invoices, thirtyDaysAgo, prevThirtyDays])
+	}, [monthD, generalD])
 
 	const todayStats = useMemo(() => {
-		const activeDate = selectedDate || now
-		const todayStr   = format(activeDate, "yyyy-MM-dd")
-
-		const todayAppts = appointments.filter(a => format(new Date(a.date), "yyyy-MM-dd") === todayStr)
-		const completedAppts = todayAppts.filter(a => a.status === "COMPLETED").length
-		const pendingAppts   = todayAppts.filter(a => ["PENDING","CONFIRMED"].includes(a.status)).length
-
-		const todayVisitList = visits.filter(v => {
-			const d = v.visitDate || v.createdAt
-			if (!d) return false
-			try { return format(new Date(d), "yyyy-MM-dd") === todayStr } catch { return false }
-		})
-		const activeVisits = todayVisitList.filter(v => 
-			v.status === "IN_PROGRESS" || v.status === "COMPLETED"
-		).length
-
-		const todayVaccinationList = vaccinations.filter(v => v.nextDue?.slice(0, 10) === todayStr)
-
-		const todayCiro = todayVisitList.reduce((s, v) => s + (v.totalAmount || 0), 0)
-
-		// Tahsilat: payments array varsa kullan, yoksa bugünkü paidAmount
-		const todayTahsilatRows: any[] = []
-		visits.forEach(v => {
-			if (v.payments && v.payments.length > 0) {
-				v.payments
-					.filter((p: any) => {
-						const pd = p.paidAt || p.createdAt
-						if (!pd) return false
-						try { return format(new Date(pd), "yyyy-MM-dd") === todayStr } catch { return false }
-					})
-					.forEach((p: any) => {
-						todayTahsilatRows.push({
-							protocolNumber: v.protocolNumber,
-							petName:   v.pet?.name,
-							ownerName: v.pet?.owner?.name || v.pet?.owner?.email,
-							ownerPhone:v.pet?.owner?.phone,
-							method:    p.method,
-							amount:    p.amount,
-							paidAt:    p.paidAt,
-						})
-					})
-			}
-		})
-		// Payments gelmediyse paidAmount ile fallback
-		const todayTahsilat = todayTahsilatRows.length > 0
-			? todayTahsilatRows.reduce((s, r) => s + r.amount, 0)
-			: todayVisitList.reduce((s, v) => s + (v.paidAmount || 0), 0)
-
-		return {
-			todayAppts: todayAppts.length, completedAppts, pendingAppts,
-			todayVisits: todayVisitList.length, activeVisits,
-			todayVaccinations: todayVaccinationList.length,
-			todayCiro, todayTahsilat,
-			// popup data
-			apptList:        todayAppts,
-			visitList:       todayVisitList,
-			vaccinationList: todayVaccinationList,
-			ciroList:        todayVisitList,
-			tahsilatList:    todayTahsilatRows,
+		if (!todayD) return {
+			todayAppts: 0, completedAppts: 0, pendingAppts: 0,
+			todayVisits: 0, activeVisits: 0, todayVaccinations: 0,
+			todayCiro: 0, todayTahsilat: 0,
+			apptList: [], visitList: [], vaccinationList: [], ciroList: [], tahsilatList: [],
 		}
-	}, [appointments, visits, vaccinations, invoices, selectedDate])
+		return {
+			todayAppts:       todayD.appointments.total,
+			completedAppts:   todayD.appointments.completed,
+			pendingAppts:     todayD.appointments.pending,
+			todayVisits:      todayD.visits.uniquePets,
+			activeVisits:     todayD.visits.total,
+			todayVaccinations:todayD.vaccinations.total,
+			todayCiro:        todayD.ciro.amount,
+			todayTahsilat:    todayD.tahsilat.amount,
+			apptList:         todayD.appointments.list,
+			visitList:        todayD.visits.list,
+			vaccinationList:  todayD.vaccinations.list,
+			ciroList:         todayD.ciro.list,
+			tahsilatList:     todayD.tahsilat.list,
+		}
+	}, [todayD])
 
 	const todayBottomStats = useMemo(() => {
-		const activeDate = selectedDate || now
-		const todayStr   = format(activeDate, "yyyy-MM-dd")
-
-		// Bugünkü reçeteler
-		const todayRx = prescriptions.filter(p => p.dateIssued?.slice(0,10) === todayStr)
-
-		// Bugün kesilen faturalar
-		const todayInvoices = invoices.filter(i => i.createdAt?.slice(0,10) === todayStr)
-
-		// Bugün iptal/ertelenen randevular
-		const cancelledAppts = appointments.filter(a =>
-			format(new Date(a.date), "yyyy-MM-dd") === todayStr && a.status === "CANCELLED"
-		)
-		const rescheduledAppts = appointments.filter(a =>
-			format(new Date(a.date), "yyyy-MM-dd") === todayStr && a.status === "PENDING"
-		)
-
-		// Kritik stok (minQuantity altında)
-		const criticalStocks = stocks.filter((s: any) => s.isActive && s.quantity <= s.minQuantity)
-
-		// Bekleyen işler: tamamlanmamış bugünkü ziyaretler (IN_PROGRESS)
-		const pendingVisits = visits.filter(v =>
-			v.visitDate?.slice(0,10) === todayStr && v.status === "IN_PROGRESS"
-		)
-		// Ödenmemiş bakiye olan ziyaretler (bakiye > 0)
-		const unpaidToday = unpaidVisits.filter(v => v.visitDate?.slice(0,10) === todayStr)
-
-		return {
-			todayRx, todayInvoices, cancelledAppts, rescheduledAppts,
-			criticalStocks, pendingVisits, unpaidToday,
-			todayInvoiceTotal: todayInvoices.filter(i => i.status === "PAID").reduce((s,i) => s + i.amount, 0),
-			unpaidInvoiceTotal: todayInvoices.filter(i => i.status === "UNPAID").reduce((s,i) => s + i.amount, 0),
+		if (!todayD || !generalD) return {
+			todayRx: [], todayInvoices: [], cancelledAppts: [], rescheduledAppts: [],
+			criticalStocks: [], pendingVisits: [], unpaidToday: [],
+			todayInvoiceTotal: 0, unpaidInvoiceTotal: 0,
 		}
-	}, [prescriptions, invoices, appointments, stocks, visits, unpaidVisits, selectedDate])
+		return {
+			todayRx:           todayD.prescriptions.list,
+			todayInvoices:     todayD.invoices.list,
+			cancelledAppts:    todayD.cancelled.list.filter((a: any) => a.status === "CANCELLED"),
+			rescheduledAppts:  todayD.cancelled.list.filter((a: any) => a.status === "PENDING"),
+			criticalStocks:    generalD.criticalStocks.list,
+			pendingVisits:     todayD.visits.list.filter((v: any) => v.status === "IN_PROGRESS"),
+			unpaidToday:       generalD.unpaidVisits.list,
+			todayInvoiceTotal: todayD.invoices.paid,
+			unpaidInvoiceTotal:todayD.invoices.unpaid,
+		}
+	}, [todayD, generalD])
 
-		const chartData = useMemo(() => {
-		const apptChart = Array.from({ length: 7 }, (_, i) => {
-			const d = new Date(now); d.setDate(d.getDate() - (6 - i))
-			return { name: format(d, "dd MMM"), value: filteredAppointments.filter(a => format(new Date(a.date),"yyyy-MM-dd")===format(d,"yyyy-MM-dd")).length }
-		})
-		const revChart = Array.from({ length: 6 }, (_, i) => {
-			const d = new Date(now); d.setMonth(d.getMonth() - (5 - i))
-			return { name: format(d, "MMM yy"), value: filteredInvoices.filter(inv => format(new Date(inv.createdAt),"yyyy-MM")===format(d,"yyyy-MM") && inv.status==="PAID").reduce((s,inv)=>s+inv.amount,0) }
-		})
+	const chartData = useMemo(() => {
 		const roleChart = [
-			{ name: "Müşteri", value: userStats.customers },
-			{ name: "Personel", value: userStats.staff },
-			{ name: "Admin", value: userStats.admins },
-			{ name: "Süper Admin", value: userStats.superAdmins },
+			{ name: "Müşteri",    value: userStats.customers },
+			{ name: "Personel",   value: userStats.staff },
+			{ name: "Admin",      value: userStats.admins },
+			{ name: "Süper Admin",value: userStats.superAdmins },
 		]
-		const daysInMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate()
-		const monthlyApptChart = Array.from({ length: daysInMonth }, (_, i) => {
-			const d = new Date(now.getFullYear(), now.getMonth(), i + 1)
-			const count = filteredAppointments.filter(a => format(new Date(a.date),"yyyy-MM-dd")===format(d,"yyyy-MM-dd")).length
-			return { name: format(d, "d MMM"), value: count }
-		}).filter(d => d.value > 0)
-		return { appt: apptChart, rev: revChart, role: roleChart, monthlyAppt: monthlyApptChart }
-	}, [filteredAppointments, filteredInvoices, userStats])
+		return {
+			appt:        dashData?.charts?.appt  || [],
+			rev:         dashData?.charts?.rev   || [],
+			role:        roleChart,
+			monthlyAppt: [],
+		}
+	}, [userStats, dashData])
 
 	const recentUsers = useMemo(() =>
 		[...users].sort((a,b) => new Date(b.createdAt||now).getTime() - new Date(a.createdAt||now).getTime()).slice(0, 6)
@@ -928,16 +819,16 @@ export function EnhancedSuperAdminDashboard() {
 						<div>
 							<p className="sa-tp-hd-title">Ödenmemiş Bakiyeler</p>
 							<p className="sa-tp-hd-count">
-								{unpaidVisits.length === 0
+								{(todayBottomStats.unpaidToday||[]).length === 0
 									? <span>Bekleyen borç yok ✓</span>
-									: <span className="sa-tp-red">{unpaidVisits.length} ziyaret · {formatCurrency(unpaidVisits.reduce((s,v)=>s+v.balance,0))} toplam</span>}
+									: <span className="sa-tp-red">{(todayBottomStats.unpaidToday||[]).length} ziyaret · {formatCurrency((todayBottomStats.unpaidToday||[]).reduce((s:number,v:any)=>s+v.balance,0))} toplam</span>}
 							</p>
 						</div>
 					</div>
 					<div className="sa-tp-list">
-						{unpaidVisits.length === 0 ? (
+						{(todayBottomStats.unpaidToday||[]).length === 0 ? (
 							<div className="sa-tp-empty sa-tp-empty-green"><CheckCircle2 className="w-5 h-5" /><span>Tüm ödemeler tamam</span></div>
-						) : unpaidVisits.slice(0,5).map((v: any) => (
+						) : (todayBottomStats.unpaidToday || []).slice(0,5).map((v: any) => (
 							<div key={v.id} className="sa-tp-row">
 								<div className="sa-tp-avatar sa-tpa-red">{(v.pet?.name||"?").charAt(0)}</div>
 								<div className="sa-tp-info">

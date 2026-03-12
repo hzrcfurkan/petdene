@@ -34,6 +34,7 @@ interface DashboardChartsProps {
 	revenueData?: ChartData[]
 	statusData?: ChartData[]
 	serviceData?: ChartData[]
+	monthlyApptData?: ChartData[]
 }
 
 const CHART_COLORS = [
@@ -90,6 +91,7 @@ export function DashboardCharts({
 	revenueData = [],
 	statusData = [],
 	serviceData = [],
+	monthlyApptData = [],
 }: DashboardChartsProps) {
 	const { formatCurrency } = useCurrency()
 	return (
