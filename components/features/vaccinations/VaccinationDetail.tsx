@@ -32,7 +32,7 @@ export function VaccinationDetail({ vaccination }: VaccinationDetailProps) {
 				</div>
 				{vaccination.nextDue && (
 					<Badge className={isDue ? "bg-red-100 text-red-800" : isUpcoming ? "bg-yellow-100 text-yellow-800" : "bg-green-100 text-green-800"}>
-						{isDue ? "Due" : isUpcoming ? "Upcoming" : "Scheduled"}
+						{isDue ? "Gecikti" : isUpcoming ? "Yaklaşıyor" : "Planlandı"}
 					</Badge>
 				)}
 			</div>
@@ -40,12 +40,12 @@ export function VaccinationDetail({ vaccination }: VaccinationDetailProps) {
 			<Separator />
 
 			<div className="grid gap-4 md:grid-cols-2">
-				{/* Date Given */}
+				{/* Uygulama Tarihi */}
 				<Card>
 					<CardHeader className="pb-3">
 						<CardTitle className="text-sm font-medium flex items-center gap-2">
 							<Calendar className="w-4 h-4" />
-							Date Given
+							Uygulama Tarihi
 						</CardTitle>
 					</CardHeader>
 					<CardContent>
@@ -58,7 +58,7 @@ export function VaccinationDetail({ vaccination }: VaccinationDetailProps) {
 					</CardContent>
 				</Card>
 
-				{/* Next Due */}
+				{/* Sonraki Aşı */}
 				{vaccination.nextDue ? (
 					<Card>
 						<CardHeader className="pb-3">
@@ -69,7 +69,7 @@ export function VaccinationDetail({ vaccination }: VaccinationDetailProps) {
 								{format(new Date(vaccination.nextDue), "EEEE, MMMM dd, yyyy")}
 							</div>
 							{isDue && (
-								<Badge className="mt-2 bg-red-100 text-red-800">Overdue</Badge>
+								<Badge className="mt-2 bg-red-100 text-red-800">Gecikti</Badge>
 							)}
 							{isUpcoming && !isDue && (
 								<Badge className="mt-2 bg-yellow-100 text-yellow-800">Due Soon</Badge>

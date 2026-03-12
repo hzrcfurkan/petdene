@@ -99,7 +99,7 @@ export function VaccinationList({ petId, upcoming, showActions = true, isPlanned
 							<Syringe className="w-5 h-5" />
 							Vaccinations
 						</CardTitle>
-						<CardDescription>Manage and view vaccination records</CardDescription>
+						<CardDescription>Aşı kayıtlarını görüntüle ve yönet</CardDescription>
 					</div>
 					{showActions && canEdit && (
 						<div className="flex gap-2">
@@ -168,7 +168,7 @@ export function VaccinationList({ petId, upcoming, showActions = true, isPlanned
 						<div className="relative">
 							<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
-								placeholder="Search by vaccine name..."
+								placeholder="Aşı adı ile ara..."
 								value={vaccineNameFilter}
 								onChange={(e) => setVaccineNameFilter(e.target.value)}
 								className="pl-8"
@@ -180,10 +180,10 @@ export function VaccinationList({ petId, upcoming, showActions = true, isPlanned
 							<SelectValue placeholder="Sırala" />
 						</SelectTrigger>
 						<SelectContent>
-							<SelectItem value="date-asc">Date (Oldest)</SelectItem>
-							<SelectItem value="date-desc">Date (Newest)</SelectItem>
-							<SelectItem value="nextdue-asc">Next Due (Earliest)</SelectItem>
-							<SelectItem value="nextdue-desc">Next Due (Latest)</SelectItem>
+							<SelectItem value="date-asc">Tarih (Eskiden Yeniye)</SelectItem>
+							<SelectItem value="date-desc">Tarih (Yeniden Eskiye)</SelectItem>
+							<SelectItem value="nextdue-asc">Sonraki Tarih (Yakın)</SelectItem>
+							<SelectItem value="nextdue-desc">Sonraki Tarih (Uzak)</SelectItem>
 						</SelectContent>
 					</Select>
 				</div>
@@ -193,13 +193,13 @@ export function VaccinationList({ petId, upcoming, showActions = true, isPlanned
 					<DatePicker
 						value={dateFrom}
 						onChange={setDateFrom}
-						placeholder="From Date"
+						placeholder="Başlangıç Tarihi"
 						className="w-[180px]"
 					/>
 					<DatePicker
 						value={dateTo}
 						onChange={setDateTo}
-						placeholder="To Date"
+						placeholder="Bitiş Tarihi"
 						className="w-[180px]"
 					/>
 					{(dateFrom || dateTo || vaccineNameFilter) && (
@@ -227,7 +227,7 @@ export function VaccinationList({ petId, upcoming, showActions = true, isPlanned
 										<TableHead>Aşı Adı</TableHead>
 										<TableHead>Hasta</TableHead>
 										<TableHead>{isPlanned ? "Planlanan Tarih" : "Uygulama Tarihi"}</TableHead>
-										{isPlanned ? <TableHead>Saat</TableHead> : <TableHead>Next Due</TableHead>}
+										{isPlanned ? <TableHead>Saat</TableHead> : <TableHead>Sonraki Aşı</TableHead>}
 										<TableHead>Sahip</TableHead>
 										{showActions && <TableHead className="text-right">İşlemler</TableHead>}
 									</TableRow>

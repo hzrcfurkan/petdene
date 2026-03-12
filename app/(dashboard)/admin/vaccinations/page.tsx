@@ -20,9 +20,9 @@ export default async function VaccinationsPage() {
 		<LayoutAdmin>
 			<div className="space-y-8">
 				<header className="space-y-1">
-					<h1 className="text-3xl font-bold tracking-tight">Vaccination Management</h1>
+					<h1 className="text-3xl font-bold tracking-tight">Aşı Yönetimi</h1>
 					<p className="text-muted-foreground">
-						Manage vaccination records and track upcoming due dates
+						Aşı kayıtlarını yönetin ve yaklaşan tarihleri takip edin
 					</p>
 				</header>
 
