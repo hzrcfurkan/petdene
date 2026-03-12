@@ -52,7 +52,11 @@ export async function GET(req: NextRequest) {
 		}
 
 		if (upcoming === "true") {
-			where.nextDue = { not: null, gte: new Date() }
+			// nextDue (hatırlatma) VEYA scheduledDate (planlama) bazlı
+			where.OR = [
+				{ nextDue: { not: null, gte: new Date() } },
+				{ isPlanned: true, scheduledDate: { gte: new Date() } },
+			]
 		}
 
 		// isPlanned filtresi
