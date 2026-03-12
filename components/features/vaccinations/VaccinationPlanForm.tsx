@@ -96,7 +96,8 @@ export function VaccinationPlanForm({ onSuccess, onCancel }: VaccinationPlanForm
 			await createVaccinationMutation.mutateAsync({
 				petId: selectedPetId,
 				vaccineName: vacName,
-				dateGiven: null as any, // henüz yapılmadı
+				dateGiven: undefined,                              // null = planlanmış kayıt
+				nextDue: new Date(scheduledDate).toISOString(),   // dashboard nextDue filtresi için
 				isPlanned: true,
 				scheduledDate: new Date(scheduledDate).toISOString(),
 				scheduledTime,

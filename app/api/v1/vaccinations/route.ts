@@ -55,16 +55,17 @@ export async function GET(req: NextRequest) {
 			where.nextDue = { not: null, gte: new Date() }
 		}
 
-		// isPlanned filtresi: "true" → sadece planlamalar, "false" → sadece gerçek aşılar
+		// isPlanned filtresi (migration sonrası isPlanned kolonu, öncesi dateGiven null kontrolü)
 		if (plannedParam === "true") {
-			where.isPlanned = true
+			where.OR = [{ isPlanned: true }, { dateGiven: null }]
 		} else if (plannedParam === "false") {
 			where.isPlanned = false
+			where.dateGiven = { not: null }
 		}
 
-		let orderBy: any = { dateGiven: "desc" }
-		if (sort === "date-asc") orderBy = { dateGiven: "asc" }
-		else if (sort === "date-desc") orderBy = { dateGiven: "desc" }
+		let orderBy: any = { createdAt: "desc" }
+		if (sort === "date-asc") orderBy = { createdAt: "asc" }
+		else if (sort === "date-desc") orderBy = { createdAt: "desc" }
 		else if (sort === "nextdue-asc") orderBy = { nextDue: "asc" }
 		else if (sort === "nextdue-desc") orderBy = { nextDue: "desc" }
 
@@ -145,17 +146,27 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: "Pet not found" }, { status: 404 })
 		}
 
-		const dateGivenValue = new Date(dateGiven)
-		if (Number.isNaN(dateGivenValue.getTime())) {
-			return NextResponse.json({ error: "Invalid dateGiven value" }, { status: 400 })
+		// dateGiven parse (planlama ise null)
+		const planned = isPlanned === true || isPlanned === "true"
+		let dateGivenValue: Date | null = null
+		if (!planned && dateGiven) {
+			dateGivenValue = new Date(dateGiven)
+			if (Number.isNaN(dateGivenValue.getTime())) {
+				return NextResponse.json({ error: "Geçersiz uygulama tarihi" }, { status: 400 })
+			}
 		}
 
 		let nextDueValue: Date | null = null
 		if (nextDue) {
 			nextDueValue = new Date(nextDue)
 			if (Number.isNaN(nextDueValue.getTime())) {
-				return NextResponse.json({ error: "Invalid nextDue value" }, { status: 400 })
+				return NextResponse.json({ error: "Geçersiz sonraki tarih" }, { status: 400 })
 			}
+		}
+
+		let scheduledDateValue: Date | null = null
+		if (planned && scheduledDate) {
+			scheduledDateValue = new Date(scheduledDate)
 		}
 
 		const vaccination = await prisma.vaccination.create({
@@ -165,14 +176,15 @@ export async function POST(req: NextRequest) {
 				dateGiven: dateGivenValue,
 				nextDue: nextDueValue,
 				notes: notes || null,
+				isPlanned: planned,
+				scheduledDate: scheduledDateValue,
+				scheduledTime: scheduledTime || null,
+				stockItemId: stockItemId || null,
 			},
 			select: {
-				id: true,
-				petId: true,
-				vaccineName: true,
-				dateGiven: true,
-				nextDue: true,
-				notes: true,
+				id: true, petId: true, vaccineName: true,
+				dateGiven: true, nextDue: true, notes: true,
+				isPlanned: true, scheduledDate: true, scheduledTime: true,
 				pet: { select: { id: true, name: true, species: true } },
 			},
 		})

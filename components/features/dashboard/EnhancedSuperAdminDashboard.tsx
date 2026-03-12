@@ -414,10 +414,17 @@ export function EnhancedSuperAdminDashboard() {
 		})
 		const activeVisits = todayVisitList.length // bugün kaydı açılan tüm hayvanlar
 
-		const todayVaccinationList = vaccinations.filter(v =>
-			v.nextDue?.slice(0, 10) === todayStr ||
-			(v as any).scheduledDate?.slice(0, 10) === todayStr
-		)
+		const todayVaccinationList = vaccinations.filter(v => {
+			// Planlanmış aşı: scheduledDate bugün
+			if ((v as any).isPlanned && (v as any).scheduledDate) {
+				try { return format(new Date((v as any).scheduledDate), "yyyy-MM-dd") === todayStr } catch { return false }
+			}
+			// Hatırlatma: nextDue bugün
+			if (v.nextDue) {
+				try { return format(new Date(v.nextDue), "yyyy-MM-dd") === todayStr } catch { return false }
+			}
+			return false
+		})
 
 		const todayCiro = todayVisitList.reduce((s, v) => s + (v.totalAmount || 0), 0)
 

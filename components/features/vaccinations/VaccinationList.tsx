@@ -251,22 +251,28 @@ export function VaccinationList({ petId, upcoming, showActions = true, isPlanned
 														<div className="text-sm text-muted-foreground">{vaccination.pet?.species}</div>
 													</div>
 												</TableCell>
-												<TableCell data-label="Date Given">
-													{format(new Date(vaccination.dateGiven), "MMM dd, yyyy")}
+												<TableCell data-label="Tarih">
+													{isPlanned
+														? ((vaccination as any).scheduledDate
+																? format(new Date((vaccination as any).scheduledDate), "dd MMM yyyy")
+																: "—")
+														: (vaccination.dateGiven
+																? format(new Date(vaccination.dateGiven), "dd MMM yyyy")
+																: "—")}
 												</TableCell>
-												<TableCell data-label="Next Due">
-													{vaccination.nextDue ? (
+												<TableCell data-label="Saat/NextDue">
+													{isPlanned ? (
+														<span className="font-semibold text-blue-700">
+															{(vaccination as any).scheduledTime || "—"}
+														</span>
+													) : vaccination.nextDue ? (
 														<div className="flex items-center gap-2">
-															<span>{format(new Date(vaccination.nextDue), "MMM dd, yyyy")}</span>
-															{isDue && (
-																<Badge className="bg-red-100 text-red-800">Due</Badge>
-															)}
-															{isUpcoming && !isDue && (
-																<Badge className="bg-yellow-100 text-yellow-800">Upcoming</Badge>
-															)}
+															<span>{format(new Date(vaccination.nextDue), "dd MMM yyyy")}</span>
+															{isDue && <Badge className="bg-red-100 text-red-800">Gecikti</Badge>}
+															{isUpcoming && !isDue && <Badge className="bg-yellow-100 text-yellow-800">Yaklaşıyor</Badge>}
 														</div>
 													) : (
-														<span className="text-muted-foreground">N/A</span>
+														<span className="text-muted-foreground">—</span>
 													)}
 												</TableCell>
 												<TableCell data-label="Sahip">
