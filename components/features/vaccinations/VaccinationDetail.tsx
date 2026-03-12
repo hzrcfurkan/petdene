@@ -50,7 +50,7 @@ export function VaccinationDetail({ vaccination }: VaccinationDetailProps) {
 					</CardHeader>
 					<CardContent>
 						<div className="text-lg font-semibold">
-							{format(new Date(vaccination.dateGiven), "EEEE, MMMM dd, yyyy")}
+							{format(new Date(vaccination.dateGiven), "dd MMMM yyyy, EEEE", { locale: require("date-fns/locale/tr").tr })}
 						</div>
 						<div className="text-sm text-muted-foreground mt-1">
 							{format(new Date(vaccination.dateGiven), "h:mm a")}

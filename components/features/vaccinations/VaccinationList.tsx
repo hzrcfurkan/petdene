@@ -61,7 +61,7 @@ export function VaccinationList({ petId, upcoming, showActions = true, isPlanned
 	const { mutate: deleteVaccination } = useDeleteVaccination()
 
 	const handleDelete = async (id: string) => {
-		if (!confirm("Are you sure you want to delete this vaccination record?")) return
+		if (!confirm("Bu aşı kaydını silmek istediğinizden emin misiniz?")) return
 
 		try {
 			await deleteVaccination(id)

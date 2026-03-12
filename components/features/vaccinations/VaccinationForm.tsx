@@ -68,7 +68,7 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 			}
 			onSuccess()
 		} catch (error: any) {
-			toast.error(error?.info?.error || "Failed to save vaccination")
+			toast.error(error?.info?.error || "Aşı kaydedilemedi")
 		} finally {
 			setIsSubmitting(false)
 		}
@@ -83,9 +83,9 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 						options={petOptions}
 						value={petId}
 						onValueChange={setPetId}
-						placeholder="Search by patient or owner name..."
-						searchPlaceholder="Search by patient name, owner name, or email..."
-						emptyText={isLoadingPets ? "Yükleniyor..." : "No patients found. Try a different search."}
+						placeholder="Hasta veya sahip adı ile ara..."
+						searchPlaceholder="Hasta adı, sahip adı veya e-posta ile ara..."
+						emptyText={isLoadingPets ? "Yükleniyor..." : "Hasta bulunamadı. Farklı bir arama deneyin."}
 						onSearchChange={setPetSearch}
 						loading={isLoadingPets}
 						renderOption={(opt) => {
@@ -134,7 +134,7 @@ export function VaccinationForm({ vaccination, onSuccess, onCancel }: Vaccinatio
 					id="notes"
 					value={notes}
 					onChange={(e) => setNotes(e.target.value)}
-					placeholder="Additional notes about the vaccination..."
+					placeholder="Aşı hakkında notlar..."
 					rows={3}
 				/>
 			</div>

@@ -133,8 +133,8 @@ export function VaccinationImport() {
 										<TableRow>
 											<TableHead>Hasta</TableHead>
 											<TableHead>Aşı Adı</TableHead>
-											<TableHead>Date Given</TableHead>
-											<TableHead>Next Due</TableHead>
+											<TableHead>Uygulama Tarihi</TableHead>
+											<TableHead>Sonraki Aşı</TableHead>
 										</TableRow>
 									</TableHeader>
 									<TableBody>
