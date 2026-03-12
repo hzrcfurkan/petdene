@@ -55,6 +55,7 @@ export function useVaccinations(params?: UseVaccinationsParams) {
 	if (params?.dateFrom) queryParams.set("dateFrom", params.dateFrom)
 	if (params?.dateTo) queryParams.set("dateTo", params.dateTo)
 	if (params?.upcoming) queryParams.set("upcoming", "true")
+	if (params?.isPlanned !== undefined) queryParams.set("isPlanned", String(params.isPlanned))
 
 	const url = `/api/v1/vaccinations${queryParams.toString() ? `?${queryParams.toString()}` : ""}`
 
