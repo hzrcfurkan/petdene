@@ -407,21 +407,29 @@ export function EnhancedSuperAdminDashboard() {
 		const completedAppts = todayAppts.filter(a => a.status === "COMPLETED").length
 		const pendingAppts   = todayAppts.filter(a => ["PENDING","CONFIRMED"].includes(a.status)).length
 
-		const todayVisitList = visits.filter(v =>
-			(v.visitDate?.slice(0,10) === todayStr) || (v.createdAt?.slice(0,10) === todayStr)
-		)
-		const activeVisits = todayVisitList.filter(v => v.status === "IN_PROGRESS").length
+		const todayVisitList = visits.filter(v => {
+			const d = v.visitDate || v.createdAt
+			if (!d) return false
+			try { return format(new Date(d), "yyyy-MM-dd") === todayStr } catch { return false }
+		})
+		const activeVisits = todayVisitList.filter(v => 
+			v.status === "IN_PROGRESS" || v.status === "COMPLETED"
+		).length
 
 		const todayVaccinationList = vaccinations.filter(v => v.nextDue?.slice(0, 10) === todayStr)
 
 		const todayCiro = todayVisitList.reduce((s, v) => s + (v.totalAmount || 0), 0)
 
-		// Tahsilat: payments array varsa kullan, yoksa paidAmount
+		// Tahsilat: payments array varsa kullan, yoksa bugünkü paidAmount
 		const todayTahsilatRows: any[] = []
 		visits.forEach(v => {
 			if (v.payments && v.payments.length > 0) {
 				v.payments
-					.filter((p: any) => p.status === "COMPLETED" && p.paidAt?.slice(0,10) === todayStr)
+					.filter((p: any) => {
+						const pd = p.paidAt || p.createdAt
+						if (!pd) return false
+						try { return format(new Date(pd), "yyyy-MM-dd") === todayStr } catch { return false }
+					})
 					.forEach((p: any) => {
 						todayTahsilatRows.push({
 							protocolNumber: v.protocolNumber,
@@ -435,7 +443,10 @@ export function EnhancedSuperAdminDashboard() {
 					})
 			}
 		})
-		const todayTahsilat = todayTahsilatRows.reduce((s, r) => s + r.amount, 0)
+		// Payments gelmediyse paidAmount ile fallback
+		const todayTahsilat = todayTahsilatRows.length > 0
+			? todayTahsilatRows.reduce((s, r) => s + r.amount, 0)
+			: todayVisitList.reduce((s, v) => s + (v.paidAmount || 0), 0)
 
 		return {
 			todayAppts: todayAppts.length, completedAppts, pendingAppts,

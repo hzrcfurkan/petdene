@@ -71,9 +71,19 @@ export async function GET(req: NextRequest) {
 					protocolNumber: true,
 					petId: true,
 					visitDate: true,
+					createdAt: true,
 					status: true,
 					totalAmount: true,
 					paidAmount: true,
+					payments: {
+						select: {
+							id: true,
+							amount: true,
+							method: true,
+							status: true,
+							paidAt: true,
+						},
+					},
 					pet: {
 						select: {
 							id: true,
@@ -105,15 +115,6 @@ export async function GET(req: NextRequest) {
 						: {
 								_count: {
 									select: { services: true, payments: true },
-								},
-								payments: {
-									select: {
-										id: true,
-										amount: true,
-										status: true,
-										paidAt: true,
-										method: true,
-									},
 								},
 							}),
 				},
