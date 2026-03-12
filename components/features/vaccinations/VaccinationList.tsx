@@ -17,6 +17,7 @@ import { format, isAfter } from "date-fns"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import { ResponsiveTableWrapper } from "@/components/ui/responsive-table"
 import { VaccinationForm } from "./VaccinationForm"
+import { VaccinationAddForm } from "./VaccinationAddForm"
 import { VaccinationPlanForm } from "./VaccinationPlanForm"
 import { VaccinationDetail } from "./VaccinationDetail"
 import { currentUserClient } from "@/lib/auth/client"
@@ -133,21 +134,27 @@ export function VaccinationList({ petId, upcoming, showActions = true, isPlanned
 										Aşı Ekle
 									</Button>
 								</DialogTrigger>
-							<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+							<DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
 								<DialogHeader>
-									<DialogTitle>{editingVaccination ? "Aşı Düzenle" : "Add Vaccination"}</DialogTitle>
+									<DialogTitle>
+										{editingVaccination ? "Aşı Düzenle" : "💉 Yapılan Aşı Ekle"}
+									</DialogTitle>
 									<DialogDescription>
-										{editingVaccination ? "Update vaccination record" : "Record a new vaccination"}
+										{editingVaccination ? "Aşı kaydını güncelle" : "Sahip → Hayvan → Stok → Tarih adımlarıyla kaydet"}
 									</DialogDescription>
 								</DialogHeader>
-								<VaccinationForm
-									vaccination={editingVaccination}
-									onSuccess={handleFormSuccess}
-									onCancel={() => {
-										setIsFormOpen(false)
-										setEditingVaccination(null)
-									}}
-								/>
+								{editingVaccination ? (
+									<VaccinationForm
+										vaccination={editingVaccination}
+										onSuccess={handleFormSuccess}
+										onCancel={() => { setIsFormOpen(false); setEditingVaccination(null) }}
+									/>
+								) : (
+									<VaccinationAddForm
+										onSuccess={handleFormSuccess}
+										onCancel={() => setIsFormOpen(false)}
+									/>
+								)}
 							</DialogContent>
 							</Dialog>
 						</div>
