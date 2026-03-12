@@ -55,12 +55,11 @@ export async function GET(req: NextRequest) {
 			where.nextDue = { not: null, gte: new Date() }
 		}
 
-		// isPlanned filtresi (migration sonrası isPlanned kolonu, öncesi dateGiven null kontrolü)
+		// isPlanned filtresi
 		if (plannedParam === "true") {
-			where.OR = [{ isPlanned: true }, { dateGiven: null }]
+			where.isPlanned = true
 		} else if (plannedParam === "false") {
 			where.isPlanned = false
-			where.dateGiven = { not: null }
 		}
 
 		let orderBy: any = { createdAt: "desc" }
