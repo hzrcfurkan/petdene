@@ -20,9 +20,9 @@ export default async function VisitsPage() {
 		<LayoutAdmin>
 			<div className="space-y-8">
 				<header className="space-y-1">
-					<h1 className="text-3xl font-bold tracking-tight">Ziyaretler (Protokoller)</h1>
+					<h1 className="text-3xl font-bold tracking-tight">Muayene Kayıtları</h1>
 					<p className="text-muted-foreground">
-						Central transaction unit: Patient visits with medical records, services & payments
+						Muayene protokolleri, hizmetler ve ödemeler
 					</p>
 				</header>
 

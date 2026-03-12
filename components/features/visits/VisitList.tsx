@@ -67,9 +67,9 @@ export function VisitList({ petId, showCreate = true }: VisitListProps) {
 			<CardHeader>
 				<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 					<div>
-						<CardTitle className="flex items-center gap-2">Ziyaretler (Protokoller)</CardTitle>
+						<CardTitle className="flex items-center gap-2">Muayene Kayıtları</CardTitle>
 						<CardDescription>
-							Clinic visits - central transaction unit for medical records, services & payments
+							Muayene protokolleri, hizmetler ve ödeme takibi
 						</CardDescription>
 					</div>
 					{showCreate && canCreate && (
@@ -77,12 +77,12 @@ export function VisitList({ petId, showCreate = true }: VisitListProps) {
 							<DialogTrigger asChild>
 								<Button>
 									<Plus className="w-4 h-4 mr-2" />
-									New Visit
+									Yeni Muayene
 								</Button>
 							</DialogTrigger>
 							<DialogContent className="max-w-lg">
 								<DialogHeader>
-									<DialogTitle>Create New Visit</DialogTitle>
+									<DialogTitle>Create Yeni Muayene</DialogTitle>
 									<DialogDescription>
 										Register a patient visit. Protocol number will be auto-generated.
 									</DialogDescription>

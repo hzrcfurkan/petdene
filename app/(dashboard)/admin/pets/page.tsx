@@ -20,9 +20,9 @@ export default async function PetsPage() {
 		<LayoutAdmin>
 			<div className="space-y-8">
 				<header className="space-y-1">
-					<h1 className="text-3xl font-bold tracking-tight">Pet Management</h1>
+					<h1 className="text-3xl font-bold tracking-tight">Hasta Yönetimi</h1>
 					<p className="text-muted-foreground">
-						Manage pets, owners, and pet information
+						Hasta ve sahip kayıtlarını yönetin
 					</p>
 				</header>
 

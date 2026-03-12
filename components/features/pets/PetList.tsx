@@ -99,12 +99,12 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 							<DialogTrigger asChild>
 								<Button onClick={() => setEditingPet(null)}>
 									<Plus className="w-4 h-4 mr-2" />
-									New Pet
+									Yeni Hasta Kaydı
 								</Button>
 							</DialogTrigger>
 							<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
 								<DialogHeader>
-									<DialogTitle>{editingPet ? "Hasta Düzenle" : "Add New Pet"}</DialogTitle>
+									<DialogTitle>{editingPet ? "Hasta Düzenle" : "Add Yeni Hasta Kaydı"}</DialogTitle>
 									<DialogDescription>
 										{editingPet ? "Hasta bilgilerini güncelle" : "Sisteme yeni hasta ekle"}
 									</DialogDescription>
@@ -129,7 +129,7 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 						<div className="relative">
 							<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
 							<Input
-								placeholder="Search by patient #, name, breed, species..."
+								placeholder="Hasta no, isim, ırk veya tür ile ara..."
 								value={searchQuery}
 								onChange={(e) => setSearchQuery(e.target.value)}
 								className="pl-8"
@@ -143,7 +143,7 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 								<SelectValue placeholder="Tür" />
 							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="ALL">All Species</SelectItem>
+								<SelectItem value="ALL">Tüm Türler</SelectItem>
 								{speciesOptions.map((spec) => (
 									<SelectItem key={spec} value={spec}>
 										{spec}
@@ -158,8 +158,8 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 							<SelectContent>
 								<SelectItem value="name-asc">Ad (A-Z)</SelectItem>
 								<SelectItem value="name-desc">Ad (Z-A)</SelectItem>
-								<SelectItem value="date-asc">Date (Oldest)</SelectItem>
-								<SelectItem value="date-desc">Date (Newest)</SelectItem>
+								<SelectItem value="date-asc">Tarih (Eski-Yeni)</SelectItem>
+								<SelectItem value="date-desc">Tarih (Yeni-Eski)</SelectItem>
 							</SelectContent>
 						</Select>
 					</div>
@@ -231,7 +231,7 @@ export function PetList({ ownerId, species, showActions = true }: PetListProps) 
 											<TableCell>
 												<div className="text-sm">
 													{pet._count?.appointments || 0} appointments,{" "}
-													{pet._count?.vaccinations || 0} vaccinations
+													{pet._count?.aşı || 0} aşı
 												</div>
 											</TableCell>
 											{showActions && (

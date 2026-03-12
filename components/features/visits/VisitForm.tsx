@@ -106,7 +106,7 @@ export function VisitForm({
 				visitDate: new Date(visitDate).toISOString(),
 				notes: notes || undefined,
 			})
-			toast.success("Visit created successfully. Protocol number assigned.")
+			toast.success("Muayene kaydı oluşturuldu. Protokol numarası atandı.")
 			onSuccess()
 		} catch (error: any) {
 			toast.error(error?.info?.error || "Ziyaret oluşturulamadı")
@@ -121,14 +121,14 @@ export function VisitForm({
 				{/* Step 1: Search & Select Owner */}
 				{(currentUser?.isAdmin || currentUser?.isSuperAdmin || currentUser?.isStaff) && (
 					<div className="space-y-2 md:col-span-2">
-						<Label htmlFor="ownerId">Owner (Customer) *</Label>
+						<Label htmlFor="ownerId">Hasta Sahibi *</Label>
 						<SearchSelect
 							options={ownerOptions}
 							value={ownerId}
 							onValueChange={handleOwnerChange}
-							placeholder="Search by owner name, email, or phone..."
-							searchPlaceholder="Search by name, email, or phone..."
-							emptyText="No owner found. Try different search."
+							placeholder="İsim, e-posta veya telefon ile ara..."
+							searchPlaceholder="İsim, e-posta veya telefon ile ara..."
+							emptyText="Sahip bulunamadı."
 							onSearchChange={setOwnerSearch}
 							loading={ownersLoading}
 							renderOption={(opt) => (
@@ -145,16 +145,16 @@ export function VisitForm({
 
 				{/* Step 2: Search & Select Pet (only when owner selected) */}
 				<div className="space-y-2">
-					<Label htmlFor="petId">Patient (Pet) *</Label>
+					<Label htmlFor="petId">Hayvan *</Label>
 					{isStaffOrAdmin ? (
 						effectiveOwnerId ? (
 							<SearchSelect
 								options={petOptions}
 								value={petId}
 								onValueChange={setPetId}
-								placeholder="Search by pet name, breed, or species..."
-								searchPlaceholder="Search by pet name, breed, or species..."
-								emptyText={pets.length === 0 ? "No pets registered for this owner." : "No matching pet."}
+								placeholder="Hayvan adı, ırk veya tür ile ara..."
+								searchPlaceholder="Hayvan adı, ırk veya tür ile ara..."
+								emptyText={pets.length === 0 ? "Bu sahibin kayıtlı hayvanı yok." : "Hayvan bulunamadı."}
 								onSearchChange={setPetSearch}
 								loading={petsLoading}
 								renderOption={(opt) => (
@@ -178,9 +178,9 @@ export function VisitForm({
 							options={petOptions}
 							value={petId}
 							onValueChange={setPetId}
-							placeholder="Select your pet..."
-							searchPlaceholder="Search pet..."
-							emptyText={pets.length === 0 ? "No pets registered. Add a pet first." : "No matching pet."}
+							placeholder="Hayvanınızı seçin..."
+							searchPlaceholder="Hayvan ara..."
+							emptyText={pets.length === 0 ? "Kayıtlı hayvanınız yok." : "Hayvan bulunamadı."}
 							renderOption={(opt) => (
 								<>
 									<span>{opt.label}</span>
@@ -194,7 +194,7 @@ export function VisitForm({
 				</div>
 
 				<div className="space-y-2">
-					<Label htmlFor="visitDate">Visit Date & Time *</Label>
+					<Label htmlFor="visitDate">Muayene Tarihi ve Saati *</Label>
 					<DateTimePicker
 						id="visitDate"
 						value={visitDate}
@@ -205,10 +205,10 @@ export function VisitForm({
 
 				{(currentUser?.isAdmin || currentUser?.isSuperAdmin || currentUser?.isStaff) && (
 					<div className="space-y-2">
-						<Label htmlFor="staffId">Assigned Staff</Label>
+						<Label htmlFor="staffId">Veteriner / Personel</Label>
 						<Select value={staffId} onValueChange={setStaffId}>
 							<SelectTrigger id="staffId">
-								<SelectValue placeholder="Select staff (optional)" />
+								<SelectValue placeholder="Personel seçin (opsiyonel)" />
 							</SelectTrigger>
 							<SelectContent>
 								{staff.map((s: any) => (
@@ -227,7 +227,7 @@ export function VisitForm({
 						id="notes"
 						value={notes}
 						onChange={(e) => setNotes(e.target.value)}
-						placeholder="Visit notes..."
+						placeholder="Muayene notları..."
 						rows={2}
 					/>
 				</div>
@@ -238,7 +238,7 @@ export function VisitForm({
 					Cancel
 				</Button>
 				<Button type="submit" disabled={isSubmitting || !petId}>
-					{isSubmitting ? "Oluşturuluyor..." : "Create Visit"}
+					{isSubmitting ? "Oluşturuluyor..." : "Muayene Oluştur"}
 				</Button>
 			</div>
 		</form>

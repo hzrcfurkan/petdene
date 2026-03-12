@@ -25,12 +25,12 @@ export function PetManagement() {
 			<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-5">
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">Total Pets</CardTitle>
+						<CardTitle className="text-sm font-medium">Toplam Hasta</CardTitle>
 						<PawPrint className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{stats.total}</div>
-						<p className="text-xs text-muted-foreground">All registered pets</p>
+						<p className="text-xs text-muted-foreground">Kayıtlı tüm hastalar</p>
 					</CardContent>
 				</Card>
 
@@ -41,7 +41,7 @@ export function PetManagement() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{stats.dogs}</div>
-						<p className="text-xs text-muted-foreground">Dog pets</p>
+						<p className="text-xs text-muted-foreground">Köpek</p>
 					</CardContent>
 				</Card>
 
@@ -52,7 +52,7 @@ export function PetManagement() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{stats.cats}</div>
-						<p className="text-xs text-muted-foreground">Cat pets</p>
+						<p className="text-xs text-muted-foreground">Kedi</p>
 					</CardContent>
 				</Card>
 
@@ -63,18 +63,18 @@ export function PetManagement() {
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{stats.others}</div>
-						<p className="text-xs text-muted-foreground">Other species</p>
+						<p className="text-xs text-muted-foreground">Diğer türler</p>
 					</CardContent>
 				</Card>
 
 				<Card>
 					<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-						<CardTitle className="text-sm font-medium">With Appointments</CardTitle>
+						<CardTitle className="text-sm font-medium">Randevusu Olan</CardTitle>
 						<Calendar className="h-4 w-4 text-muted-foreground" />
 					</CardHeader>
 					<CardContent>
 						<div className="text-2xl font-bold">{stats.withAppointments}</div>
-						<p className="text-xs text-muted-foreground">Pets with bookings</p>
+						<p className="text-xs text-muted-foreground">Randevusu olan hastalar</p>
 					</CardContent>
 				</Card>
 			</div>
