@@ -99,13 +99,37 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 						<CardDescription>Manage and view vaccination records</CardDescription>
 					</div>
 					{showActions && canEdit && (
-						<Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
-							<DialogTrigger asChild>
-								<Button onClick={() => setEditingVaccination(null)}>
-									<Plus className="w-4 h-4 mr-2" />
-									New Vaccination
-								</Button>
-							</DialogTrigger>
+						<div className="flex gap-2">
+							<Dialog open={isPlanFormOpen} onOpenChange={setIsPlanFormOpen}>
+								<DialogTrigger asChild>
+									<Button variant="outline" className="border-blue-300 text-blue-700 hover:bg-blue-50">
+										<CalendarPlus className="w-4 h-4 mr-2" />
+										Yeni Aşı Planla
+									</Button>
+								</DialogTrigger>
+								<DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+									<DialogHeader>
+										<DialogTitle className="flex items-center gap-2">
+											<CalendarPlus className="w-5 h-5 text-blue-600" />
+											Yeni Aşı Planla
+										</DialogTitle>
+										<DialogDescription>
+											Hayvan sahibini arayın, hayvanı ve aşıyı seçin, tarih ve saat belirleyin
+										</DialogDescription>
+									</DialogHeader>
+									<VaccinationPlanForm
+										onSuccess={() => { setIsPlanFormOpen(false); refetch() }}
+										onCancel={() => setIsPlanFormOpen(false)}
+									/>
+								</DialogContent>
+							</Dialog>
+							<Dialog open={isFormOpen} onOpenChange={setIsFormOpen}>
+								<DialogTrigger asChild>
+									<Button onClick={() => setEditingVaccination(null)}>
+										<Plus className="w-4 h-4 mr-2" />
+										Aşı Ekle
+									</Button>
+								</DialogTrigger>
 							<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
 								<DialogHeader>
 									<DialogTitle>{editingVaccination ? "Aşı Düzenle" : "Add Vaccination"}</DialogTitle>
@@ -122,7 +146,8 @@ export function VaccinationList({ petId, upcoming, showActions = true }: Vaccina
 									}}
 								/>
 							</DialogContent>
-						</Dialog>
+							</Dialog>
+						</div>
 					)}
 				</div>
 			</CardHeader>
