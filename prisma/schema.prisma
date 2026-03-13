@@ -130,6 +130,7 @@ model Visit {
     payments    VisitPayment[]
     invoice     Invoice?
     stockUsages VisitStockUsage[]
+    orders      VetOrder[]
 }
 
 // Services added to a Visit (with quantity and unit price)
@@ -282,6 +283,7 @@ model StockItem {
 
     usages       VisitStockUsage[]
     vaccinations Vaccination[]
+    vetOrders    VetOrder[]
 }
 
 model VisitStockUsage {
@@ -296,4 +298,59 @@ model VisitStockUsage {
 
     visit     Visit     @relation(fields: [visitId], references: [id], onDelete: Cascade)
     stockItem StockItem @relation(fields: [stockItemId], references: [id])
+}
+
+// ============ VETERİNER ORDER SİSTEMİ ============
+
+model VetOrder {
+    id             String   @id @default(uuid())
+    visitId        String
+    petId          String
+    orderedById    String                          // Emri veren veteriner
+    assignedToId   String?                         // Atanan hemşire/personel (opsiyonel)
+
+    // Order tipi ve içeriği
+    type           String                          // MEDICATION | PROCEDURE | LAB | DIET | TASK
+    title          String                          // Kısa başlık: "Amoksisilin IV"
+    description    String?                         // Detay notlar
+
+    // İlaç/stok bağlantısı
+    stockItemId    String?                         // Stoktan ilaç seçilirse
+    dose           String?                         // "10 mg/kg", "5 ml" vs.
+    route          String?                         // IV, IM, PO, SC, Topikal
+    frequency      String?                         // "6 saatte bir", "günde 2x" vs.
+    duration       String?                         // "3 gün", "5 uygulama" vs.
+
+    // Zamanlama
+    scheduledAt    DateTime?                       // Planlanmış uygulama zamanı
+    priority       String    @default("NORMAL")    // URGENT | HIGH | NORMAL | LOW
+
+    // Durum
+    status         String    @default("PENDING")   // PENDING | IN_PROGRESS | COMPLETED | CANCELLED | SKIPPED
+
+    // Finansal
+    chargeToVisit  Boolean   @default(true)        // Visit faturasına eklensin mi?
+    unitPrice      Float     @default(0)
+
+    createdAt      DateTime  @default(now())
+    updatedAt      DateTime  @updatedAt
+
+    visit       Visit      @relation(fields: [visitId], references: [id], onDelete: Cascade)
+    pet         Pet        @relation(fields: [petId], references: [id], onDelete: Cascade)
+    orderedBy   User       @relation("OrderedBy",   fields: [orderedById],  references: [id])
+    assignedTo  User?      @relation("AssignedTo",  fields: [assignedToId], references: [id])
+    stockItem   StockItem? @relation(fields: [stockItemId], references: [id])
+    logs        VetOrderLog[]
+}
+
+model VetOrderLog {
+    id          String   @id @default(uuid())
+    orderId     String
+    userId      String                             // İşlemi yapan kişi
+    action      String                             // CREATED | STARTED | COMPLETED | SKIPPED | CANCELLED | NOTE
+    note        String?                            // "Hayvan direndi, doz yarıya indirildi"
+    createdAt   DateTime @default(now())
+
+    order  VetOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+    user   User     @relation(fields: [userId], references: [id])
 }

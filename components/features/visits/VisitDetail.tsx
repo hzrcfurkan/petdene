@@ -1,5 +1,6 @@
 "use client"
 
+import { VisitOrders } from "@/components/features/orders/VisitOrders"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -167,6 +168,7 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 	const TABS = [
 		{ key: "services", label: "Hizmetler", icon: <ClipboardList className="w-4 h-4" /> },
 		{ key: "stocks", label: "İlaç / Malzeme", icon: <Package className="w-4 h-4" /> },
+		{ key: "orders", label: "Orderlar", icon: <span className="text-sm">📋</span> },
 		{ key: "medical", label: "Tıbbi Kayıt", icon: <Stethoscope className="w-4 h-4" /> },
 		{ key: "payments", label: "Ödemeler", icon: <CreditCard className="w-4 h-4" /> },
 	]
@@ -330,6 +332,12 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 			)}
 
 			{/* ── TIBBİ KAYIT ── */}
+			{activeTab === "orders" && (
+				<div className="vd-panel">
+					<VisitOrders visitId={visit.id} petId={visit.petId} canEdit={true} />
+				</div>
+			)}
+
 			{activeTab === "medical" && (
 				<div className="vd-panel">
 					<div className="vd-panel-hd">

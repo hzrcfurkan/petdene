@@ -82,6 +82,11 @@ export function getNavItems(role: string): NavItem[] {
 			icon: Sparkles,
 		})
 		items.push({
+			label: "Orderlar",
+			href: "/admin/orders",
+			icon: ClipboardList,
+		})
+		items.push({
 			label: "Aşılar",
 			href: "/admin/vaccinations",
 			icon: Syringe,
@@ -139,6 +144,11 @@ export function getNavItems(role: string): NavItem[] {
 			label: "Hastalar",
 			href: "/admin/pets",
 			icon: PawPrint,
+		})
+		items.push({
+			label: "Orderlar",
+			href: "/admin/orders",
+			icon: ClipboardList,
 		})
 		items.push({
 			label: "Aşılar",
