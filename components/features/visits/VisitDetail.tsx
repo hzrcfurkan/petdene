@@ -1,6 +1,8 @@
 "use client"
 
 import { VisitOrders } from "@/components/features/orders/VisitOrders"
+import { VisitInvoiceDetail } from "./VisitInvoiceDetail"
+import { VisitInvoiceDetail } from "@/components/features/visits/VisitInvoiceDetail"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -9,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
 import {
-	Stethoscope, CreditCard, Plus, Trash2, Download,
+	Stethoscope, CreditCard, Plus, Trash2, Download, Receipt,
 	Calendar, User, PawPrint, Hash, Banknote, CheckCircle2,
 	Clock, XCircle, Package, ClipboardList, Syringe, Pencil, AlertCircle,
 } from "lucide-react"
@@ -171,6 +173,8 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 		{ key: "orders", label: "Orderlar", icon: <span className="text-sm">📋</span> },
 		{ key: "medical", label: "Tıbbi Kayıt", icon: <Stethoscope className="w-4 h-4" /> },
 		{ key: "payments", label: "Ödemeler", icon: <CreditCard className="w-4 h-4" /> },
+		{ key: "invoice", label: "Hizmet Dökümü", icon: <Receipt className="w-4 h-4" /> },
+		{ key: "invoice", label: "Hizmet Dökümü", icon: <span className="text-sm">🧾</span> },
 	]
 
 	return (
@@ -398,6 +402,12 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 			)}
 
 			{/* ── ÖDEMELER ── */}
+			{activeTab === "invoice" && (
+				<div className="vd-panel">
+					<VisitInvoiceDetail visit={visit} />
+				</div>
+			)}
+
 			{activeTab === "payments" && (
 				<div className="vd-panel">
 					<div className="vd-panel-hd">

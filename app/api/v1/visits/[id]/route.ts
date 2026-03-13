@@ -55,6 +55,22 @@ export async function GET(
 					},
 				},
 				medicalRecord: true,
+				stockUsages: {
+					select: {
+						id: true, quantity: true, unitPrice: true, total: true, notes: true,
+						stockItem: { select: { id: true, name: true, unit: true } },
+					},
+				},
+				orders: {
+					where: { status: { not: "CANCELLED" } },
+					select: {
+						id: true, title: true, type: true, status: true,
+						dose: true, route: true, frequency: true, duration: true,
+						chargeToVisit: true, unitPrice: true, priority: true,
+						orderedBy: { select: { id: true, name: true } },
+						stockItem: { select: { id: true, name: true, unit: true } },
+					},
+				},
 				payments: {
 					orderBy: { paidAt: "desc" },
 					select: {
