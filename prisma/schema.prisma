@@ -52,6 +52,9 @@ model User {
     appointments  Appointment[]
     prescriptions Prescription[]
     visits        Visit[]
+    orderedByMe     VetOrder[]    @relation("OrderedBy")
+    assignedOrders  VetOrder[]    @relation("AssignedTo")
+    orderLogs       VetOrderLog[]
 }
 
 model VerificationToken {
@@ -89,6 +92,7 @@ model Pet {
     prescriptions Prescription[]
     appointments  Appointment[]
     visits        Visit[]
+    vetOrders     VetOrder[]
 }
 
 model PetService {
