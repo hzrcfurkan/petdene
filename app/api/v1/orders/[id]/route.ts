@@ -97,26 +97,18 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 			include: ORDER_INCLUDE,
 		})
 
-		// COMPLETED ise stok düş + visit faturasına ekle
+		// COMPLETED ise stok düş (tutar zaten order oluşturulunca eklendi)
 		if (status === "COMPLETED" && order.status !== "COMPLETED") {
-			if (order.stockItemId && order.unitPrice > 0 && order.chargeToVisit) {
-				// Stoktan düş
+			if (order.stockItemId && order.chargeToVisit) {
 				await prisma.stockItem.update({
 					where: { id: order.stockItemId },
 					data: { quantity: { decrement: 1 } },
 				})
 			}
-			if (order.chargeToVisit && order.unitPrice > 0) {
-				// Visit totalAmount güncelle
-				await prisma.visit.update({
-					where: { id: order.visitId },
-					data: { totalAmount: { increment: order.unitPrice } },
-				})
-			}
 		}
 
-		// CANCELLED/SKIPPED ise daha önce eklendiyse geri al
-		if ((status === "CANCELLED" || status === "SKIPPED") && order.status === "COMPLETED") {
+		// CANCELLED veya SKIPPED ise faturadan düş (COMPLETED değilse de — order hiç tamamlanmadan iptal)
+		if ((status === "CANCELLED" || status === "SKIPPED") && order.status !== "CANCELLED" && order.status !== "SKIPPED") {
 			if (order.chargeToVisit && order.unitPrice > 0) {
 				await prisma.visit.update({
 					where: { id: order.visitId },

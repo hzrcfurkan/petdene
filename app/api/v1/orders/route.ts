@@ -136,6 +136,14 @@ export async function POST(req: NextRequest) {
 			include: ORDER_INCLUDE,
 		})
 
+		// Order oluşturulunca visit faturasına ekle
+		if (order.chargeToVisit && order.unitPrice > 0) {
+			await prisma.visit.update({
+				where: { id: order.visitId },
+				data: { totalAmount: { increment: order.unitPrice } },
+			})
+		}
+
 		return NextResponse.json(order, { status: 201 })
 	} catch (error) {
 		console.error("[orders POST]", error)
