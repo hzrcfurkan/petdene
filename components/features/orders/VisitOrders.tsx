@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useState }
+import { currentUserClient } from "@/lib/auth/client" from "react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
@@ -16,7 +17,9 @@ interface VisitOrdersProps {
 	canEdit?: boolean
 }
 
-export function VisitOrders({ visitId, petId, canEdit = true }: VisitOrdersProps) {
+export function VisitOrders({ visitId, petId, canEdit: canEditProp = true }: VisitOrdersProps) {
+	const currentUser = currentUserClient()
+	const canEdit = canEditProp && !!(currentUser?.isStaff || currentUser?.isAdmin || currentUser?.isSuperAdmin)
 	const [showCreate, setShowCreate] = useState(false)
 	const [filter,     setFilter]     = useState<OrderStatus | "ALL">("ALL")
 
