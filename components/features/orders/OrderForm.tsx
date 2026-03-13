@@ -29,56 +29,66 @@ export function OrderForm({ visitId, petId, order, onSuccess, onCancel }: OrderF
 	const { mutateAsync: updateOrder } = useUpdateOrder()
 
 	const [type,         setType]         = useState<OrderType>(order?.type || "MEDICATION")
-	const [title,        setTitle]        = useState(order?.title || "")
 	const [description,  setDescription]  = useState(order?.description || "")
 	const [priority,     setPriority]     = useState<OrderPriority>(order?.priority || "NORMAL")
 	const [assignedToId, setAssignedToId] = useState(order?.assignedToId || "")
 	const [scheduledAt,  setScheduledAt]  = useState(order?.scheduledAt ? new Date(order.scheduledAt).toISOString().slice(0, 16) : "")
-	// İlaç alanları
 	const [stockItemId,  setStockItemId]  = useState(order?.stockItemId || "")
 	const [dose,         setDose]         = useState(order?.dose || "")
 	const [route,        setRoute]        = useState(order?.route || "")
 	const [frequency,    setFrequency]    = useState(order?.frequency || "")
 	const [duration,     setDuration]     = useState(order?.duration || "")
-	// Finansal
+	const [title,        setTitle]        = useState(order?.title || "")
 	const [chargeToVisit, setChargeToVisit] = useState(order?.chargeToVisit !== false)
 	const [unitPrice,    setUnitPrice]    = useState(order?.unitPrice?.toString() || "0")
 	const [isSubmitting, setIsSubmitting] = useState(false)
 
-	// Stok listesi
+	const isMedication = type === "MEDICATION"
+
 	const { data: stockData } = useQuery({
 		queryKey: ["stocks-active"],
 		queryFn:  () => fetcher<{ items: any[] }>("/api/v1/stocks?limit=500&active=true"),
 	})
-	const stocks = stockData?.items || (stockData as any)?.stockItems || []
+	const stocks = stockData?.items || []
 
-	// Personel listesi
 	const { data: staffData } = useQuery({
 		queryKey: ["staff-list"],
 		queryFn:  () => fetcher<{ users: any[] }>("/api/v1/admin/users?limit=100"),
 	})
 	const staff = staffData?.users?.filter((u: any) => ["STAFF", "ADMIN", "SUPER_ADMIN"].includes(u.role)) || []
 
-	// Stok seçilince fiyat otomatik doldur
 	useEffect(() => {
-		if (stockItemId) {
+		if (stockItemId && stockItemId !== "__none__") {
 			const item = stocks.find((s: any) => s.id === stockItemId)
-			if (item) {
-				if (!title) setTitle(item.name)
-				if (!unitPrice || unitPrice === "0") setUnitPrice(item.price?.toString() || "0")
+			if (item && (!unitPrice || unitPrice === "0")) {
+				setUnitPrice(item.price?.toString() || "0")
 			}
 		}
 	}, [stockItemId])
 
 	const handleSubmit = async () => {
-		if (!title.trim()) { toast.error("Başlık zorunludur"); return }
+		if (isMedication) {
+			if (!stockItemId || stockItemId === "__none__") { toast.error("Stoktan ilaç seçimi zorunludur"); return }
+			if (!dose.trim()) { toast.error("Doz zorunludur"); return }
+			if (!route)       { toast.error("Uygulama yolu zorunludur"); return }
+			if (!frequency)   { toast.error("Sıklık zorunludur"); return }
+			if (!duration)    { toast.error("Süre zorunludur"); return }
+		} else {
+			if (!title.trim()) { toast.error("Başlık zorunludur"); return }
+		}
+
 		setIsSubmitting(true)
 		try {
+			const selectedStock = stocks.find((s: any) => s.id === stockItemId)
+			const finalTitle = isMedication ? (selectedStock?.name || stockItemId) : title
+
 			const data = {
-				visitId, petId, type, title, description: description || undefined,
+				visitId, petId, type,
+				title: finalTitle,
+				description: description || undefined,
 				priority, assignedToId: assignedToId || undefined,
 				scheduledAt: scheduledAt || undefined,
-				stockItemId: stockItemId || undefined,
+				stockItemId: (stockItemId && stockItemId !== "__none__") ? stockItemId : undefined,
 				dose: dose || undefined, route: route || undefined,
 				frequency: frequency || undefined, duration: duration || undefined,
 				chargeToVisit, unitPrice: parseFloat(unitPrice) || 0,
@@ -97,8 +107,6 @@ export function OrderForm({ visitId, petId, order, onSuccess, onCancel }: OrderF
 			setIsSubmitting(false)
 		}
 	}
-
-	const isMedication = type === "MEDICATION"
 
 	return (
 		<div className="space-y-5">
@@ -124,27 +132,26 @@ export function OrderForm({ visitId, petId, order, onSuccess, onCancel }: OrderF
 				</div>
 			</div>
 
-			{/* Başlık */}
-			<div className="space-y-1.5">
-				<Label>Başlık *</Label>
-				<Input
-					placeholder={isMedication ? "Örn: Amoksisilin IV, Serum SF" : "Order başlığı..."}
-					value={title}
-					onChange={e => setTitle(e.target.value)}
-					autoFocus
-				/>
-			</div>
+			{/* İlaç olmayan tipler için başlık */}
+			{!isMedication && (
+				<div className="space-y-1.5">
+					<Label>Başlık *</Label>
+					<Input placeholder="Order başlığı..." value={title} onChange={e => setTitle(e.target.value)} autoFocus />
+				</div>
+			)}
 
-			{/* İlaç sekmesi */}
+			{/* İlaç detayları */}
 			{isMedication && (
 				<div className="space-y-3 p-4 bg-blue-50 dark:bg-blue-950/20 rounded-xl border border-blue-100">
 					<p className="text-xs font-semibold text-blue-700 uppercase tracking-wide">İlaç Detayları</p>
 					<div className="space-y-1.5">
-						<Label>Stoktan Seç</Label>
+						<Label>Stoktan Seç <span className="text-red-500">*</span></Label>
 						<Select value={stockItemId} onValueChange={v => setStockItemId(v === "__none__" ? "" : v)}>
-							<SelectTrigger><SelectValue placeholder="Stoktan ilaç seç (opsiyonel)" /></SelectTrigger>
+							<SelectTrigger className={!stockItemId ? "border-red-200" : ""}>
+								<SelectValue placeholder="İlaç seçin..." />
+							</SelectTrigger>
 							<SelectContent>
-								<SelectItem value="__none__">— Manuel gir —</SelectItem>
+								<SelectItem value="__none__">— Seçin —</SelectItem>
 								{stocks.map((s: any) => (
 									<SelectItem key={s.id} value={s.id}>
 										{s.name} ({s.unit}) — {s.quantity} adet
@@ -155,34 +162,28 @@ export function OrderForm({ visitId, petId, order, onSuccess, onCancel }: OrderF
 					</div>
 					<div className="grid grid-cols-2 gap-3">
 						<div className="space-y-1.5">
-							<Label>Doz</Label>
-							<Input placeholder="Örn: 10 mg/kg, 5 ml" value={dose} onChange={e => setDose(e.target.value)} />
+							<Label>Doz <span className="text-red-500">*</span></Label>
+							<Input placeholder="Örn: 10 mg/kg, 5 ml" value={dose} onChange={e => setDose(e.target.value)} className={!dose ? "border-red-200" : ""} />
 						</div>
 						<div className="space-y-1.5">
-							<Label>Uygulama Yolu</Label>
+							<Label>Uygulama Yolu <span className="text-red-500">*</span></Label>
 							<Select value={route} onValueChange={setRoute}>
-								<SelectTrigger><SelectValue placeholder="Seçin" /></SelectTrigger>
-								<SelectContent>
-									{ROUTE_OPTIONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}
-								</SelectContent>
+								<SelectTrigger className={!route ? "border-red-200" : ""}><SelectValue placeholder="Seçin" /></SelectTrigger>
+								<SelectContent>{ROUTE_OPTIONS.map(r => <SelectItem key={r} value={r}>{r}</SelectItem>)}</SelectContent>
 							</Select>
 						</div>
 						<div className="space-y-1.5">
-							<Label>Sıklık</Label>
+							<Label>Sıklık <span className="text-red-500">*</span></Label>
 							<Select value={frequency} onValueChange={setFrequency}>
-								<SelectTrigger><SelectValue placeholder="Seçin" /></SelectTrigger>
-								<SelectContent>
-									{FREQUENCY_OPTIONS.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}
-								</SelectContent>
+								<SelectTrigger className={!frequency ? "border-red-200" : ""}><SelectValue placeholder="Seçin" /></SelectTrigger>
+								<SelectContent>{FREQUENCY_OPTIONS.map(f => <SelectItem key={f} value={f}>{f}</SelectItem>)}</SelectContent>
 							</Select>
 						</div>
 						<div className="space-y-1.5">
-							<Label>Süre</Label>
+							<Label>Süre <span className="text-red-500">*</span></Label>
 							<Select value={duration} onValueChange={setDuration}>
-								<SelectTrigger><SelectValue placeholder="Seçin" /></SelectTrigger>
-								<SelectContent>
-									{DURATION_OPTIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-								</SelectContent>
+								<SelectTrigger className={!duration ? "border-red-200" : ""}><SelectValue placeholder="Seçin" /></SelectTrigger>
+								<SelectContent>{DURATION_OPTIONS.map(d => <SelectItem key={d} value={d}>{d}</SelectItem>)}</SelectContent>
 							</Select>
 						</div>
 					</div>
@@ -192,12 +193,7 @@ export function OrderForm({ visitId, petId, order, onSuccess, onCancel }: OrderF
 			{/* Açıklama */}
 			<div className="space-y-1.5">
 				<Label>Açıklama / Not</Label>
-				<Textarea
-					placeholder="Detaylı talimatlar, özel notlar..."
-					rows={3}
-					value={description}
-					onChange={e => setDescription(e.target.value)}
-				/>
+				<Textarea placeholder="Detaylı talimatlar, özel notlar..." rows={3} value={description} onChange={e => setDescription(e.target.value)} />
 			</div>
 
 			{/* Zamanlama + Atama */}
@@ -212,9 +208,7 @@ export function OrderForm({ visitId, petId, order, onSuccess, onCancel }: OrderF
 						<SelectTrigger><SelectValue placeholder="— Herhangi biri —" /></SelectTrigger>
 						<SelectContent>
 							<SelectItem value="__none__">— Herhangi biri —</SelectItem>
-							{staff.map((s: any) => (
-								<SelectItem key={s.id} value={s.id}>{s.name || s.email}</SelectItem>
-							))}
+							{staff.map((s: any) => (<SelectItem key={s.id} value={s.id}>{s.name || s.email}</SelectItem>))}
 						</SelectContent>
 					</Select>
 				</div>
@@ -229,12 +223,7 @@ export function OrderForm({ visitId, petId, order, onSuccess, onCancel }: OrderF
 				{chargeToVisit && (
 					<div className="flex items-center gap-2">
 						<Label className="text-sm text-muted-foreground">Tutar (₺)</Label>
-						<Input
-							type="number"
-							className="w-24 h-8 text-right"
-							value={unitPrice}
-							onChange={e => setUnitPrice(e.target.value)}
-						/>
+						<Input type="number" className="w-24 h-8 text-right" value={unitPrice} onChange={e => setUnitPrice(e.target.value)} />
 					</div>
 				)}
 			</div>
