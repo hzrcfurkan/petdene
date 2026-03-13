@@ -99,7 +99,10 @@ export function useCreateOrder() {
 	return useMutation({
 		mutationFn: (data: Partial<VetOrder>) =>
 			mutationFetcher<VetOrder>("/api/v1/orders", { method: "POST", body: data }),
-		onSuccess: () => { qc.invalidateQueries({ queryKey: ["orders"] }) },
+		onSuccess: () => {
+			qc.invalidateQueries({ queryKey: ["orders"] })
+			qc.invalidateQueries({ queryKey: ["visits"] })
+		},
 	})
 }
 
@@ -108,7 +111,10 @@ export function useUpdateOrder() {
 	return useMutation({
 		mutationFn: ({ id, ...data }: { id: string } & Partial<VetOrder> & { note?: string }) =>
 			mutationFetcher<VetOrder>(`/api/v1/orders/${id}`, { method: "PATCH", body: data }),
-		onSuccess: () => { qc.invalidateQueries({ queryKey: ["orders"] }) },
+		onSuccess: () => {
+			qc.invalidateQueries({ queryKey: ["orders"] })
+			qc.invalidateQueries({ queryKey: ["visits"] })
+		},
 	})
 }
 
