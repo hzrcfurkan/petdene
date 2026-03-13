@@ -2,7 +2,6 @@
 
 import { VisitOrders } from "@/components/features/orders/VisitOrders"
 import { VisitInvoiceDetail } from "./VisitInvoiceDetail"
-import { VisitInvoiceDetail } from "@/components/features/visits/VisitInvoiceDetail"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -174,7 +173,6 @@ export function VisitDetail({ visit: initialVisit }: VisitDetailProps) {
 		{ key: "medical", label: "Tıbbi Kayıt", icon: <Stethoscope className="w-4 h-4" /> },
 		{ key: "payments", label: "Ödemeler", icon: <CreditCard className="w-4 h-4" /> },
 		{ key: "invoice", label: "Hizmet Dökümü", icon: <Receipt className="w-4 h-4" /> },
-		{ key: "invoice", label: "Hizmet Dökümü", icon: <span className="text-sm">🧾</span> },
 	]
 
 	return (

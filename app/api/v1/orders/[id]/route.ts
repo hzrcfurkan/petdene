@@ -97,25 +97,36 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 			include: ORDER_INCLUDE,
 		})
 
-		// COMPLETED ise stok düş (tutar zaten order oluşturulunca eklendi)
-		if (status === "COMPLETED" && order.status !== "COMPLETED") {
-			if (order.stockItemId && order.chargeToVisit) {
-				await prisma.stockItem.update({
-					where: { id: order.stockItemId },
-					data: { quantity: { decrement: 1 } },
-				})
-			}
+		// ── Fatura mantığı ──────────────────────────────────────────────────────
+		// Eski durum: aktif mi? (CANCELLED/SKIPPED ise faturada zaten 0'dı)
+		const wasActive    = order.status !== "CANCELLED" && order.status !== "SKIPPED"
+		const becomesCancel = (status === "CANCELLED" || status === "SKIPPED") && wasActive
+
+		// Sonraki değerler
+		const nextCharge = updateData.chargeToVisit !== undefined ? updateData.chargeToVisit : order.chargeToVisit
+		const nextPrice  = updateData.unitPrice     !== undefined ? updateData.unitPrice     : (order.unitPrice || 0)
+
+		// Önceki faturaya yansıyan tutar
+		const oldBilled = wasActive && order.chargeToVisit ? (order.unitPrice || 0) : 0
+		// Yeni faturaya yansıyacak tutar (iptal oluyorsa 0)
+		const newBilled = (!becomesCancel && nextCharge) ? nextPrice : 0
+
+		const diff = newBilled - oldBilled
+		if (diff !== 0 && order.visitId) {
+			await prisma.visit.update({
+				where: { id: order.visitId },
+				data:  { totalAmount: { increment: diff } },
+			})
 		}
 
-		// CANCELLED veya SKIPPED ise faturadan düş (COMPLETED değilse de — order hiç tamamlanmadan iptal)
-		if ((status === "CANCELLED" || status === "SKIPPED") && order.status !== "CANCELLED" && order.status !== "SKIPPED") {
-			if (order.chargeToVisit && order.unitPrice > 0) {
-				await prisma.visit.update({
-					where: { id: order.visitId },
-					data: { totalAmount: { decrement: order.unitPrice } },
-				})
-			}
+		// COMPLETED ise stok düş
+		if (status === "COMPLETED" && order.status !== "COMPLETED" && order.stockItemId) {
+			await prisma.stockItem.update({
+				where: { id: order.stockItemId },
+				data:  { quantity: { decrement: 1 } },
+			})
 		}
+		// ────────────────────────────────────────────────────────────────────────
 
 		return NextResponse.json(updated)
 	} catch (error) {
