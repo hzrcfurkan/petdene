@@ -1,5 +1,3 @@
-"use server"
-
 import LayoutAdmin from "@/components/layout/admin"
 import { OrderManagement } from "@/components/features/orders/OrderManagement"
 import { currentUserServer } from "@/lib/auth"
