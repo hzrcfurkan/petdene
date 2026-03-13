@@ -1,7 +1,7 @@
 "use client"
 
-import { useState }
-import { currentUserClient } from "@/lib/auth/client" from "react"
+import { useState } from "react"
+import { currentUserClient } from "@/lib/auth/client"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
