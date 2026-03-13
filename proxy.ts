@@ -62,6 +62,7 @@ export async function proxy(request: NextRequest) {
 			"/admin/payments",
 			"/admin/reports",
 			"/admin/stocks",
+			"/admin/orders",
 		]
 		const isStaffAllowedPath = staffAllowedPaths.some((allowedPath) => path.startsWith(allowedPath))
 		
