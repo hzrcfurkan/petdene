@@ -141,10 +141,10 @@ export function OrderForm({ visitId, petId, order, onSuccess, onCancel }: OrderF
 					<p className="text-xs font-semibold text-blue-700 uppercase tracking-wide">İlaç Detayları</p>
 					<div className="space-y-1.5">
 						<Label>Stoktan Seç</Label>
-						<Select value={stockItemId} onValueChange={setStockItemId}>
+						<Select value={stockItemId} onValueChange={v => setStockItemId(v === "__none__" ? "" : v)}>
 							<SelectTrigger><SelectValue placeholder="Stoktan ilaç seç (opsiyonel)" /></SelectTrigger>
 							<SelectContent>
-								<SelectItem value="">— Manuel gir —</SelectItem>
+								<SelectItem value="__none__">— Manuel gir —</SelectItem>
 								{stocks.map((s: any) => (
 									<SelectItem key={s.id} value={s.id}>
 										{s.name} ({s.unit}) — {s.quantity} adet
@@ -208,10 +208,10 @@ export function OrderForm({ visitId, petId, order, onSuccess, onCancel }: OrderF
 				</div>
 				<div className="space-y-1.5">
 					<Label>Atanan Personel</Label>
-					<Select value={assignedToId} onValueChange={setAssignedToId}>
+					<Select value={assignedToId} onValueChange={v => setAssignedToId(v === "__none__" ? "" : v)}>
 						<SelectTrigger><SelectValue placeholder="— Herhangi biri —" /></SelectTrigger>
 						<SelectContent>
-							<SelectItem value="">— Herhangi biri —</SelectItem>
+							<SelectItem value="__none__">— Herhangi biri —</SelectItem>
 							{staff.map((s: any) => (
 								<SelectItem key={s.id} value={s.id}>{s.name || s.email}</SelectItem>
 							))}
