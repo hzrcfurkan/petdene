@@ -1,10 +1,11 @@
 export type UserRole = "SUPER_ADMIN" | "ADMIN" | "DOCTOR" | "NURSE" | "CUSTOMER"
 
-export const ROLE_HIERARCHY: Record<UserRole, number> = {
+export const ROLE_HIERARCHY: Record<string, number> = {
 	SUPER_ADMIN: 5,
 	ADMIN:       4,
 	DOCTOR:      3,
 	NURSE:       2,
+	STAFF:       2, // geriye dönük uyumluluk
 	CUSTOMER:    1,
 }
 
