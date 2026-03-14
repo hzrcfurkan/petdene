@@ -44,7 +44,7 @@ export function NurseDashboard() {
 	const appointments = appointmentsData?.appointments || []
 	const pending      = pendingOrders?.orders         || []
 	const inProgress   = progressOrders?.orders        || []
-	const stocks       = (stockData as any)?.stocks    || []
+	const stocks       = (stockData as any)?.items     || []
 
 	const todayAppointments = useMemo(() =>
 		appointments.filter(a => format(new Date(a.date), "yyyy-MM-dd") === todayStr)

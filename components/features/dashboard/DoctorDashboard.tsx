@@ -73,8 +73,8 @@ export function DoctorDashboard() {
 					</p>
 				</div>
 				<div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-					<Link href="/admin/visits/new" className="sa-mgmt-btn">
-						<Stethoscope className="w-4 h-4" /> Yeni Ziyaret
+					<Link href="/admin/visits" className="sa-mgmt-btn">
+						<Stethoscope className="w-4 h-4" /> Ziyaretler
 					</Link>
 					<span className="ad-live"><span className="ad-live-dot" />Canlı</span>
 				</div>
