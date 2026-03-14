@@ -29,8 +29,16 @@ export default function Sidebar() {
 	if (!currentUser) return null
 
 	const userRole = currentUser.role
-	const dashLink = userRole === "Süper Admin" ? "/super" : userRole === "Admin" ? "/admin" : userRole === "Personel" ? "/staff" : "/customer"
-	const navItems = getNavItems(userRole || "Müşteri")
+	const dashLink = (() => {
+		switch (userRole) {
+			case "SUPER_ADMIN": return "/super"
+			case "ADMIN":       return "/admin"
+			case "DOCTOR":      return "/doctor"
+			case "NURSE":       return "/nurse"
+			default:            return "/customer"
+		}
+	})()
+	const navItems = getNavItems(userRole || "CUSTOMER")
 	const initials = (currentUser.name || currentUser.email || "U").split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2)
 
 	const SidebarContent = () => (

@@ -35,7 +35,7 @@ export async function DELETE(req: NextRequest, { params }: { params: Promise<{ i
 		const { id } = await params
 		const currentUser = await currentUserServer()
 		if (!currentUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-		if (currentUser.isCustomer || currentUser.isStaff)
+		if (currentUser.isCustomer)
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
 		await prisma.stockItem.update({ where: { id }, data: { isActive: false } })

@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
 	try {
 		const currentUser = await currentUserServer()
 		if (!currentUser) return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
-		if (currentUser.isCustomer || currentUser.isStaff)
+		if (currentUser.isCustomer)
 			return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 
 		const body = await req.json()

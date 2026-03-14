@@ -55,7 +55,7 @@ export function OrderForm({ visitId, petId, order, onSuccess, onCancel }: OrderF
 		queryKey: ["staff-list"],
 		queryFn:  () => fetcher<{ users: any[] }>("/api/v1/admin/users?limit=100"),
 	})
-	const staff = staffData?.users?.filter((u: any) => ["STAFF", "ADMIN", "SUPER_ADMIN"].includes(u.role)) || []
+	const staff = staffData?.users?.filter((u: any) => ["DOCTOR", "NURSE", "STAFF", "ADMIN", "SUPER_ADMIN"].includes(u.role)) || []
 
 	useEffect(() => {
 		if (stockItemId && stockItemId !== "__none__") {

@@ -55,7 +55,7 @@ function useTypewriter(strings: string[], speed = 65, pause = 1600) {
 function SearchResults({ query, onSelect, role }: { query: string; onSelect: () => void; role: string | undefined }) {
 	const { data, isLoading } = usePets({ search: query, limit: 6 })
 	const pets = data?.pets || []
-	const basePath = (role === "ADMIN" || role === "SUPER_ADMIN" || role === "STAFF") ? "/admin/pets" : "/customer/pets"
+	const basePath = (role === "ADMIN" || role === "SUPER_ADMIN" || role === "DOCTOR" || role === "NURSE" || role === "STAFF") ? "/admin/pets" : "/customer/pets"
 
 	if (!query.trim()) return null
 
@@ -87,7 +87,7 @@ function SearchResults({ query, onSelect, role }: { query: string; onSelect: () 
 
 function getBreadcrumb(pathname: string): string {
 	const segments: Record<string, string> = {
-		"admin": "Yönetim", "customer": "Müşteri", "staff": "Personel", "super": "Süper Admin",
+		"admin": "Yönetim", "customer": "Müşteri", "staff": "Hemşire", "doctor": "Doktor", "nurse": "Hemşire", "super": "Süper Admin",
 		"visits": "Ziyaretler", "appointments": "Randevular", "pets": "Hastalar",
 		"vaccinations": "Aşılar", "prescriptions": "Reçeteler", "medical-records": "Tıbbi Kayıtlar",
 		"invoices": "Faturalar", "payments": "Ödemeler", "reports": "Raporlar",
@@ -119,7 +119,7 @@ export default function Header() {
 
 	const handleKeyDown = (e: React.KeyboardEvent) => {
 		if (e.key === "Enter" && query.trim()) {
-			const base = (currentUser?.role === "ADMIN" || currentUser?.role === "SUPER_ADMIN" || currentUser?.role === "STAFF") ? "/admin/pets" : "/customer/pets"
+			const base = (currentUser?.role === "ADMIN" || currentUser?.role === "SUPER_ADMIN" || currentUser?.role === "DOCTOR" || currentUser?.role === "NURSE" || currentUser?.role === "STAFF") ? "/admin/pets" : "/customer/pets"
 			router.push(`${base}?search=${encodeURIComponent(query.trim())}`)
 			setFocused(false); setQuery("")
 		}

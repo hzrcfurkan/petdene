@@ -5,18 +5,15 @@ import { NextResponse } from "next/server"
 export async function proxy(request: NextRequest) {
 	const path = request.nextUrl.pathname
 
-	// Get token from NextAuth
 	const token = await getToken({
 		req: request,
 		secret: process.env.NEXTAUTH_SECRET,
-		// Ensure cookie name matches auth configuration
-		cookieName: process.env.NODE_ENV === "production" 
-			? "__Secure-next-auth.session-token" 
+		cookieName: process.env.NODE_ENV === "production"
+			? "__Secure-next-auth.session-token"
 			: "next-auth.session-token",
 	})
 
-	// 🚫 Protected routes - require authentication
-	const protectedRoutes = ["/customer", "/admin", "/staff", "/super", "/profile", "/settings"]
+	const protectedRoutes = ["/customer", "/admin", "/staff", "/doctor", "/nurse", "/super", "/profile", "/settings"]
 	const isProtectedRoute = protectedRoutes.some((route) => path.startsWith(route))
 
 	if (isProtectedRoute && !token) {
@@ -25,33 +22,25 @@ export async function proxy(request: NextRequest) {
 		return NextResponse.redirect(signInUrl)
 	}
 
-	// If no token, allow access to public routes
-	if (!token) {
-		return NextResponse.next()
-	}
+	if (!token) return NextResponse.next()
 
-	// Get user role from token
 	const userRole = (token.role as string) || "CUSTOMER"
+	// Geriye dönük uyumluluk
+	const normalizedRole = userRole === "STAFF" ? "NURSE" : userRole
 
-	// Role-based access control
-	// SUPER ADMIN only routes
+	// SUPER_ADMIN rotaları
 	if (path.startsWith("/super")) {
-		if (userRole !== "SUPER_ADMIN") {
-			// Redirect to appropriate dashboard based on role
-			if (userRole === "ADMIN") {
-				return NextResponse.redirect(new URL("/admin", request.url))
-			}
-			if (userRole === "STAFF") {
-				return NextResponse.redirect(new URL("/staff", request.url))
-			}
+		if (normalizedRole !== "SUPER_ADMIN") {
+			if (normalizedRole === "ADMIN")  return NextResponse.redirect(new URL("/admin",  request.url))
+			if (normalizedRole === "DOCTOR") return NextResponse.redirect(new URL("/doctor", request.url))
+			if (normalizedRole === "NURSE")  return NextResponse.redirect(new URL("/nurse",  request.url))
 			return NextResponse.redirect(new URL("/customer", request.url))
 		}
 	}
 
-	// ADMIN routes (accessible by ADMIN, SUPER_ADMIN, and STAFF for certain pages)
+	// ADMIN rotaları
 	if (path.startsWith("/admin")) {
-		// STAFF can access specific admin pages: visits, appointments, pets, vaccinations, prescriptions, medical-records, invoices, reports
-		const staffAllowedPaths = [
+		const clinicalAllowedPaths = [
 			"/admin/visits",
 			"/admin/appointments",
 			"/admin/pets",
@@ -60,47 +49,52 @@ export async function proxy(request: NextRequest) {
 			"/admin/medical-records",
 			"/admin/invoices",
 			"/admin/payments",
-			"/admin/reports",
 			"/admin/stocks",
 			"/admin/orders",
 		]
-		const isStaffAllowedPath = staffAllowedPaths.some((allowedPath) => path.startsWith(allowedPath))
-		
-		if (userRole === "STAFF" && !isStaffAllowedPath) {
-			// STAFF can only access specific pages, redirect others to staff dashboard
-			return NextResponse.redirect(new URL("/staff", request.url))
+		const isClinicalAllowed = clinicalAllowedPaths.some((p) => path.startsWith(p))
+
+		if ((normalizedRole === "DOCTOR" || normalizedRole === "NURSE") && !isClinicalAllowed) {
+			const redirect = normalizedRole === "DOCTOR" ? "/doctor" : "/nurse"
+			return NextResponse.redirect(new URL(redirect, request.url))
 		}
-		
-		if (!["ADMIN", "SUPER_ADMIN", "STAFF"].includes(userRole)) {
+
+		if (!["ADMIN", "SUPER_ADMIN", "DOCTOR", "NURSE"].includes(normalizedRole)) {
 			return NextResponse.redirect(new URL("/customer", request.url))
 		}
 	}
 
-	// STAFF only routes
-	if (path.startsWith("/staff")) {
-		if (userRole !== "STAFF") {
-			if (userRole === "SUPER_ADMIN") {
-				return NextResponse.redirect(new URL("/super", request.url))
-			}
-			if (userRole === "ADMIN") {
-				return NextResponse.redirect(new URL("/admin", request.url))
-			}
+	// DOCTOR rotaları
+	if (path.startsWith("/doctor")) {
+		if (normalizedRole !== "DOCTOR") {
+			if (normalizedRole === "SUPER_ADMIN") return NextResponse.redirect(new URL("/super",    request.url))
+			if (normalizedRole === "ADMIN")       return NextResponse.redirect(new URL("/admin",    request.url))
+			if (normalizedRole === "NURSE")       return NextResponse.redirect(new URL("/nurse",    request.url))
 			return NextResponse.redirect(new URL("/customer", request.url))
 		}
 	}
 
-	// CUSTOMER only routes
+	// NURSE rotaları (+ eski /staff geriye dönük)
+	if (path.startsWith("/nurse") || path.startsWith("/staff")) {
+		if (normalizedRole !== "NURSE") {
+			if (normalizedRole === "SUPER_ADMIN") return NextResponse.redirect(new URL("/super",  request.url))
+			if (normalizedRole === "ADMIN")       return NextResponse.redirect(new URL("/admin",  request.url))
+			if (normalizedRole === "DOCTOR")      return NextResponse.redirect(new URL("/doctor", request.url))
+			return NextResponse.redirect(new URL("/customer", request.url))
+		}
+		// /staff isteğini /nurse'e yönlendir
+		if (path.startsWith("/staff")) {
+			return NextResponse.redirect(new URL("/nurse", request.url))
+		}
+	}
+
+	// CUSTOMER rotaları
 	if (path.startsWith("/customer")) {
-		if (userRole !== "CUSTOMER") {
-			if (userRole === "SUPER_ADMIN") {
-				return NextResponse.redirect(new URL("/super", request.url))
-			}
-			if (userRole === "ADMIN") {
-				return NextResponse.redirect(new URL("/admin", request.url))
-			}
-			if (userRole === "STAFF") {
-				return NextResponse.redirect(new URL("/staff", request.url))
-			}
+		if (normalizedRole !== "CUSTOMER") {
+			if (normalizedRole === "SUPER_ADMIN") return NextResponse.redirect(new URL("/super",  request.url))
+			if (normalizedRole === "ADMIN")       return NextResponse.redirect(new URL("/admin",  request.url))
+			if (normalizedRole === "DOCTOR")      return NextResponse.redirect(new URL("/doctor", request.url))
+			if (normalizedRole === "NURSE")       return NextResponse.redirect(new URL("/nurse",  request.url))
 		}
 	}
 
@@ -108,5 +102,5 @@ export async function proxy(request: NextRequest) {
 }
 
 export const config = {
-	matcher: ["/customer/:path*", "/admin/:path*", "/staff/:path*", "/super/:path*", "/profile/:path*", "/settings/:path*"],
+	matcher: ["/customer/:path*", "/admin/:path*", "/staff/:path*", "/doctor/:path*", "/nurse/:path*", "/super/:path*", "/profile/:path*", "/settings/:path*"],
 }

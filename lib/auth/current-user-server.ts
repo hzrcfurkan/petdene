@@ -9,7 +9,9 @@ export interface CurrentUserServer {
 	role: UserRole
 	isSuperAdmin: boolean
 	isAdmin: boolean
-	isStaff: boolean
+	isDoctor: boolean
+	isNurse: boolean
+	isStaff: boolean  // geriye dönük uyumluluk (DOCTOR veya NURSE ise true)
 	isCustomer: boolean
 	[key: string]: any
 }
@@ -30,8 +32,10 @@ export default async function currentUserServer(): Promise<CurrentUserServer | n
 		...user,
 		role,
 		isSuperAdmin: role === "SUPER_ADMIN",
-		isAdmin: role === "ADMIN",
-		isStaff: role === "STAFF",
-		isCustomer: role === "CUSTOMER",
+		isAdmin:      role === "ADMIN",
+		isDoctor:     role === "DOCTOR",
+		isNurse:      role === "NURSE",
+		isStaff:      role === "DOCTOR" || role === "NURSE",
+		isCustomer:   role === "CUSTOMER",
 	}
 }

@@ -283,7 +283,8 @@ export function UserManagement() {
 						<SelectContent>
 							<SelectItem value="ALL">Tüm Roller</SelectItem>
 							<SelectItem value="CUSTOMER">Müşteri</SelectItem>
-							<SelectItem value="STAFF">Personel</SelectItem>
+							<SelectItem value="DOCTOR">Doktor</SelectItem>
+							<SelectItem value="NURSE">Hemşire</SelectItem>
 							<SelectItem value="ADMIN">Admin</SelectItem>
 							<SelectItem value="SUPER_ADMIN">Süper Admin</SelectItem>
 						</SelectContent>
@@ -318,9 +319,10 @@ export function UserManagement() {
 										</SelectTrigger>
 										<SelectContent>
 											<SelectItem value="CUSTOMER">{getRoleLabel("CUSTOMER")}</SelectItem>
-											<SelectItem value="STAFF">{getRoleLabel("Personel")}</SelectItem>
-											<SelectItem value="ADMIN">{getRoleLabel("Admin")}</SelectItem>
-											<SelectItem value="SUPER_ADMIN">{getRoleLabel("Süper Admin")}</SelectItem>
+											<SelectItem value="DOCTOR">{getRoleLabel("DOCTOR")}</SelectItem>
+											<SelectItem value="NURSE">{getRoleLabel("NURSE")}</SelectItem>
+											<SelectItem value="ADMIN">{getRoleLabel("ADMIN")}</SelectItem>
+											<SelectItem value="SUPER_ADMIN">{getRoleLabel("SUPER_ADMIN")}</SelectItem>
 										</SelectContent>
 									</Select>
 									{user.role === "CUSTOMER" && user.id !== currentUserId && (
